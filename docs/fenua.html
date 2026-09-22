@@ -273,6 +273,9 @@ const sc=moon.shadow.camera;
 sc.left=-46;sc.right=46;sc.top=46;sc.bottom=-46;sc.near=1;sc.far=140;
 moon.shadow.bias=-0.0006; moon.shadow.normalBias=0.05;
 scene.add(moon); scene.add(moon.target);
+// appoint froid venu du côté opposé : il détache les silhouettes du fond sans éclairer la scène
+const fill=new THREE.DirectionalLight(0x6f86c4,0.22);
+fill.position.set(-34,26,-30); scene.add(fill);
 const MOON_DIR=new THREE.Vector3(38,52,26).normalize().multiplyScalar(300);
 
 // lumières ponctuelles, réaffectées chaque image aux torches les plus proches
@@ -412,7 +415,8 @@ const MAT={
   plank:P({color:0x6b4e2e}),
   door:P({color:0x4b3220}),
   shutter:P({color:0x3c5c57}),
-  bush:L(0x2e4c2e), bush2:L(0x3b5a33),
+  bush:new THREE.MeshLambertMaterial({color:0x2e4c2e,emissive:0x0a1409}),
+  bush2:new THREE.MeshLambertMaterial({color:0x3b5a33,emissive:0x0b1509}),
   wood:P({color:0x4e3a24}),
   iron:P({color:0x2e2e33,shininess:40,specular:0x444444}),
   rope:L(0x5e4e34),
@@ -423,7 +427,7 @@ const MAT={
   winDark:new THREE.MeshBasicMaterial({color:0x0d0907}),
   winLit:new THREE.MeshBasicMaterial({color:0xffa94a,toneMapped:false}),
   tiles:P({map:TEX.tiles}),
-  leaf:P({map:canvasTex(64,256,(x,w,h)=>{
+  leaf:new THREE.MeshLambertMaterial({map:canvasTex(64,256,(x,w,h)=>{
     // palme : nervure centrale et folioles découpées (le fond transparent est éliminé par alphaTest)
     x.clearRect(0,0,w,h); x.strokeStyle="#3d6534"; x.lineWidth=3;
     x.beginPath(); x.moveTo(w/2,0); x.lineTo(w/2,h); x.stroke();
@@ -431,7 +435,7 @@ const MAT={
       x.strokeStyle=y%12?"#35592f":"#2c4d28"; x.lineWidth=3.2;
       x.beginPath(); x.moveTo(w/2,y); x.lineTo(w/2-L2,y-9); x.stroke();
       x.beginPath(); x.moveTo(w/2,y); x.lineTo(w/2+L2,y-9); x.stroke(); }
-  }),side:THREE.DoubleSide,alphaTest:0.45}),
+  }),side:THREE.DoubleSide,alphaTest:0.45,emissive:0x0d1c10}),
   trunk:P({color:0x6a5238}),
   paper:L(0xe6dcc3)
 };
@@ -524,6 +528,18 @@ TEX.water=canvasTex(256,256,(x,w,h)=>{
       x.beginPath(); x.moveTo(px+dx-l,py+dy); x.quadraticCurveTo(px+dx,py+dy-4,px+dx+l,py+dy); x.stroke();});});
 });
 TEX.water.repeat.set(24,24);
+TEX.ecume=canvasTex(256,256,(x,w,h)=>{
+  // transparent au centre, mousseux sur le pourtour : la frange de l'eau sur le sable
+  x.clearRect(0,0,w,h);
+  for(let i=0;i<1400;i++){
+    const a=Math.random()*TAU, r=w/2*(0.80+Math.random()*0.19);
+    const px=w/2+Math.cos(a)*r, py=h/2+Math.sin(a)*r;
+    const t=1-Math.abs(r/(w/2)-0.895)/0.1;
+    x.fillStyle="rgba(255,255,255,"+(0.1+Math.random()*0.5*Math.max(0,t))+")";
+    x.beginPath(); x.ellipse(px,py,1+Math.random()*3.5,1+Math.random()*2,a,0,TAU); x.fill();
+  }
+});
+TEX.ecume.wrapS=TEX.ecume.wrapT=THREE.ClampToEdgeWrapping;
 TEX.fall=canvasTex(64,256,(x,w,h)=>{
   x.fillStyle="#9fb8c4"; x.fillRect(0,0,w,h);
   strokes(x,90,()=>{const px=Math.random()*w; x.fillStyle="rgba(255,255,255,"+(.2+Math.random()*.5)+")";
@@ -586,6 +602,8 @@ Object.assign(MAT,{
   sack:P({map:TEX.thatch}),
   water:new THREE.MeshPhongMaterial({color:0x1b5566,map:TEX.water,bumpMap:TEX.water,bumpScale:0.03,
     transparent:true,opacity:0.86,shininess:95,specular:0xbfe6ff,depthWrite:false}),
+  ecume:new THREE.MeshBasicMaterial({map:TEX.ecume,transparent:true,opacity:0.5,
+    depthWrite:false,side:THREE.DoubleSide,toneMapped:false}),
   fall:new THREE.MeshBasicMaterial({map:TEX.fall,transparent:true,opacity:0.8,side:THREE.DoubleSide,depthWrite:false}),
   tapa:new THREE.MeshLambertMaterial({map:TEX.tapa,side:THREE.DoubleSide}),
   pareu:new THREE.MeshLambertMaterial({map:TEX.pareu,side:THREE.DoubleSide}),
@@ -701,9 +719,11 @@ function(){
   hides.push({x:17.5,z:1.5,w:3.2,d:3.2,kind:"bush"});
   hides.push({x:-14,z:14.2,w:3,d:3,kind:"bush"});
   hides.push({x:1.5,z:-10,w:2.8,d:2.8,kind:"jar"});
+  hides.push({x:-10.5,z:14.5,w:3.4,d:2.6,kind:"vaa"});   // pirogue retournée, remontée sur le sable
+  hides.push({x:6,z:-21,w:3.2,d:3.2,kind:"filet"});      // tas de filets, derrière le magasin
   guards.push(guard(-23,-22,{path:[[-23,-22],[-23,12],[23,12],[23,-22]],speed:1.9}));
-  guards.push(guard(-9,-6,{kind:"torche",path:[[-9,-6],[4,-6],[4,-21],[-9,-21]]}));
-  guards.push(guard(-4,4,{kind:"eclaireur",path:[[-4,4],[14,4],[14,0],[-4,0]]}));
+  guards.push(guard(-9,-6,{kind:"torche",path:[[-9,-6],[4,-6],[4,-21],[-9,-21],[-9,2]]}));
+  guards.push(guard(-4,4,{kind:"eclaireur",path:[[-9,4],[14,4],[14,0],[-9,0]]}));
   guards.push(guard(12,-8,{y:4.2,path:[[9,-10],[16.5,-5]],wait:3.5,isTarget:true,oid:"t1",name:"Le sergent Aubry"}));
   return {
     name:"Matavai", tag:"Le village occupé",
@@ -736,6 +756,7 @@ function(){
   boxes.push(b(0,19,13,13,0,6.2,"stone"));
   boxes.push(b(19,0,13,13,0,7.2,"stone"));
   boxes.push(b(19,19,13,13,0,6.8,"wood"));
+  boxes.push(b(11.2,23,2.6,5,0,5,"wood"));       // annexe de la douane : son toit fait face à celui de la mission
   room(boxes,0,0,12,12,4.6,3.2,"stone");       // le bureau du gouverneur, porte au sud
   boxes.push(b(-18,-19,6,10,0,4.5,"wood"));     // entrepôt du quai nord : x -21..-15
   boxes.push(b(-18,19,6,10,0,4.5,"wood"));      // entrepôt du quai sud
@@ -766,6 +787,8 @@ function(){
   hides.push({x:-13.5,z:-27.5,w:2.8,d:2.8,kind:"jar"});
   hides.push({x:27.3,z:-15,w:3.2,d:3.2,kind:"bush"});
   hides.push({x:-13.5,z:-11.5,w:3.2,d:3.2,kind:"bush"});
+  hides.push({x:-19,z:-25,w:3.4,d:2.6,kind:"vaa"});      // pirogue au sec, au bout du quai nord
+  hides.push({x:-19,z:25,w:3.2,d:3.2,kind:"filet"});     // filets du quai sud
   guards.push(guard(-8.2,-27,{path:[[-8.2,-27],[-8.2,27],[8.2,27],[8.2,-27]]}));
   guards.push(guard(-11,-8.2,{kind:"torche",path:[[-11,-8.2],[27,-8.2],[27,8.2],[-11,8.2]]}));
   guards.push(guard(10,-10,{kind:"eclaireur",path:[[10,-10],[10,10],[-10,10],[-10,-10]]}));
@@ -803,6 +826,7 @@ function(){
   boxes.push(b(-16,-16,7,7,0,5,"wood"));
   boxes.push(b(17,-15,8,6,0,4.4,"wood"));
   boxes.push(b(-16,15,8,8,0,5.6,"stone"));
+  boxes.push(b(-16,5.5,6.4,3.4,0,5,"wood"));     // appentis du génie : son toit fait face à celui de Verneuil
   boxes.push(b(17,16,9,7,0,4.8,"wood"));
   boxes.push(b(26.5,-4,5,12,0,4,"stone"));       // la poudrière
   boxes.push(b(-26.2,4,1.8,1.8,0,1.3,"crate"));
@@ -835,6 +859,8 @@ function(){
   hides.push({x:-11,z:-20,w:2.8,d:2.8,kind:"jar"});
   hides.push({x:11,z:20,w:2.8,d:2.8,kind:"jar"});
   hides.push({x:-20,z:-6,w:2.8,d:2.8,kind:"jar"});
+  hides.push({x:22,z:-25,w:3.2,d:3.2,kind:"filet"});     // filets du génie, au pied de la tour
+  hides.push({x:-24,z:-14,w:3.4,d:2.6,kind:"vaa"});      // pirogue réquisitionnée
   guards.push(guard(23,23,{path:[[23,23],[-23,23],[-23,-23],[23,-23]],speed:2.1}));
   guards.push(guard(11,11,{kind:"eclaireur",path:[[11,11],[-11,11],[-11,-11],[11,-11]]}));
   guards.push(guard(-11,-11,{kind:"brute",path:[[-11,-11],[11,-11],[11,11],[-11,11]]}));
@@ -873,7 +899,7 @@ function(){
   boxes.push(b(-18,10,12,12,0,11,"rock"));      // éperon C
   boxes.push(b(8,8,14,10,0,7,"rock"));
   boxes.push(b(-21.5,-25,3,4,0,16,"rock"));       // le piton au-dessus du bassin           // éperon D
-  boxes.push(b(21,-2,6,14,0,4.2,"wood"));        // dépôt E
+  boxes.push(b(21,-2,6,14,0,4.6,"wood"));        // dépôt E, rehaussé : sa corniche fait face à l'éperon
   // le grand ʻōrā adossé à la paroi nord : le chemin des branches au-dessus du camp
   ora(boxes,-4,23,14,[[2.877,8,9],[-2.142,11,11.5]]);
   room(boxes,-2,-1,9,9,4.4,3,"tent");            // la tente du commandant
@@ -896,6 +922,8 @@ function(){
   hides.push({x:9,z:20,w:4,d:4,kind:"stall"});
   hides.push({x:-26,z:-12,w:3.2,d:3.2,kind:"bush"});
   hides.push({x:25,z:14,w:3.2,d:3.2,kind:"bush"});
+  hides.push({x:-20.5,z:-20.5,w:3.2,d:3.2,kind:"filet"});// filets près du bassin
+  hides.push({x:13,z:-5,w:3.4,d:2.6,kind:"vaa"});        // pirogue remontée de la vallée
   guards.push(guard(-26,-21,{path:[[-26,-21],[-26,26],[26,26],[26,-26],[-18.5,-26],[-18.5,-21]],speed:2.1}));
   guards.push(guard(-8,-8,{kind:"eclaireur",path:[[-8,-8],[-8,18],[16.5,18],[16.5,-8]]}));
   guards.push(guard(-26,-2,{kind:"brute",path:[[-26,-2],[-8,-2]]}));
@@ -948,7 +976,10 @@ const DECO=[
   {t:"tiki",x:15.4,z:-14.6,h:1.7},{t:"tiki",x:20.6,z:-14.6,h:1.5},
   {t:"fire",x:13,z:-2},{t:"faisceau",x:9.5,z:-3.2,rot:0.4},
   {t:"barrels",x:6.6,z:-19.6,n:3},{t:"rocks",x:-24,z:21,r:3,n:6},{t:"rocks",x:24,z:-22,r:2.5,n:4},
-  {t:"tiare",x:8,z:6},{t:"palm",x:11,z:19.5,h:7.5}
+  {t:"tiare",x:8,z:6},{t:"palm",x:11,z:19.5,h:7.5},
+  {t:"sechoir",x:-3,z:19.5,rot:0.15},{t:"sechoir",x:16,z:18,rot:-0.4},
+  {t:"puits",x:-8,z:2},{t:"pont",x:-21,z:11,len:4.5,rot:0.25},
+  {t:"rocks",x:-2,z:23,r:2,n:4},{t:"rocks",x:18,z:22,r:2.5,n:5}
  ],
  [
   {t:"ship",x:-72,z:-4,rot:0.15},
@@ -963,7 +994,9 @@ const DECO=[
   {t:"faisceau",x:-10.5,z:-3.5,rot:0.8},{t:"faisceau",x:16,z:24,rot:-0.5},{t:"faisceau",x:4.5,z:8.4,rot:2.2},
   {t:"barrels",x:-21,z:-8,n:4},{t:"barrels",x:-21,z:8,n:3},{t:"barrels",x:22,z:-27,n:3},
   {t:"cannon",x:-20.2,z:9,rot:Math.PI},{t:"tent",x:-11,z:-27,rot:0.2},{t:"tent",x:-12.5,z:27,rot:-0.3},
-  {t:"rocks",x:-28,z:22,r:2.5,n:5},{t:"palm",x:24,z:26,h:8}
+  {t:"rocks",x:-28,z:22,r:2.5,n:5},{t:"palm",x:24,z:26,h:8},
+  {t:"sechoir",x:-17,z:-25,rot:1.4},{t:"sechoir",x:-17,z:25,rot:1.4},
+  {t:"puits",x:11,z:4},{t:"pont",x:-22.5,z:0,len:5,rot:Math.PI/2}
  ],
  [
   {t:"flag",x:0,y:9,z:0},{t:"cannon",x:7.9,y:9,z:7.9,rot:-0.8},{t:"cannon",x:-7.9,y:9,z:-7.9,rot:2.35},
@@ -978,11 +1011,13 @@ const DECO=[
   {t:"tent",x:-22,z:-20,rot:0.35},{t:"tent",x:-18,z:-23,rot:-0.2},{t:"tent",x:21,z:20,rot:0.5},
   {t:"uru",x:-24,z:-3,h:8},{t:"fara",x:12,z:25,h:4.5},{t:"fara",x:-4,z:-25,h:4},
   {t:"meia",x:22,z:-24},{t:"rocks",x:-27,z:26,r:3,n:6},{t:"rocks",x:27,z:12,r:2.5,n:5},
-  {t:"cannon",x:-26,z:-22,rot:0.4},{t:"ladder",x:8.9,z:4,h:8.6,rot:-Math.PI/2}
+  {t:"cannon",x:-26,z:-22,rot:0.4},{t:"ladder",x:8.9,z:4,h:8.6,rot:-Math.PI/2},
+  {t:"puits",x:-5,z:11},{t:"sechoir",x:19,z:-22,rot:0.6},
+  {t:"pont",x:13,z:8,len:5,rot:0.2},{t:"rocks",x:-14,z:-24,r:2.5,n:5}
  ],
  [
   {t:"waterfall",x:-25,z:-26.95,w:3.2,h:16},
-  {t:"gable",x:6,y:5.4,z:-15,w:16,d:9,h:2.6,axis:"x"},{t:"gable",x:21,y:4.2,z:-2,w:6,d:14,h:2,axis:"z"},
+  {t:"gable",x:6,y:5.4,z:-15,w:16,d:9,h:2.6,axis:"x"},{t:"gable",x:21,y:4.6,z:-2,w:6,d:14,h:2,axis:"z"},
   {t:"tent",x:21,z:-13,rot:0.3},{t:"tent",x:0,z:-22.5,rot:0},{t:"cannon",x:4,z:-24,rot:-Math.PI/2},
   {t:"ladder",x:12,z:1.8,h:5.4,rot:Math.PI},{t:"flag",x:2,y:4.4,z:-5.2},
   {t:"palm",x:23.5,z:-23.5,h:7},{t:"palm",x:-23.5,z:23.5,h:7.5},
@@ -994,7 +1029,9 @@ const DECO=[
   {t:"barrels",x:12,z:-20,n:4},{t:"barrels",x:-20,z:-27,n:3},{t:"barrels",x:24,z:5,n:3},
   {t:"tent",x:-12,z:-25,rot:0.15},{t:"tent",x:10,z:22,rot:-0.4},
   {t:"fara",x:-27,z:17,h:5},{t:"fara",x:19,z:-25,h:4.5},{t:"meia",x:-26,z:5},{t:"meia",x:26,z:-10},
-  {t:"taro",x:-24,z:-16,w:6,d:7},{t:"tiki",x:-25.6,z:-22.4,h:1.9}
+  {t:"taro",x:-24,z:-16,w:6,d:7},{t:"tiki",x:-25.6,z:-22.4,h:1.9},
+  {t:"puits",x:-2,z:9},{t:"sechoir",x:-17,z:-25,rot:0.3},
+  {t:"pont",x:-20,z:-20,len:5,rot:0.7},{t:"rocks",x:2,z:-12,r:2,n:4}
  ]
 ];
 
@@ -1366,7 +1403,7 @@ const TOOLS=[
 const G={
   phase:"menu", levelIndex:0, level:null, root:null,
   boxes:[], hides:[], guards:[], pickups:[], inter:[], torches:[], ropes:[],
-  projectiles:[], smokes:[],
+  projectiles:[], smokes:[], ripples:[],
   player:null, camYaw:0, camPitch:0.38, camDist:6.6,
   time:0, alarm:0, alarmCount:0, kills:0, maxSeen:0, bodiesHidden:0, bodiesFound:0,
   bellSabotaged:false, showCones:true, tools:{}, tool:"stone",
@@ -1523,6 +1560,35 @@ function buildHide(h,hi){
       m.scale.y=0.75; m.position.set(h.x+(k-1)*h.w*0.22,0,h.z+(k%2?0.3:-0.3)); m.castShadow=true; G.root.add(m);
     }
     for(let k=0;k<6;k++) A.niau.push({x:h.x,y:0.8,z:h.z,s:0.7,rx:1.3,ry:k/6*TAU});
+  }else if(h.kind==="vaa"){
+    // une pirogue retournée sur ses tréteaux : on se glisse dessous, même debout
+    const g=new THREE.Group(); g.position.set(h.x,0,h.z); g.rotation.y=hi*1.1;
+    const co=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.62,h.w*1.5,12,1,false,0,Math.PI),MAT.wood);
+    co.rotation.set(0,0,Math.PI/2); co.position.y=1.05; co.castShadow=true; g.add(co);
+    [1,-1].forEach(sd=>{ const c=new THREE.Mesh(new THREE.ConeGeometry(0.62,1.1,12,1,false,0,Math.PI),MAT.wood);
+      c.rotation.set(0,0,-sd*Math.PI/2); c.position.set(sd*(h.w*0.75+0.5),1.05,0); c.castShadow=true; g.add(c); });
+    [-1,1].forEach(sd=>[-1,1].forEach(sd2=>{
+      const t=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.07,1.05,6),MAT.wood);
+      t.position.set(sd*h.w*0.4,0.52,sd2*0.5); t.rotation.z=sd2*0.16; g.add(t); }));
+    const pag=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.04,0.14),MAT.plank);
+    pag.position.set(0,0.1,0.85); pag.rotation.y=0.3; g.add(pag);
+    G.root.add(g);
+  }else if(h.kind==="filet"){
+    // un tas de filets de pêche : mou, il avale un saut de la foi
+    for(let k=0;k<4;k++){
+      const r=h.w*(0.3+Math.random()*0.14);
+      const m=new THREE.Mesh(SPH1,NET);
+      m.scale.set(r,r*0.55,r);
+      m.position.set(h.x+(Math.random()-.5)*h.w*0.55,r*0.4,h.z+(Math.random()-.5)*h.d*0.55);
+      m.rotation.set(Math.random(),Math.random()*3,0); G.root.add(m);
+    }
+    for(let k=0;k<3;k++){
+      const fl=new THREE.Mesh(SPH8,MAT.sack); fl.scale.setScalar(0.16);
+      fl.position.set(h.x+(Math.random()-.5)*h.w*0.7,0.55,h.z+(Math.random()-.5)*h.d*0.7); G.root.add(fl);
+    }
+    const pq=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.08,1.9,6),MAT.wood);
+    pq.position.set(h.x+h.w*0.42,0.95,h.z-h.d*0.35); pq.rotation.z=0.2; pq.castShadow=true; G.root.add(pq);
+    ACC.niau.push({x:h.x,y:0.7,z:h.z,s:0.55,rx:1.4,ry:hi});
   }else if(h.kind==="jar"){
     for(let k=0;k<3;k++){
       const a=k/3*TAU+hi, r=h.w*0.26, px=h.x+Math.cos(a)*r, pz=h.z+Math.sin(a)*r;
@@ -1634,6 +1700,38 @@ function buildForest(lv){
     o.scale.set(c[2],c[2]*(0.7+Math.random()*0.4),c[2]); o.updateMatrix(); im.setMatrixAt(k,o.matrix); });
   im.instanceMatrix.needsUpdate=true; G.root.add(im);
 }
+// Là où les soldats passent tous les soirs, le sable est tassé : on lit
+// les rondes au sol avant même de voir un uniforme.
+let TEX_SENTIER=null;
+function buildPaths(lv){
+  if(G.quality==="low") return;
+  TEX_SENTIER=TEX_SENTIER||canvasTex(64,64,(x,w,h)=>{
+    const g=x.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,"rgba(0,0,0,0)"); g.addColorStop(.5,"rgba(48,38,26,.38)"); g.addColorStop(1,"rgba(0,0,0,0)");
+    x.fillStyle=g; x.fillRect(0,0,w,h);
+    for(let i=0;i<300;i++){ x.fillStyle="rgba(30,24,16,"+(Math.random()*.2)+")";
+      x.fillRect(Math.random()*w,h*0.3+Math.random()*h*0.4,1+Math.random()*3,1+Math.random()*2); }
+  });
+  const mat=new THREE.MeshBasicMaterial({map:TEX_SENTIER,transparent:true,depthWrite:false});
+  const segs=[];
+  lv.guards.forEach(gd=>{
+    if(gd.y) return;                              // seules les rondes au sol marquent le sol
+    const P=gd.path;
+    for(let k=0;k<P.length;k++){
+      const A=P[k], B=P[(k+1)%P.length];
+      const L=Math.hypot(B[0]-A[0],B[1]-A[1]);
+      if(L<1.5) continue;
+      segs.push({x:(A[0]+B[0])/2,y:0.025,z:(A[1]+B[1])/2,
+        rx:-Math.PI/2,ry:Math.atan2(B[0]-A[0],B[1]-A[1]),sx:1.5,sy:L,sz:1});
+    }
+  });
+  if(!segs.length) return;
+  const geo=new THREE.PlaneGeometry(1,1); geo.userData.shared=true;
+  const im=new THREE.InstancedMesh(geo,mat,segs.length), d=new THREE.Object3D();
+  segs.forEach((o,k)=>{ d.position.set(o.x,o.y,o.z); d.rotation.set(0,o.ry,0,"YXZ");
+    d.rotateX(-Math.PI/2); d.scale.set(o.sx,o.sy,1); d.updateMatrix(); im.setMatrixAt(k,d.matrix); });
+  im.instanceMatrix.needsUpdate=true; im.renderOrder=1; G.root.add(im);
+}
 function collectSpikes(bx,out){
   const alongX=bx.w>bx.d, len=alongX?bx.w:bx.d, n=Math.floor(len/0.46);
   for(let k=0;k<n;k++){ const off=-len/2+(k+0.5)*len/n;
@@ -1652,6 +1750,12 @@ function buildWater(lv){
   (lv.water||[]).concat(lv.ocean||[]).forEach(w=>{
     const geo=new THREE.PlaneGeometry(w.w,w.d); planeUV(geo,w.w,w.d,9);
     const m=new THREE.Mesh(geo,MAT.water); m.rotation.x=-Math.PI/2; m.position.set(w.x,0.04,w.z); m.renderOrder=1; G.root.add(m); });
+  // la frange d'écume, là où l'eau lèche le sable
+  (lv.water||[]).forEach(w=>{
+    const f=new THREE.Mesh(new THREE.PlaneGeometry(w.w+2.2,w.d+2.2),MAT.ecume);
+    f.rotation.x=-Math.PI/2; f.position.set(w.x,0.07,w.z); f.renderOrder=2; G.root.add(f);
+    G.anim.push({o:f,k:0,type:"ecume",bw:w.w+2.2,bd:w.d+2.2});
+  });
 }
 function buildMountains(lv){
   const oc=(lv.ocean||[])[0], seaA=oc?Math.atan2(oc.x,oc.z):null;
@@ -1887,6 +1991,51 @@ function tiki(x,z,h){
     arm.position.set(sd*0.3,h*0.36,0.1); arm.rotation.z=sd*0.25; g.add(arm); });
   G.root.add(g);
 }
+// séchoir : un cadre de bambou où pendent poissons et bandes de coprah
+function sechoir(x,z,rot){
+  const g=new THREE.Group(); g.position.set(x,0,z); g.rotation.y=rot||0;
+  [-1.3,1.3].forEach(px=>{ const p2=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.08,2,6),MAT.bambooPole);
+    p2.position.set(px,1,0); p2.castShadow=true; g.add(p2); });
+  [1.9,1.45].forEach(y=>{ const b2=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,2.8,5),MAT.bambooPole);
+    b2.rotation.z=Math.PI/2; b2.position.y=y; g.add(b2); });
+  for(let k=0;k<9;k++){
+    const px=-1.15+k*0.29, haut=k%2?1.9:1.45;
+    const f=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.42+Math.random()*0.2,0.05),
+      k%3?MAT.pebble:MAT.sack);
+    f.position.set(px,haut-0.3,0); f.castShadow=true; g.add(f);
+    G.anim.push({o:f,k:Math.random()*TAU,type:"bob"});
+  }
+  G.root.add(g);
+}
+// puits de pierre, avec sa potence et son seau
+function puits(x,z){
+  const g=new THREE.Group(); g.position.set(x,0,z);
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(0.95,1.05,0.9,14),MAT.rock);
+  m.position.y=0.45; m.castShadow=true; m.receiveShadow=true; g.add(m);
+  const in2=new THREE.Mesh(new THREE.CylinderGeometry(0.72,0.72,0.1,14),MAT.winDark);
+  in2.position.y=0.88; g.add(in2);
+  [-1,1].forEach(sd=>{ const p2=new THREE.Mesh(new THREE.BoxGeometry(0.11,1.9,0.11),MAT.wood);
+    p2.position.set(sd*0.85,1.45,0); p2.castShadow=true; g.add(p2); });
+  const t=new THREE.Mesh(new THREE.BoxGeometry(2,0.12,0.12),MAT.wood); t.position.y=2.35; g.add(t);
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.9,4),MAT.rope); c.position.set(0,1.9,0); g.add(c);
+  const se=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.15,0.3,10),MAT.wood);
+  se.position.set(0,1.3,0); se.castShadow=true; g.add(se);
+  G.root.add(g); G.anim.push({o:se,k:0,type:"bob"});
+}
+// passerelle de planches, posée sur deux pierres
+function pont(x,z,len,rot){
+  const g=new THREE.Group(); g.position.set(x,0,z); g.rotation.y=rot||0;
+  for(let k=0;k<Math.max(3,Math.floor(len/0.42));k++){
+    const pl=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.07,0.34),MAT.plank);
+    pl.position.set(0,0.34,-len/2+0.2+k*0.42); pl.rotation.y=(Math.random()-.5)*0.03;
+    pl.castShadow=true; pl.receiveShadow=true; g.add(pl);
+  }
+  [-1,1].forEach(sd=>{ const pt=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,len),MAT.wood);
+    pt.position.set(sd*0.6,0.26,0); g.add(pt); });
+  [-1,1].forEach(sd=>{ const st=new THREE.Mesh(SPH0,MAT.rock);
+    st.scale.setScalar(0.5); st.position.set(0,0.14,sd*(len/2-0.3)); g.add(st); });
+  G.root.add(g);
+}
 // éboulis de basalte
 function rocks(x,z,r,n){
   const list=[];
@@ -2006,6 +2155,9 @@ function buildDecor(list){
     else if(d.t==="barrels") barrels(d.x,d.z,d.n);
     else if(d.t==="tiki") tiki(d.x,d.z,d.h);
     else if(d.t==="rocks") rocks(d.x,d.z,d.r,d.n);
+    else if(d.t==="sechoir") sechoir(d.x,d.z,d.rot);
+    else if(d.t==="puits") puits(d.x,d.z);
+    else if(d.t==="pont") pont(d.x,d.z,d.len||4,d.rot);
     else if(d.t==="ahimaa") ahimaa(d.x,d.z);
     else if(d.t==="belfry") belfry(d.x,d.y,d.z);
     else if(d.t==="tent") tent(d.x,d.z,d.rot);
@@ -2015,19 +2167,32 @@ function buildDecor(list){
     else if(d.t==="lanterns") hangLine(d.a,d.b);
   });
 }
+const WIND={a:0.9};                       // le vent souffle dans une direction, avec des rafales
+function windGust(){ return 0.65+Math.sin(VT*0.31)*0.25+Math.sin(VT*0.83)*0.12; }
 function animDecor(){
   TEX.water.offset.set((VT*0.012)%1,(VT*0.02)%1); TEX.fall.offset.y=(VT*0.9)%1;
+  const g=windGust(), wx=Math.sin(WIND.a)*g, wz=Math.cos(WIND.a)*g;
   for(const a of G.anim){
-    if(a.type==="sway") a.o.rotation.x=Math.sin(VT*1.6+a.k)*0.16;
+    if(a.type==="sway") a.o.rotation.x=Math.sin(VT*1.6+a.k)*0.16*(0.6+g*0.6);
     else if(a.type==="bob") a.o.rotation.z=Math.sin(VT*1.3+a.k)*0.08;
-    else if(a.type==="palm"){ a.o.rotation.z=Math.sin(VT*0.5+a.k)*0.012; a.o.rotation.x=Math.cos(VT*0.4+a.k)*0.01; }
-    else if(a.type==="flag"){ a.o.rotation.y=Math.sin(VT*2.1+a.k)*0.3; a.o.scale.x=0.9+Math.sin(VT*3.3+a.k)*0.1; }
+    else if(a.type==="palm"){
+      // tous les arbres se penchent du même côté, et respirent ensemble
+      const b2=0.016+Math.sin(VT*1.7+a.k)*0.009;
+      a.o.rotation.z=-wx*b2; a.o.rotation.x=wz*b2;
+    }
+    else if(a.type==="flag"){ a.o.rotation.y=WIND.a+Math.sin(VT*2.1+a.k)*0.3*g;
+      a.o.scale.x=0.85+g*0.2+Math.sin(VT*3.3+a.k)*0.08; }
     else if(a.type==="float"){ a.o.position.y=a.by+Math.sin(VT*1.2+a.k)*0.06; a.o.rotation.z=Math.sin(VT*0.9+a.k)*0.03; }
-    else if(a.type==="cloth") a.o.rotation.x=Math.sin(VT*1.4+a.k)*0.1;
+    else if(a.type==="cloth") a.o.rotation.x=Math.sin(VT*1.4+a.k)*0.1*(0.5+g*0.8);
     else if(a.type==="smoke"){ const t=(VT*0.22+a.k)%1; a.o.position.y=a.by+t*5; a.o.material.opacity=0.32*(1-t);
+      a.o.position.x+=wx*t*0.5; a.o.position.z+=wz*t*0.5;
       const sc=0.8+t*2.6; a.o.scale.set(sc,sc,1); }
     else if(a.type==="bird"){ const an=VT*0.35;
       a.o.position.set(a.cx+Math.cos(an)*9,a.cy+Math.sin(VT*0.7)*0.8,a.cz+Math.sin(an)*9); a.o.rotation.set(0,-an,0.35); }
+    else if(a.type==="ecume"){                  // la frange respire avec la houle
+      const t=1+Math.sin(VT*0.7+a.k)*0.012;
+      a.o.scale.set(t,t,1); a.o.material.opacity=0.4+Math.sin(VT*0.7+a.k)*0.12;
+    }
     else if(a.type==="mist"){ const t=(VT*0.5+a.k)%1; a.o.position.y=a.by+t*1.5; a.o.material.opacity=0.4*(1-t); const sc=1.5+t*2; a.o.scale.set(sc,sc,1); }
   }
 }
@@ -2050,6 +2215,32 @@ function batch(geo,mat,list,shadow){
 function leafBatch(list,shadow){
   batch(SPH1,MAT.bush ,list.filter((_,k)=>k%2===0),shadow);
   batch(SPH1,MAT.bush2,list.filter((_,k)=>k%2===1),shadow);
+}
+/* Poussière soulevée par la course, rides laissées par le nageur : deux
+   traces discrètes, réutilisant le même système de particules.            */
+function dustFX(x,y,z){
+  const N=7, pos=new Float32Array(N*3), vel=[];
+  for(let k=0;k<N;k++){ pos.set([x+(Math.random()-.5)*0.4,y+0.05,z+(Math.random()-.5)*0.4],k*3);
+    vel.push(new THREE.Vector3((Math.random()-.5)*0.7,0.5+Math.random()*0.6,(Math.random()-.5)*0.7)); }
+  const geo=new THREE.BufferGeometry(); geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xcbb38a,size:0.14,
+    transparent:true,opacity:0.5,depthWrite:false}));
+  G.root.add(pts); G.fx.push({pts,vel,t:0,g:1.6});
+}
+function rippleFX(x,z){
+  const r=new THREE.Mesh(new THREE.RingGeometry(0.18,0.3,18),
+    new THREE.MeshBasicMaterial({color:0xcfeaf5,transparent:true,opacity:0.5,
+      side:THREE.DoubleSide,depthWrite:false,toneMapped:false}));
+  r.rotation.x=-Math.PI/2; r.position.set(x,0.08,z); G.root.add(r);
+  G.ripples.push({m:r,t:0});
+}
+function updateRipples(dt){
+  for(let i=G.ripples.length-1;i>=0;i--){
+    const r=G.ripples[i]; r.t+=dt;
+    const k=1+r.t*3.2; r.m.scale.set(k,k,1);
+    r.m.material.opacity=Math.max(0,0.5*(1-r.t/1.5));
+    if(r.t>1.5){ G.root.remove(r.m); r.m.geometry.dispose(); G.ripples.splice(i,1); }
+  }
 }
 function splashFX(x,z){
   const N=24, pos=new Float32Array(N*3), vel=[];
@@ -2103,6 +2294,34 @@ function startWallClimb(p,wall){
   p.climbing={t:0,dur:0.45+0.26*(wall.y1-p.pos.y),from,to:new THREE.Vector3(tx,wall.y1,tz),tree:true,wall:true};
   p.vy=0; sfx("stone");
 }
+/* ---- Franchissement -----------------------------------------------------
+   Un muret, une caisse, un bastingage : en courant, on passe par-dessus d'un
+   appui de main sans s'arrêter. Au-delà, c'est de l'escalade.              */
+const VAULT_MAX=1.35;
+function lowObstacle(p,fx,fz){
+  const px=p.pos.x+fx*0.7, pz=p.pos.z+fz*0.7;
+  let best=null,bd=1e9;
+  for(const bx of G.boxes){
+    if(bx.type==="void"||bx.type==="palm"||bx.type==="mast"||bx.type==="ora") continue;
+    const h=bx.y1-p.pos.y;
+    if(h<0.55||h>VAULT_MAX) continue;
+    const cx=clamp(px,bx.minX,bx.maxX), cz=clamp(pz,bx.minZ,bx.maxZ);
+    const d=Math.hypot(px-cx,pz-cz);
+    if(d>0.55||d>=bd) continue;
+    // il faut de la place pour retomber de l'autre côté
+    const lx=p.pos.x+fx*2.2, lz=p.pos.z+fz*2.2;
+    if(groundAt(lx,lz,bx.y1+0.3,G.boxes)>bx.y1+0.05) continue;
+    bd=d; best=bx;
+  }
+  return best;
+}
+function startVault(p,bx,fx,fz){
+  const to=new THREE.Vector3(p.pos.x+fx*2.1,0,p.pos.z+fz*2.1);
+  to.y=groundAt(to.x,to.z,bx.y1+0.3,G.boxes);
+  p.vault={t:0,dur:0.42,from:p.pos.clone(),to,haut:bx.y1+0.35};
+  p.noGrab=0.5; sfx("stone"); makeNoise(p.pos.x,p.pos.z,5,0.12);
+}
+
 /* ---- Rebords ------------------------------------------------------------
    Tout ce qui s'escalade a désormais une corniche : on s'y suspend par les
    mains, on se déplace de côté, on passe les angles, on se rétablit sur le
@@ -2204,6 +2423,35 @@ function hangShimmy(h,du){
     if(nu>=nsp[0]-0.02&&nu<=nsp[1]+0.02){ h.side=ns; h.u=clamp(nu,nsp[0],nsp[1]); sfx("tick"); return; }
   }
   h.u=clamp(u,sp[0],sp[1]);
+}
+/* Sauter d'un rebord à l'autre : suspendu, Q ou D pousse vers le côté, et si
+   une corniche attend à portée sur un AUTRE bâtiment, on s'y jette.
+   Sans direction, Espace se contente de rétablir sur le toit.              */
+function ledgeJump(p,dir){
+  const h=p.hang, yaw=hangYaw(h.side);
+  const rx=Math.cos(yaw), rz=-Math.sin(yaw);          // « à droite » du grimpeur
+  const dx=rx*dir, dz=rz*dir;
+  let best=null,bd=1e9;
+  for(const bx of G.boxes){
+    if(bx===h.bx||!hangable(bx)) continue;
+    if(Math.abs(bx.y1-h.bx.y1)>2.6) continue;         // pas plus d'un étage d'écart
+    for(const side in FACE_N){
+      const n=FACE_N[side];
+      if(n[0]*dx+n[1]*dz>-0.3) continue;              // la face doit nous regarder
+      const cible={bx,side,u:n[0]?p.pos.z:p.pos.x};
+      const q=hangPos(cible);
+      const ecart=(q.x-p.pos.x)*dx+(q.z-p.pos.z)*dz;  // devant nous, du bon côté
+      if(ecart<0.6||ecart>4.4) continue;
+      const lat=Math.abs((q.x-p.pos.x)*dz-(q.z-p.pos.z)*dx);
+      if(lat>1.6) continue;
+      const d=Math.hypot(q.x-p.pos.x,q.z-p.pos.z);
+      if(d<bd){ bd=d; best={cible,q}; }
+    }
+  }
+  if(!best) return false;
+  p.hang=null;
+  p.saut={t:0,dur:0.1+bd*0.075,from:p.pos.clone(),to:best.q,cible:best.cible};
+  sfx("rope"); return true;
 }
 function mastVisual(bx){
   const h=bx.y1-bx.y0+3;
@@ -2330,11 +2578,11 @@ function updateFX(dt){
     const f=G.fx[i]; f.t+=dt;
     const a=f.pts.geometry.attributes.position;
     for(let k=0;k<f.vel.length;k++){
-      f.vel[k].y-=6*dt;
+      f.vel[k].y-=(f.g===undefined?6:f.g)*dt;
       a.array[k*3]+=f.vel[k].x*dt; a.array[k*3+1]=Math.max(0.05,a.array[k*3+1]+f.vel[k].y*dt); a.array[k*3+2]+=f.vel[k].z*dt;
     }
     a.needsUpdate=true;
-    f.pts.material.opacity=Math.max(0,1-f.t/0.9);
+    f.pts.material.opacity=Math.max(0,(f.g===undefined?1:0.5)*(1-f.t/0.9));
     if(f.t>0.9){ G.root.remove(f.pts); f.pts.geometry.dispose(); G.fx.splice(i,1); }
   }
 }
@@ -2355,7 +2603,7 @@ function buildLevel(i){
   G.boxes=lv.boxes; G.hides=lv.hides; G.inter=lv.inter; G.tapu=lv.tapu||[];
   G.time=0; G.alarm=0; G.alarmCount=0; G.kills=0; G.maxSeen=0;
   G.bodiesHidden=0; G.bodiesFound=0; G.bellSabotaged=false;
-  G.projectiles=[]; G.smokes=[]; G.anim=[]; G.fx=[]; G.slow=0; G.sync=null;
+  G.projectiles=[]; G.smokes=[]; G.ripples=[]; G.anim=[]; G.fx=[]; G.slow=0; G.sync=null;
   G.tools=Object.assign({},lv.tools); G.tool="stone";
   G.killTypes={}; G.kos=0; G.coinPiles=[];
   lv.objectives.forEach(o=>o.done=false);
@@ -2396,7 +2644,7 @@ function buildLevel(i){
     else if(built&&!ringW) collectWindows(bx,lv.boxes,wins,doors);
   });
   buildInstances(wins,doors,merl);
-  buildSpikes(spikes); buildWater(lv); buildMountains(lv);
+  buildSpikes(spikes); buildPaths(lv); buildWater(lv); buildMountains(lv);
   PALM_ACC={futs:[],palmes:[]};
   buildForest(lv);
   batch(CYL6,MAT.trunk,PALM_ACC.futs,true);
@@ -2460,7 +2708,7 @@ function buildLevel(i){
   pm.position.set(lv.start.x,0,lv.start.z); G.root.add(pm);
   G.player={mesh:pm,pos:new THREE.Vector3(lv.start.x,0,lv.start.z),vy:0,yaw:lv.start.yaw,
     crouch:false,onGround:true,phase:0,climbing:null,gliding:null,lunge:null,stun:0,bladeT:0,grabT:0,
-    hang:null,noGrab:0,
+    hang:null,noGrab:0,vx:0,vz:0,step:0,vault:null,saut:null,roll:0,wasHidden:false,
     speedNow:0,hidden:false,detect:0,light:0,carrying:null,fallFrom:0};
   G.camYaw=lv.start.yaw+Math.PI; G.camPitch=0.35; G.camDistEff=G.camDist;
 
@@ -2487,7 +2735,8 @@ function buildLevel(i){
       pos:new THREE.Vector3(start[0],y,start[1]),baseY:y,yaw:def.yaw||0,
       state:"PATROL",wp:1,waitT:0,aware:0,poi:null,searchT:0,phase:0,
       dead:false,deadT:0,carried:false,stashed:false,frozen:false,
-      poison:0,coins:null,picking:false,pull:null,ko:false,koT:0,idle:"look",restYaw:def.yaw||0};
+      poison:0,coins:null,picking:false,pull:null,ko:false,koT:0,idle:"look",restYaw:def.yaw||0,
+      meet:null,croiseT:Math.random()*4,fouille:null,fouilleT:0};
   });
   G.guards.forEach(g=>{ g.mesh.position.copy(g.pos); });
 
@@ -2658,6 +2907,24 @@ bindBtn("tbKO",()=>tryKO());
    ============================================================ */
 function playerHeight(){return G.player.crouch?1.15:1.8;}
 function chestY(){return G.player.pos.y+(G.player.crouch?0.62:1.28);}
+// Ce qui amortit une chute, et ce qui cache un homme debout.
+const SOFT_HIDE={hay:1,stall:1,filet:1};
+const STAND_HIDE={jar:1,vaa:1};
+const HIDE_NOTE={
+  stall:"Sous l'abri du pêcheur",
+  hay:"Enfoui dans le nīʻau",
+  bush:"Dans le fourré",
+  jar:"Derrière les tonneaux",
+  vaa:"Sous la pirogue retournée",
+  filet:"Dans les filets"
+};
+const HIDE_STASH={
+  stall:"glisser le corps sous l'abri",
+  hay:"enfouir le corps dans le nīʻau",
+  jar:"caler le corps derrière les tonneaux",
+  vaa:"glisser le corps sous la pirogue",
+  filet:"rouler le corps dans les filets"
+};
 function inHide(x,z){
   for(const h of G.hides)
     if(x>h.x-h.w/2&&x<h.x+h.w/2&&z>h.z-h.d/2&&z<h.z+h.d/2) return h;
@@ -2683,8 +2950,17 @@ function cycleTool(){
   selectTool(TOOLS[(i+1)%TOOLS.length].k);
 }
 function tryClimb(){
-  const p=G.player; if(p.climbing||p.gliding||p.stun>0) return;
-  if(p.hang){ hangPullUp(p); return; }        // suspendu : on se rétablit sur le toit
+  const p=G.player; if(p.climbing||p.gliding||p.saut||p.vault||p.stun>0) return;
+  if(p.hang){
+    // suspendu : avec une direction, on se jette vers la corniche voisine ;
+    // sans direction, on se rétablit sur le toit
+    let dir=0;
+    if(K.KeyA||K.ArrowLeft) dir-=1;
+    if(K.KeyD||K.ArrowRight) dir+=1;
+    if(Math.abs(touch.move.x)>0.4) dir+=touch.move.x;
+    if(dir&&ledgeJump(p,clamp(dir,-1,1)>0?1:-1)) return;
+    hangPullUp(p); return;
+  }
   // tyrolienne prioritaire
   for(const r of G.ropes){
     for(const [from,to] of [[r.a,r.b],[r.b,r.a]]){
@@ -2943,6 +3219,7 @@ function tryAction(){
     g.mesh.scale.setScalar(0.92); toast("Corps sur l'épaule");
   }else if(a.kind==="stash"){
     const g=p.carrying; g.stashed=true; g.mesh.visible=false;
+    g.pos.set(p.pos.x,p.pos.y,p.pos.z);      // le corps reste là où on l'a glissé
     p.mesh.remove(g.mesh); p.carrying=null;
     G.bodiesHidden++; sfx("good"); toast("Corps dissimulé — il ne sera pas trouvé");
   }else if(a.kind==="drop"){ dropBody(); }
@@ -3036,6 +3313,25 @@ function updatePlayer(dt){
     p.yaw=Math.atan2(c.to.x-c.from.x,c.to.z-c.from.z);
     p.speedNow=0;
     if(k>=1){ p.pos.copy(c.to); p.gliding=null; p.vy=0; p.fallFrom=p.pos.y; }
+  }else if(p.saut){
+    // vol entre deux corniches : on lâche, on passe, on rattrape
+    const c=p.saut; c.t+=dt;
+    const t=clamp(c.t/c.dur,0,1);
+    p.pos.lerpVectors(c.from,c.to,t); p.pos.y-=Math.sin(t*Math.PI)*0.45;
+    p.speedNow=0;
+    if(t>=1){ p.saut=null; startHang(p,c.cible); }
+  }else if(p.vault){
+    // franchissement : une courbe par-dessus l'obstacle, sans perdre l'élan
+    const c=p.vault; c.t+=dt;
+    const t=clamp(c.t/c.dur,0,1);
+    p.pos.x=lerp(c.from.x,c.to.x,t); p.pos.z=lerp(c.from.z,c.to.z,t);
+    p.pos.y=lerp(c.from.y,c.to.y,t)+Math.sin(t*Math.PI)*(c.haut-Math.max(c.from.y,c.to.y)+0.25);
+    p.speedNow=5.4;
+    if(t>=1){
+      p.pos.copy(c.to); p.vault=null; p.onGround=true; p.vy=0; p.fallFrom=p.pos.y;
+      const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw);
+      p.vx=fx*4.2; p.vz=fz*4.2;                     // on repart dans la foulée
+    }
   }else if(p.hang){
     // suspendu : on ne se déplace que de côté, le long du rebord
     const h=p.hang;
@@ -3074,18 +3370,43 @@ function updatePlayer(dt){
     let spd=p.crouch?1.65:(running?5.4:3.1);
     if(p.swim) spd*=p.crouch?0.85:0.6;
     if(p.carrying) spd*=0.6;
+    // Vitesse lissée : le corps met un instant à se lancer et à s'arrêter.
+    // On se relance vite, on s'arrête plus vite encore, et en l'air on garde son élan.
+    let wx=0,wz=0;
     if(mag>0.01){
       ix/=Math.max(mag,1); iz/=Math.max(mag,1);
       const fwd={x:-Math.sin(G.camYaw),z:-Math.cos(G.camYaw)};
       const rgt={x:Math.cos(G.camYaw),z:-Math.sin(G.camYaw)};
       const mx=fwd.x*iz+rgt.x*ix, mz=fwd.z*iz+rgt.z*ix;
       const ml=Math.hypot(mx,mz)||1;
-      p.pos.x+=mx/ml*spd*dt; p.pos.z+=mz/ml*spd*dt;
-      p.speedNow=spd*Math.min(mag,1);
-      p.yaw+=angDelta(p.yaw,Math.atan2(mx,mz))*Math.min(1,dt*13);
-      p.phase+=dt*(running?13:8.5);
-    }else{ p.speedNow=0; p.phase+=dt*1.2; }
+      wx=mx/ml*spd*Math.min(mag,1); wz=mz/ml*spd*Math.min(mag,1);
+    }
+    const prise=p.onGround?(mag>0.01?9:13):2.6;      // en l'air, on ne change presque plus de cap
+    const k=Math.min(1,dt*prise);
+    p.vx=lerp(p.vx,wx,k); p.vz=lerp(p.vz,wz,k);
+    if(Math.abs(p.vx)<0.02) p.vx=0;
+    if(Math.abs(p.vz)<0.02) p.vz=0;
+    p.speedNow=Math.hypot(p.vx,p.vz);
+    const ox=p.pos.x, oz=p.pos.z;
+    p.pos.x+=p.vx*dt; p.pos.z+=p.vz*dt;
+    if(p.speedNow>0.25){
+      p.yaw+=angDelta(p.yaw,Math.atan2(p.vx,p.vz))*Math.min(1,dt*13);
+      p.phase+=dt*(running?2.4:2.75)*p.speedNow;
+    }else p.phase+=dt*1.2;
+
+    const avant=groundAt(p.pos.x,p.pos.z,p.pos.y+0.05,G.boxes);
     circleVsBoxes(p.pos,0.42,p.pos.y,p.pos.y+playerHeight(),G.boxes);
+    // Marche d'escalier : on monte tout seul les ressauts jusqu'à 55 cm, au lieu de buter.
+    if(p.onGround&&!p.swim&&avant>p.pos.y+0.02&&avant<p.pos.y+0.55){
+      p.pos.x=ox+p.vx*dt; p.pos.z=oz+p.vz*dt;
+      p.pos.y=avant; p.fallFrom=avant; p.vy=0; p.step=0.18;
+    }
+    // Franchissement en course : un obstacle à hauteur de hanche se passe d'un appui de main.
+    if(!p.vault&&p.onGround&&!p.swim&&!p.carrying&&p.speedNow>4&&p.stun<=0){
+      const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+      const bx=lowObstacle(p,fx,fz);
+      if(bx) startVault(p,bx,fx,fz);
+    }
 
     p.vy-=19*dt;
     let ny=p.pos.y+p.vy*dt;
@@ -3102,8 +3423,12 @@ function updatePlayer(dt){
       if(!p.onGround&&drop>3.5){
         const h=inHide(p.pos.x,p.pos.z);
         if(inWater(p.pos.x,p.pos.z)){ toast("Plongeon — personne n'a rien entendu"); splashFX(p.pos.x,p.pos.z); }
-        else if(h&&(h.kind==="hay"||h.kind==="stall")){
+        else if(h&&SOFT_HIDE[h.kind]){
           toast("Saut de la foi — atterrissage silencieux"); sfx("good");
+        }else if(drop<7&&p.speedNow>2.6){
+          // roulade : en arrivant lancé, on roule et on repart, presque sans bruit
+          p.roll=0.5; sfx("stone"); makeNoise(p.pos.x,p.pos.z,6,0.15);
+          toast("Roulade — l'élan a absorbé la chute");
         }else{
           sfx("thud"); makeNoise(p.pos.x,p.pos.z,14,0.4);
           p.stun=0.45; toast("Chute lourde : le bruit a porté");
@@ -3119,6 +3444,16 @@ function updatePlayer(dt){
   const wasSwim=p.swim;
   p.swim=p.pos.y<0.3&&inWater(p.pos.x,p.pos.z);
   if(p.swim&&!wasSwim&&!p.lunge) splashFX(p.pos.x,p.pos.z);
+  // une trace à chaque foulée : poussière sur le sable, rides sur l'eau
+  if(p.speedNow>0.4&&G.quality!=="low"){
+    p.stepT=(p.stepT||0)+dt*p.speedNow;
+    const cadence=p.swim?2.6:(p.speedNow>4.2?2.2:3.2);
+    if(p.stepT>cadence){
+      p.stepT=0;
+      if(p.swim) rippleFX(p.pos.x,p.pos.z);
+      else if(p.onGround&&p.speedNow>3.4&&!p.crouch) dustFX(p.pos.x,p.pos.y,p.pos.z);
+    }
+  }
   p.onPalm=G.boxes.some(bx=>(bx.type==="palm"||bx.type==="ora")&&Math.abs(p.pos.y-bx.y1)<0.25
     &&Math.hypot(p.pos.x-bx.x,p.pos.z-bx.z)<(bx.type==="ora"?2.2:0.9))
     ||G.boxes.some(bx=>bx.type==="branch"&&Math.abs(p.pos.y-bx.y1)<0.25&&insideBox(p.pos.x,p.pos.z,bx,0.4));
@@ -3150,6 +3485,31 @@ function updatePlayer(dt){
     p.mesh.rotation.x=lerp(p.mesh.rotation.x,diving?1.2:0,kk);
     ud.armL.rotation.z=lerp(ud.armL.rotation.z,diving?-1.4:0,kk); ud.armR.rotation.z=lerp(ud.armR.rotation.z,diving?1.4:0,kk);
     if(diving) straighten(ud,true,true); }
+  if(p.vault){                      // franchissement : une main sur l'obstacle, jambes repliées
+    const t=p.vault.t/p.vault.dur;
+    ud.armR.rotation.x=-1.9-Math.sin(t*Math.PI)*0.7; ud.armL.rotation.x=-0.5;
+    ud.legL.rotation.x=-0.9*Math.sin(t*Math.PI); ud.legR.rotation.x=-1.2*Math.sin(t*Math.PI);
+    ud.legL.lower.rotation.x=1.5*Math.sin(t*Math.PI); ud.legR.lower.rotation.x=1.7*Math.sin(t*Math.PI);
+    p.mesh.rotation.x=Math.sin(t*Math.PI)*0.35;
+  }
+  if(p.saut){                       // vol entre deux corniches : bras tendus vers la prise
+    ud.armL.rotation.x=-2.8; ud.armR.rotation.x=-2.8; straighten(ud,true,false);
+    ud.legL.rotation.x=0.5; ud.legR.rotation.x=0.2;
+    ud.legL.lower.rotation.x=0.9; ud.legR.lower.rotation.x=0.5;
+  }
+  if(p.roll>0){                     // roulade : le corps fait un tour vers l'avant
+    p.roll-=dt;
+    p.mesh.rotation.x=(1-clamp(p.roll/0.5,0,1))*TAU;
+    ud.armL.rotation.x=-1.9; ud.armR.rotation.x=-1.9;
+    ud.legL.rotation.x=-1.1; ud.legR.rotation.x=-1.1;
+    ud.legL.lower.rotation.x=1.9; ud.legR.lower.rotation.x=1.9;
+    if(p.roll<=0) p.mesh.rotation.x=0;
+  }
+  if(p.step>0){                     // ressaut franchi : un petit fléchissement
+    p.step-=dt;
+    const t=clamp(p.step/0.18,0,1);
+    ud.legL.lower.rotation.x+=t*0.5; ud.legR.lower.rotation.x+=t*0.5;
+  }
   if(p.hang){                       // bras levés au rebord, jambes qui pendent
     const sw=Math.sin(p.phase)*(p.speedNow>0.1?0.5:0.12);
     ud.armL.rotation.x=-2.95+sw*0.25; ud.armR.rotation.x=-2.95-sw*0.25;
@@ -3174,7 +3534,10 @@ function updatePlayer(dt){
     0.12+p.speedNow*0.09+Math.sin(VT*7)*0.05*Math.min(1,p.speedNow/3)+(p.onGround?0:0.5),Math.min(1,dt*8));
 
   const h=inHide(p.pos.x,p.pos.z);
-  p.hidden=(!!h&&p.pos.y<1.6&&(h.kind==="jar"||p.crouch))||(p.swim&&p.crouch);
+  const cache=!!h&&p.pos.y<1.6&&(STAND_HIDE[h.kind]||p.crouch);
+  p.hidden=cache||(p.swim&&p.crouch);
+  if(cache&&!p.wasHidden){ sfx("tick"); toast(HIDE_NOTE[h.kind]||"Tu te fonds dans l'ombre"); }
+  p.wasHidden=cache;
   p.light=lightAt(p.pos.x,p.pos.z)*(p.hidden?0.25:(h?0.6:1))*(p.onPalm?0.5:1);
 
   updateProjectiles(dt);
@@ -3267,6 +3630,26 @@ function moveGuard(g,tx,tz,speed,dt){
   g.phase+=dt*speed*2.6;
   return false;
 }
+// les cachettes autour d'un point, de la plus proche à la plus lointaine
+function hidesNear(x,z,r){
+  return G.hides.filter(h=>Math.hypot(h.x-x,h.z-z)<r)
+    .sort((a,b)=>Math.hypot(a.x-x,a.z-z)-Math.hypot(b.x-x,b.z-z));
+}
+// un garde écarte le feuillage : il y trouve ce qu'on y a mis
+function fouillerCachette(g,h){
+  const p=G.player;
+  if(inHide(p.pos.x,p.pos.z)===h&&p.pos.y<1.6&&Math.abs(p.pos.y-g.pos.y)<2){
+    g.aware=1; g.lastSeen={x:p.pos.x,z:p.pos.z};
+    toast("Il a fouillé ta cachette !");
+  }
+  for(const o of G.guards){
+    if(!o.stashed||Math.hypot(o.pos.x-h.x,o.pos.z-h.z)>2.4) continue;
+    o.stashed=false; o.mesh.visible=true; o.mesh.position.copy(o.pos);
+    G.bodiesHidden=Math.max(0,G.bodiesHidden-1); G.bodiesFound++;
+    g.aware=Math.max(g.aware,0.8);
+    toast("Un corps dissimulé a été découvert");
+  }
+}
 function nearestWaypoint(g){
   let bi=0,bd=1e9;
   g.def.path.forEach((w,i)=>{const d=Math.hypot(w[0]-g.pos.x,w[1]-g.pos.z); if(d<bd){bd=d;bi=i;}});
@@ -3349,7 +3732,7 @@ function updateGuards(dt){
     if(g.aware>=1){
       g.state="ALERT"; triggerAlarm(p.pos);
     }else if(g.aware>0.45&&g.state==="PATROL"){
-      g.state="INVESTIGATE"; g.coins=null;
+      g.state="INVESTIGATE"; g.coins=null; g.meet=null; g.fouille=null;
       g.poi=g.lastSeen?{x:g.lastSeen.x,z:g.lastSeen.z}:{x:p.pos.x,z:p.pos.z};
       g.searchT=0;
     }
@@ -3363,6 +3746,21 @@ function updateGuards(dt){
       if(moveGuard(g,c.x,c.z,g.def.speed*1.1,dt)){ c.t+=dt; g.picking=true; g.phase+=dt*0.5;
         if(c.t>6){ g.coins=null; g.state="PATROL"; g.wp=nearestWaypoint(g); g.waitT=0; } }
     }else if(g.state==="PATROL"){
+      // deux hommes qui se croisent échangent un regard : la ronde s'arrête un instant
+      if(g.meet){
+        g.meet.t-=dt;
+        g.yaw+=angDelta(g.yaw,Math.atan2(g.meet.o.pos.x-g.pos.x,g.meet.o.pos.z-g.pos.z))*Math.min(1,dt*5);
+        g.phase+=dt*0.6;
+        g.mesh.userData.headG.rotation.y=Math.sin(VT*1.8+g.pos.x)*0.25;
+        if(g.meet.t<=0){ g.meet=null; g.croiseT=7; }
+      }else{
+      if(g.croiseT>0) g.croiseT-=dt;
+      else for(const o of G.guards){
+        if(o===g||o.dead||o.state!=="PATROL"||o.meet||o.croiseT>0||o.coins) continue;
+        if(Math.abs(o.pos.y-g.pos.y)>1) continue;
+        if(Math.hypot(o.pos.x-g.pos.x,o.pos.z-g.pos.z)>2.6) continue;
+        g.meet={t:2+Math.random()*1.6,o}; o.meet={t:g.meet.t,o:g}; break;
+      }
       const path=g.def.path;
       if(path.length>1){
         if(g.waitT>0){ g.waitT-=dt; g.phase+=dt*0.8;
@@ -3373,20 +3771,51 @@ function updateGuards(dt){
             g.restYaw=g.yaw; g.idle=["look","look","stretch","lean"][(Math.random()*4)|0]; }
         }
       }else g.yaw+=dt*0.35;
+      }
     }else if(g.state==="INVESTIGATE"){
-      if(visible) g.poi={x:p.pos.x,z:p.pos.z};
-      const arrived=g.poi?moveGuard(g,g.poi.x,g.poi.z,g.def.speed*1.18*boost,dt):true;
-      if(arrived){
-        g.searchT+=dt; g.yaw+=Math.sin(g.searchT*2.1)*dt*2.4;
-        if(g.searchT>4.5&&g.aware<0.35){ g.state="PATROL"; g.wp=nearestWaypoint(g); g.waitT=0; g.poi=null; }
+      if(visible){ g.poi={x:p.pos.x,z:p.pos.z}; g.fouille=null; }
+      // Tant qu'il reste une cachette à fouiller, c'est elle qui mène ses pas :
+      // sinon il serait rappelé vers son point d'enquête à chaque image.
+      if(g.fouille&&g.fouille.length){
+        const h=g.fouille[0];
+        if(moveGuard(g,h.x,h.z,g.def.speed*0.95*boost,dt)){
+          g.fouilleT+=dt; g.picking=g.fouilleT>0.4;
+          g.yaw+=Math.sin(g.fouilleT*3.4)*dt*2.6;
+          if(g.fouilleT>1.5){ fouillerCachette(g,h); g.fouille.shift(); g.fouilleT=0; g.picking=false; }
+        }
+      }else{
+        const arrived=g.poi?moveGuard(g,g.poi.x,g.poi.z,g.def.speed*1.18*boost,dt):true;
+        if(arrived){
+          if(!g.fouille){
+            // arrivé sur place : il ira écarter les deux cachettes les plus proches
+            g.fouille=g.poi?hidesNear(g.poi.x,g.poi.z,7).slice(0,2):[];
+            g.fouilleT=0;
+          }
+          if(!g.fouille.length){
+            g.searchT+=dt; g.yaw+=Math.sin(g.searchT*2.1)*dt*2.4;
+            if(g.searchT>4.5&&g.aware<0.35){
+              g.state="PATROL"; g.wp=nearestWaypoint(g); g.waitT=0; g.poi=null; g.fouille=null;
+            }
+          }
+        }
       }
     }else{
+      // Chaque unité réagit à l'alarme à sa manière :
+      // la sentinelle ne quitte pas son poste et fouille l'horizon,
+      // le voltigeur court droit sur la dernière position vue,
+      // le sapeur avance lourdement mais rattrape de plus loin.
       if(visible){ g.poi={x:p.pos.x,z:p.pos.z}; g.searchT=0; }
-      const arrived=g.poi?moveGuard(g,g.poi.x,g.poi.z,g.def.speed*1.45*boost,dt):true;
-      if(arrived&&!visible){
-        g.searchT+=dt; g.yaw+=Math.sin(g.searchT*2.6)*dt*3;
-        if(g.searchT>7){ g.state="INVESTIGATE"; g.searchT=0; }
+      let arrived;
+      if(g.def.kind==="guetteur"){
+        const poste=g.def.path[g.wp%g.def.path.length];
+        arrived=moveGuard(g,poste[0],poste[1],g.def.speed,dt);
+        if(arrived&&!visible){ g.yaw+=Math.sin(VT*1.1+g.pos.x)*dt*1.9; g.searchT+=dt*0.55; }
+      }else{
+        const vite=g.def.kind==="eclaireur"?1.8:(g.def.brute?1.2:1.45);
+        arrived=g.poi?moveGuard(g,g.poi.x,g.poi.z,g.def.speed*vite*boost,dt):true;
+        if(arrived&&!visible){ g.searchT+=dt; g.yaw+=Math.sin(g.searchT*2.6)*dt*3; }
       }
+      if(arrived&&!visible&&g.searchT>7){ g.state="INVESTIGATE"; g.searchT=0; g.fouille=null; }
       const catchD=g.def.brute?1.7:1.35;
       if(visible&&Math.hypot(p.pos.x-g.pos.x,p.pos.z-g.pos.z)<catchD&&Math.abs(p.pos.y-g.pos.y)<2){
         endLevel(false,"Rattrapé par "+g.def.name.toLowerCase()+"."); return;
@@ -3475,7 +3904,9 @@ function updateCamera(dt){
   if(G.autoCam&&isTouch&&!lookPts.length&&!G.sync&&p.speedNow>1&&!p.climbing&&!p.gliding)
     G.camYaw+=angDelta(G.camYaw,p.yaw+Math.PI)*Math.min(1,dt*0.9);
   if(G.sync){ G.sync.t+=dt; G.camYaw+=dt*2.2; G.camPitch=lerp(G.camPitch,0.3,Math.min(1,dt*2)); if(G.sync.t>2.8) G.sync=null; }
-  G.camDistEff=lerp(G.camDistEff||G.camDist,G.slow>0?3.3:(G.sync?10:G.camDist),Math.min(1,dt*6));
+  const acro=p.vault||p.saut||p.roll>0;
+  G.camDistEff=lerp(G.camDistEff||G.camDist,
+    G.slow>0?3.3:(G.sync?10:(acro?G.camDist*0.82:G.camDist)),Math.min(1,dt*6));
   let dist=G.camDistEff;
   const fovT=G.slow>0?50:62;
   if(Math.abs(camera.fov-fovT)>0.05){camera.fov=lerp(camera.fov,fovT,Math.min(1,dt*6));camera.updateProjectionMatrix();}
@@ -3545,7 +3976,7 @@ function computePrompt(){
 
   if(p.carrying){
     const h=inHide(p.pos.x,p.pos.z);
-    if(h&&h.kind!=="bush") G.promptAction={kind:"stash",text:"dissimuler le corps"};
+    if(h&&h.kind!=="bush") G.promptAction={kind:"stash",text:HIDE_STASH[h.kind]||"dissimuler le corps"};
     else G.promptAction={kind:"drop",text:"déposer le corps"};
     return updatePrompt();
   }
@@ -3620,7 +4051,9 @@ function updatePrompt(){
       if(Math.hypot(p.pos.x-from.x,p.pos.z-from.z)<2&&Math.abs(p.pos.y-(from.y-0.2))<1.6&&ropeOK(p,from,to)){
         promptEl.innerHTML="<kbd>Espace</kbd>tyrolienne"; promptEl.classList.add("on"); return; }
   if(p.hang){
-    promptEl.innerHTML='<kbd>Espace</kbd>se rétablir<span class="alt"><kbd>C</kbd>lâcher</span>';
+    promptEl.innerHTML='<kbd>Espace</kbd>se rétablir'+
+      '<span class="alt"><kbd>Q</kbd><kbd>D</kbd>+<kbd>Espace</kbd>sauter au rebord voisin</span>'+
+      '<span class="alt"><kbd>C</kbd>lâcher</span>';
     promptEl.classList.add("on"); return; }
   const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw);
   for(const bx of G.boxes){
@@ -3789,6 +4222,8 @@ function showMenu(){
     '<div><span>Se suspendre au rebord · se rétablir</span><b>Espace</b></div>'+
     '<div><span>Lâcher le rebord</span><b>C ou X</b></div>'+
     '<div><span>Se déplacer aux mains</span><b>Q et D</b></div>'+
+    '<div><span>Sauter au rebord voisin</span><b>Q ou D + Espace</b></div>'+
+    '<div><span>Franchir un muret, rouler</span><b>en courant, tout seul</b></div>'+
     '<div><span>Assassiner, agir, synchroniser</span><b>E</b></div>'+
     '<div><span>Assommer (sans tuer)</span><b>R</b></div>'+
     '<div><span>Lâcher un corps</span><b>X</b></div>'+
@@ -3809,11 +4244,20 @@ function showMenu(){
     '<b>ʻŌrā</b> — le banian. Son tronc se grimpe comme un cocotier, et ses branches maîtresses portent un homme : on y court, on s\'y arrête, on y tend des cordes. '+
     '<b>Cocotiers et mâts</b> — on monte jusqu\'à la couronne ou la hune, où l\'on te voit mal ; des cordes de nape relient les sommets. '+
     '<b>Saut en course</b> — Espace en courant franchit un vide de trois mètres. Au bord d\'un toit, cours pour sauter, arrête-toi pour te suspendre. '+
+    '<b>Franchissement</b> — un muret, une caisse, un bastingage : en courant, tu passes par-dessus sans t\'arrêter. Plus haut, il faut grimper. '+
+    '<b>Roulade</b> — arrive lancé d\'une chute de moins de sept mètres et tu roules : aucun mal, presque aucun bruit. À l\'arrêt, la même chute fait du bruit et te sonne. '+
+    '<b>De rebord en rebord</b> — suspendu, pousse Q ou D et appuie sur Espace : tu te jettes vers la corniche voisine. '+
     '<b>Points de vue</b> — au sommet le plus haut, synchronise-toi : l\'ʻōtaha te révèle tous les soldats. '+
     '<b>Saut de la foi</b> — dans le lagon, un bassin ou un tas de nī\'au, la chute est silencieuse.'+
     '<h4>Le fenua est ton allié</h4>'+
     '<b>Le lagon</b> — les soldats n\'y entrent pas ; accroupis-toi dans l\'eau pour plonger. '+
     '<b>Le marae</b> — lieu tapu : on n\'y verse pas le sang.'+
+    '<h4>Six cachettes</h4>'+
+    'L\'abri du pêcheur, le tas de nīʻau, le fourré, les tonneaux, la <b>pirogue retournée</b> et le <b>tas de filets</b>. '+
+    'Sous la pirogue et derrière les tonneaux, on tient debout ; ailleurs il faut s\'accroupir. '+
+    'Le nīʻau, l\'abri et les filets sont mous : on peut y tomber de haut sans bruit. '+
+    '<b>Mais un garde qui enquête fouille les cachettes les plus proches</b> — et y trouve aussi les corps qu\'on y a glissés. '+
+    'Se terrer sur place ne suffit plus : il faut s\'éloigner, ou monter.'+
     '<h4>Quatorze façons de frapper</h4>'+
     '<b>Dans le dos</b>, <b>aérien</b> (depuis un toit, un cocotier, une vergue), <b>embuscade</b> (abri de pêcheur, tas de nī\'au, tonneau, fourré), '+
     '<b>double</b>, <b>en pleine course</b> (bruyant), <b>dans le vide</b> (tire la sentinelle postée au bord), <b>depuis la corde</b>, '+
@@ -3824,6 +4268,11 @@ function showMenu(){
     'et <b>assommer</b> (R), sans tuer.'+
     '<h4>Les piastres</h4>Lance des pièces : les soldats se penchent pour ramasser et ne voient presque plus rien. '+
     'Même un sapeur se laisse alors prendre de face.'+
+    '<h4>La garnison</h4>'+
+    'Deux hommes qui se croisent en ronde s\'arrêtent et se font face un moment : la ronde s\'ouvre ailleurs. '+
+    'À l\'alarme, chacun réagit selon son arme : le <b>voltigeur</b> court droit sur ta dernière position, '+
+    'le <b>sapeur</b> avance lourdement mais te rattrape de plus loin, et la <b>sentinelle ne quitte pas son poste</b> — '+
+    'elle reste en hauteur et fouille l\'horizon.'+
     '<h4>Sur téléphone</h4>Glisse <b>n\'importe où</b> sur l\'écran pour tourner la caméra — le manche et les boutons gardent la priorité. '+
     '<b>Deux doigts</b> règlent la distance. Un <b>double appui</b> remet la caméra derrière ton épaule. '+
     'La sensibilité, le sens du regard vertical et la caméra qui suit se règlent dans le menu Pause.</div>';
@@ -3965,7 +4414,7 @@ function frame(){
     }
     computePrompt(); updateCamera(real); updateHUD(real);
     objT+=real; if(objT>0.5){objT=0;updateObjectivesUI();}
-    updateFX(dt); updateHazards(dt);
+    updateFX(dt); updateRipples(dt); updateHazards(dt);
     updateLightPool(G.player.pos.x,G.player.pos.z);
   }else if(G.phase==="menu"||G.phase==="brief"){
     menuT+=real*0.045;
