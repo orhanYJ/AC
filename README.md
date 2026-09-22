@@ -51,6 +51,18 @@ node outils/valider-niveaux.js
 node outils/verifier-script.js
 ```
 
+Les textures peintes (générées par Gemini) sont rangées dans `textures/` et
+intégrées au fichier du jeu :
+
+```sh
+# découper une grille de textures 4 × 4 (Pillow et numpy)
+python3 outils/decouper-grille.py textures/grille-gemini.webp
+# les intégrer dans docs/fenua.html
+node outils/integrer-textures.js
+```
+
+Si une texture manque, le jeu reprend celle qu'il dessine lui-même.
+
 Les deux vérifications tournent aussi dans GitHub Actions à chaque poussée
 (`.github/workflows/verifier.yml`).
 
