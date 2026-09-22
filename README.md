@@ -14,7 +14,7 @@ chargé depuis cdnjs, avec jsdelivr en secours.
 
 | | Lieu | Contrat |
 |---|---|---|
-| 1 | **Matavai** | Le village occupé. Le sergent Aubry, sur le toit du poste. |
+| 1 | **Matavai** | Le village occupé et ses collines. Le sergent Aubry, sur le toit du poste. |
 | 2 | **Papeete** | Le port du gouverneur. Les ordres à voler, le capitaine Duval. |
 | 3 | **Le fortin du récif** | Deux officiers sur deux toits opposés, une nuit. |
 | 4 | **Fautaua** | Décembre 1846, les falaises. Le commandant Lorrain. |
