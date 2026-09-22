@@ -4,6 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>L'Ombre du Fenua</title>
+<meta name="description" content="Jeu d'infiltration 3D dans un seul fichier : Tahiti, 1844, pendant la guerre franco-tahitienne. Quatre missions, aucun dialogue, et le chemin passe toujours par le haut.">
+<meta name="theme-color" content="#08141c">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="L'Ombre du Fenua">
+<meta property="og:description" content="Jeu d'infiltration 3D : Tahiti, 1844. Quatre missions, aucun dialogue, le chemin passe par le haut.">
+<meta name="twitter:card" content="summary">
+<!-- pour l'ajout à l'écran d'accueil, sur téléphone -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fenua">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2308141c'/%3E%3Cpath d='M21 4a12 12 0 1 0 6.5 21.5A14 14 0 0 1 21 4z' fill='%23f0a94b'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@400;600&display=swap" rel="stylesheet">
@@ -194,8 +207,26 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// Si cdnjs ne répond pas, on retente par jsdelivr. document.write est voulu ici :
+// il bloque l'analyse de la page le temps du chargement, ce dont le script du jeu a besoin.
+if(!window.THREE)
+  document.write('<scr'+'ipt src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></scr'+'ipt>');
+</script>
+<script>
 (function(){
 "use strict";
+
+// Ni cdnjs ni jsdelivr : on le dit, plutôt que de laisser un écran noir.
+if(!window.THREE){
+  document.getElementById("sheet").innerHTML=
+    '<h1><span class="sub">L\'Ombre du Fenua</span>La bibliothèque 3D n\'a pas pu être chargée</h1>'+
+    '<p class="lede">Le jeu a besoin de Three.js, servi par cdnjs ou par jsdelivr. Aucun des deux n\'a répondu.'+
+    '<br><br>Vérifie ta connexion, puis recharge la page. Si tu utilises un bloqueur de publicité ou un '+
+    'réseau d\'entreprise, il filtre peut-être ces deux adresses.</p>'+
+    '<div class="row"><button class="btn" id="rl">Recharger la page</button></div>';
+  document.getElementById("rl").onclick=()=>location.reload();
+  return;
+}
 
 /* ============================================================
    0. Outils généraux
