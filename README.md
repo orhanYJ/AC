@@ -10,7 +10,7 @@ Tout le jeu tient dans **un seul fichier HTML autonome**, `docs/fenua.html`.
 Aucune compilation : on l'ouvre dans un navigateur et ça marche. Three.js est
 chargé depuis cdnjs, avec jsdelivr en secours.
 
-## Les quatre missions
+## Les cinq missions
 
 | | Lieu | Contrat |
 |---|---|---|
@@ -18,14 +18,19 @@ chargé depuis cdnjs, avec jsdelivr en secours.
 | 2 | **Papeete** | Le port du gouverneur. Les ordres à voler, le capitaine Duval. |
 | 3 | **Le fortin du récif** | Deux officiers sur deux toits opposés, une nuit. |
 | 4 | **Fautaua** | Décembre 1846, les falaises. Le commandant Lorrain. |
+| 5 | **Taravao** | Janvier 1847, l'isthme. Le dernier passage vers la presqu'île. |
 
 ## Comment on joue
 
 **Au clavier** — Z Q S D pour se déplacer, Maj pour courir, C pour s'accroupir
 et plonger, **Espace** pour tout ce qui monte (escalader, grimper, sauter,
 prendre une corde, se suspendre à un rebord, se rétablir), E pour agir et
-assassiner, R pour assommer, 1 à 6 pour choisir un outil et F pour le lancer.
-La souris tourne la caméra, la molette règle la distance.
+assassiner, R pour assommer, T pour siffler, 1 à 6 pour choisir un outil et F
+pour le lancer. La souris tourne la caméra, la molette règle la distance.
+
+**À la manette** — reconnue dès qu'on y touche : stick gauche pour marcher,
+stick droit pour regarder, A grimper, X agir, Y assommer, B s'accroupir,
+gâchette droite pour courir.
 
 **Sur téléphone** — glisse le doigt **n'importe où** sur l'écran pour tourner la
 caméra ; deux doigts règlent la distance ; un double appui remet la caméra

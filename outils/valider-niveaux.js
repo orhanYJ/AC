@@ -25,5 +25,5 @@ LEVELS.forEach((F,li)=>{const lv=F(), bad=[], B=lv.boxes;
   total+=bad.length; console.log('Niveau '+(li+1)+' « '+lv.name+' » : '+(bad.length?bad.length+' problème(s)':'0 conflit'));
   bad.slice(0,12).forEach(x=>console.log('   · '+x));
 });
-console.log(total?'TOTAL '+total+' problème(s)':'Géométrie : 0 conflit sur les 4 niveaux');
+console.log(total?'TOTAL '+total+' problème(s)':'Géométrie : 0 conflit sur les '+LEVELS.length+' niveaux');
 process.exit(total?1:0);
