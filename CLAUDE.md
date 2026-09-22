@@ -5,7 +5,7 @@ Jeu d'infiltration 3D dans l'esprit des **anciens Assassin's Creed** (AC1/2, Bro
 - Langue : **tout en français** (interface, commentaires du code, réponses).
 - Le propriétaire est **débutant en développement** : expliquer simplement, sans jargon inutile.
 - Version en ligne (GitHub Pages) : https://orhanyj.github.io/AC/
-- Version en ligne (artefact Claude) : https://claude.ai/artifact/TQ5d2nfyt27Eg6cbivfR4G
+- Version en ligne (artefact Claude) : https://claude.ai/artifact/3Ke8xXAUFeKFt73GCtdwQG
 - Jeu précédent sur le même moteur (Proche-Orient médiéval) : « L'Ombre de Bab el-Ward », https://claude.ai/artifact/JUe3Z3Ed7dPrjVsgM8xWWE
 
 ## Lancer et vérifier
