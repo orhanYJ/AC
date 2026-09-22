@@ -4,6 +4,7 @@ Jeu d'infiltration 3D dans l'esprit des **anciens Assassin's Creed** (AC1/2, Bro
 
 - Langue : **tout en français** (interface, commentaires du code, réponses).
 - Le propriétaire est **débutant en développement** : expliquer simplement, sans jargon inutile.
+- Version en ligne (GitHub Pages) : https://orhanyj.github.io/AC/
 - Version en ligne (artefact Claude) : https://claude.ai/artifact/TQ5d2nfyt27Eg6cbivfR4G
 - Jeu précédent sur le même moteur (Proche-Orient médiéval) : « L'Ombre de Bab el-Ward », https://claude.ai/artifact/JUe3Z3Ed7dPrjVsgM8xWWE
 
@@ -18,7 +19,8 @@ Jeu d'infiltration 3D dans l'esprit des **anciens Assassin's Creed** (AC1/2, Bro
   - que les points de vue et les cibles en hauteur sont bien sur un sommet.
 
   Il doit afficher « 0 conflit ».
-- Vérifier la syntaxe JS : extraire le `<script>` et le passer à `new Function(...)` sous Node.
+- Vérifier la syntaxe JS, le crochet de test oublié et les sources externes : `node outils/verifier-script.js`.
+- Les deux vérifications tournent aussi dans GitHub Actions (`.github/workflows/verifier.yml`) à chaque poussée.
 - **Hors ligne**, cdnjs peut être bloqué : pour tester, récupérer Three.js r128 avec `npm pack three@0.128.0`, extraire `package/build/three.min.js` à côté de la **copie** de test et y remplacer l'URL cdnjs. Ne jamais livrer la copie.
 - Tests en navigateur utilisés jusqu'ici : Playwright + Chromium avec `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`, fenêtre 640×360, capture avec `timeout=150000` (le rendu logiciel est lent). Pour tester la logique, on ajoute sur **une copie** du fichier, juste avant `frame();` à la fin :
   ```js
@@ -105,7 +107,8 @@ Un seul `<script>` dans une IIFE, découpé en sections commentées :
 - **Culture** : les marae sont tapu, on ne s'y bat pas et on ne les escalade pas. Les mots en reo tahiti (fare, vaʻa, nīʻau, tūpāpaʻu, ʻōtaha, hora, nape, tatau, pāreu, tiare, ahimaʻa, tiʻi…) sont **à faire relire par le propriétaire**, qui connaît la langue.
 - **Pas d'anachronisme** : pas de grands immeubles façon Unity. La hauteur vient des cocotiers, mâts, tours de guet, blockhaus, pitons et falaises.
 - **Perf mobile** : sur téléphone, c'est le **nombre d'objets** qui coûte, pas les triangles. Tout élément répété passe par `batch()` ou `InstancedMesh` ; les géométries partagées (`SPH0`, `SPH1`, `CYL6`, `SPH8`, `LEAF_GEO`, `BARREL`) portent `userData.shared` pour que `clearScene` ne les libère pas. Repère actuel : **760 à 1040 objets par niveau**, 60 à 82 k triangles. Garder le mode « graphismes allégés » fonctionnel.
-- Garder **un seul fichier HTML autonome**. Seules sources externes autorisées pour la publication en artefact : cdnjs, jsdelivr, Google Fonts.
+- Garder **un seul fichier HTML autonome**. Seules sources externes autorisées : cdnjs, jsdelivr, Google Fonts — `outils/verifier-script.js` refuse tout le reste. Three.js est chargé depuis cdnjs, avec **jsdelivr en secours** ; si aucune des deux ne répond, la page affiche un message en français au lieu d'un écran noir.
+- **Mise en ligne** : GitHub Pages en mode « Deploy from a branch », sur la branche par défaut, dossier racine. `index.html` renvoie vers `fenua.html`, `.nojekyll` évite le passage par Jekyll. Activer Pages est un réglage du dépôt : un workflow ne peut pas le faire (le jeton d'Actions n'a pas le droit de créer le site).
 
 ## Pistes ouvertes
 

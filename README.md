@@ -46,11 +46,29 @@ node outils/valider-niveaux.js
 node outils/verifier-script.js
 ```
 
-Les deux vérifications tournent aussi dans GitHub Actions avant chaque mise en
-ligne : si l'une échoue, rien n'est publié.
+Les deux vérifications tournent aussi dans GitHub Actions à chaque poussée
+(`.github/workflows/verifier.yml`).
 
 `CLAUDE.md` décrit l'architecture du fichier, le format des niveaux et les
 règles du projet.
+
+## Mise en ligne
+
+Le site est servi par **GitHub Pages**, en mode « Deploy from a branch » : Pages
+publie la branche telle quelle, et `index.html` à la racine renvoie vers
+`fenua.html`. Chaque poussée est donc mise en ligne toute seule, en une minute
+environ.
+
+Un seul réglage est à faire **une fois**, dans le dépôt :
+
+> **Settings → Pages → Build and deployment**
+> · Source : `Deploy from a branch`
+> · Branch : `claude/jeu-infiltration-file-pxebtb` et dossier `/ (root)`
+> · **Save**
+
+Ce réglage ne peut pas être fait depuis un workflow : créer un site Pages
+demande un droit d'administration que le jeton de GitHub Actions n'a pas
+(`Resource not accessible by integration`).
 
 ## Histoire et culture
 

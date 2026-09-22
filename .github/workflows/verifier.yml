@@ -1,0 +1,39 @@
+# Vérifie le jeu à chaque poussée. La mise en ligne elle-même est faite par
+# GitHub Pages, réglé sur « Deploy from a branch » : il sert cette branche
+# telle quelle, et index.html à la racine ouvre le jeu.
+#
+# On ne publie pas depuis ce workflow : le jeton d'Actions n'a pas le droit de
+# créer le site Pages la première fois (« Resource not accessible by
+# integration »), donc l'activation reste un réglage du dépôt, à faire une fois.
+name: Vérifier le jeu
+
+on:
+  push:
+    branches: [claude/jeu-infiltration-file-pxebtb]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    name: Vérifier le jeu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Géométrie des niveaux
+        run: node outils/valider-niveaux.js
+
+      - name: Syntaxe, crochet de test et sources externes
+        run: node outils/verifier-script.js
+
+      - name: La racine du site ouvre bien le jeu
+        run: |
+          test -f index.html || { echo "index.html manque : la racine du site renverrait une erreur 404."; exit 1; }
+          grep -q 'fenua.html' index.html || { echo "index.html ne renvoie pas vers fenua.html."; exit 1; }
+          echo "index.html renvoie bien vers fenua.html"
