@@ -6,9 +6,9 @@ Jeu d'infiltration 3D dans l'esprit des anciens *Assassin's Creed* : le parcours
 passe **en hauteur plus qu'en largeur**, et il n'y a aucun dialogue. L'action se
 déroule pendant la guerre franco-tahitienne (1844–1847).
 
-Tout le jeu tient dans **un seul fichier HTML autonome**, `fenua.html`. Aucune
-compilation : on l'ouvre dans un navigateur et ça marche. Three.js est chargé
-depuis cdnjs, avec jsdelivr en secours.
+Tout le jeu tient dans **un seul fichier HTML autonome**, `docs/fenua.html`.
+Aucune compilation : on l'ouvre dans un navigateur et ça marche. Three.js est
+chargé depuis cdnjs, avec jsdelivr en secours.
 
 ## Les quatre missions
 
@@ -37,7 +37,7 @@ se règlent dans le menu Pause.
 
 ```sh
 # lancer : aucune compilation, on ouvre le fichier
-open fenua.html
+open docs/fenua.html
 
 # après toute modification de niveau — doit afficher « 0 conflit »
 node outils/valider-niveaux.js
@@ -54,16 +54,19 @@ règles du projet.
 
 ## Mise en ligne
 
-Le site est servi par **GitHub Pages**, en mode « Deploy from a branch » : Pages
-publie la branche telle quelle, et `index.html` à la racine renvoie vers
-`fenua.html`. Chaque poussée est donc mise en ligne toute seule, en une minute
-environ.
+Le site est servi par **GitHub Pages**, en mode « Deploy from a branch »,
+dossier **`/docs`** : Pages publie le contenu de `docs/`, où `index.html`
+renvoie vers `fenua.html`. Chaque poussée est donc mise en ligne toute seule,
+en une minute environ.
+
+C'est pour cela que le jeu vit dans `docs/` et non à la racine : c'est le seul
+des deux dossiers que Pages sait publier en plus de la racine.
 
 Un seul réglage est à faire **une fois**, dans le dépôt :
 
 > **Settings → Pages → Build and deployment**
 > · Source : `Deploy from a branch`
-> · Branch : `claude/jeu-infiltration-file-pxebtb` et dossier `/ (root)`
+> · Branch : `claude/jeu-infiltration-file-pxebtb` et dossier **`/docs`**
 > · **Save**
 
 Ce réglage ne peut pas être fait depuis un workflow : créer un site Pages

@@ -1,6 +1,6 @@
 # L'Ombre du Fenua — Tahiti, 1844
 
-Jeu d'infiltration 3D dans l'esprit des **anciens Assassin's Creed** (AC1/2, Brotherhood, Black Flag, Mirage) : parcours **en hauteur plus qu'en largeur**, sans dialogue. Il se déroule pendant la guerre franco-tahitienne (1844–1847). Tout le jeu tient dans **un seul fichier HTML** : `fenua.html`, environ 210 Ko.
+Jeu d'infiltration 3D dans l'esprit des **anciens Assassin's Creed** (AC1/2, Brotherhood, Black Flag, Mirage) : parcours **en hauteur plus qu'en largeur**, sans dialogue. Il se déroule pendant la guerre franco-tahitienne (1844–1847). Tout le jeu tient dans **un seul fichier HTML** : `docs/fenua.html`, environ 212 Ko. Il vit dans `docs/` parce que c'est le dossier que GitHub Pages sait publier.
 
 - Langue : **tout en français** (interface, commentaires du code, réponses).
 - Le propriétaire est **débutant en développement** : expliquer simplement, sans jargon inutile.
@@ -10,7 +10,7 @@ Jeu d'infiltration 3D dans l'esprit des **anciens Assassin's Creed** (AC1/2, Bro
 
 ## Lancer et vérifier
 
-- Ouvrir `fenua.html` dans un navigateur. Aucune compilation ; Three.js **r128** est chargé depuis cdnjs.
+- Ouvrir `docs/fenua.html` dans un navigateur. Aucune compilation ; Three.js **r128** est chargé depuis cdnjs.
 - **Après toute modification de niveau**, lancer `node outils/valider-niveaux.js`. Ce script vérifie :
   - que les rondes des gardes ne traversent ni mur ni eau ;
   - que les gardes postés en hauteur restent sur leur toit ;
@@ -108,7 +108,7 @@ Un seul `<script>` dans une IIFE, découpé en sections commentées :
 - **Pas d'anachronisme** : pas de grands immeubles façon Unity. La hauteur vient des cocotiers, mâts, tours de guet, blockhaus, pitons et falaises.
 - **Perf mobile** : sur téléphone, c'est le **nombre d'objets** qui coûte, pas les triangles. Tout élément répété passe par `batch()` ou `InstancedMesh` ; les géométries partagées (`SPH0`, `SPH1`, `CYL6`, `SPH8`, `LEAF_GEO`, `BARREL`) portent `userData.shared` pour que `clearScene` ne les libère pas. Repère actuel : **760 à 1040 objets par niveau**, 60 à 82 k triangles. Garder le mode « graphismes allégés » fonctionnel.
 - Garder **un seul fichier HTML autonome**. Seules sources externes autorisées : cdnjs, jsdelivr, Google Fonts — `outils/verifier-script.js` refuse tout le reste. Three.js est chargé depuis cdnjs, avec **jsdelivr en secours** ; si aucune des deux ne répond, la page affiche un message en français au lieu d'un écran noir.
-- **Mise en ligne** : GitHub Pages en mode « Deploy from a branch », sur la branche par défaut, dossier racine. `index.html` renvoie vers `fenua.html`, `.nojekyll` évite le passage par Jekyll. Activer Pages est un réglage du dépôt : un workflow ne peut pas le faire (le jeton d'Actions n'a pas le droit de créer le site).
+- **Mise en ligne** : GitHub Pages en mode « Deploy from a branch », sur la branche par défaut, dossier **`/docs`**. `docs/index.html` renvoie vers `docs/fenua.html`, `docs/.nojekyll` évite le passage par Jekyll. Tout ce qui doit être servi en ligne va donc dans `docs/`. Activer Pages est un réglage du dépôt : un workflow ne peut pas le faire (le jeton d'Actions n'a pas le droit de créer le site).
 
 ## Pistes ouvertes
 

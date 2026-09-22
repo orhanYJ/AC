@@ -2,17 +2,17 @@
 // crochet de test `window.T` n'a pas été livré par mégarde.
 // Usage : node outils/verifier-script.js
 const fs=require("fs"), path=require("path");
-const f=path.join(__dirname,"..","fenua.html");
+const f=path.join(__dirname,"..","docs","fenua.html");
 const h=fs.readFileSync(f,"utf8");
 
 const a=h.lastIndexOf("<script>"), b=h.lastIndexOf("</script>");
-if(a<0||b<a){ console.error("Aucun bloc <script> trouvé dans fenua.html."); process.exit(1); }
+if(a<0||b<a){ console.error("Aucun bloc <script> trouvé dans docs/fenua.html."); process.exit(1); }
 
 try{ new Function(h.slice(a+8,b)); }
 catch(e){ console.error("Erreur de syntaxe dans le script du jeu : "+e.message); process.exit(1); }
 
 if(/window\.T\s*=/.test(h)){
-  console.error("Le crochet de test « window.T » est encore dans fenua.html. On ne le livre jamais.");
+  console.error("Le crochet de test « window.T » est encore dans docs/fenua.html. On ne le livre jamais.");
   process.exit(1);
 }
 

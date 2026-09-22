@@ -1,7 +1,7 @@
-// Vérifie la géométrie des niveaux de fenua.html : rondes des gardes, points clés, eau, cordes, points de vue.
+// Vérifie la géométrie des niveaux de docs/fenua.html : rondes des gardes, points clés, eau, cordes, points de vue.
 // Usage : node outils/valider-niveaux.js
 const fs=require('fs'), path=require('path');
-const h=fs.readFileSync(path.join(__dirname,'..','fenua.html'),'utf8');
+const h=fs.readFileSync(path.join(__dirname,'..','docs','fenua.html'),'utf8');
 const code=h.slice(h.indexOf('function b(x,z,w,d,y0,y1,type){'),h.indexOf('/* ============================================================\n   3. Géométrie'));
 const {LEVELS,HAZARDS}=new Function('const TAU=Math.PI*2;'+code+';return {LEVELS,HAZARDS};')();
 const inB=(x,z,q,m)=>x>q.minX-m&&x<q.maxX+m&&z>q.minZ-m&&z<q.maxZ+m;

@@ -1,6 +1,6 @@
 # Vérifie le jeu à chaque poussée. La mise en ligne elle-même est faite par
-# GitHub Pages, réglé sur « Deploy from a branch » : il sert cette branche
-# telle quelle, et index.html à la racine ouvre le jeu.
+# GitHub Pages, réglé sur « Deploy from a branch », dossier /docs : Pages sert
+# le contenu de docs/, où index.html ouvre le jeu.
 #
 # On ne publie pas depuis ce workflow : le jeton d'Actions n'a pas le droit de
 # créer le site Pages la première fois (« Resource not accessible by
@@ -32,8 +32,9 @@ jobs:
       - name: Syntaxe, crochet de test et sources externes
         run: node outils/verifier-script.js
 
-      - name: La racine du site ouvre bien le jeu
+      - name: Le dossier publié ouvre bien le jeu
         run: |
-          test -f index.html || { echo "index.html manque : la racine du site renverrait une erreur 404."; exit 1; }
-          grep -q 'fenua.html' index.html || { echo "index.html ne renvoie pas vers fenua.html."; exit 1; }
-          echo "index.html renvoie bien vers fenua.html"
+          test -f docs/fenua.html || { echo "docs/fenua.html manque : c'est le jeu lui-même."; exit 1; }
+          test -f docs/index.html || { echo "docs/index.html manque : la racine du site renverrait une erreur 404."; exit 1; }
+          grep -q 'fenua.html' docs/index.html || { echo "docs/index.html ne renvoie pas vers fenua.html."; exit 1; }
+          echo "docs/ contient le jeu et un index qui y renvoie"
