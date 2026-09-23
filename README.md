@@ -28,6 +28,16 @@ prendre une corde, se suspendre à un rebord, se rétablir), E pour agir et
 assassiner, R pour assommer, T pour siffler, 1 à 6 pour choisir un outil et F
 pour le lancer. La souris tourne la caméra, la molette règle la distance.
 
+**Course libre** — en courant (Maj) droit sur un obstacle, le corps choisit le
+geste tout seul : il franchit un muret, se rétablit sur un mur à hauteur
+d'homme, escalade un mur plus haut, saute d'un toit à l'autre s'il y a un
+appui en face, et s'arrête au bord d'un grand vide. Au mur, Z et S montent et
+descendent, Q et D longent, Espace bondit vers la prise du dessus, C lâche.
+
+**Repéré ?** Ce n'est plus perdu d'avance : tu as trois forces (◆◆◆). Les
+fusiliers épaulent puis tirent, les autres frappent au corps à corps — et
+pendant qu'un garde arme son coup, **E le contre**.
+
 **À la manette** — reconnue dès qu'on y touche : stick gauche pour marcher,
 stick droit pour regarder, A grimper, X agir, Y assommer, B s'accroupir,
 gâchette droite pour courir.

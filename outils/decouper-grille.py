@@ -35,6 +35,7 @@ CASES = [
     ('ecorce',    2, 0, 'bruit', 'bruit', (80, 64, 45),   (14, 12, 9)),
     ('tapa',      2, 1, 'motif', 'motif', (169, 147, 115), (59, 64, 56)),
     ('feuillage', 2, 3, 'bruit', 'bruit', (43, 81, 38),   (13, 20, 10)),
+    ('terre',     2, 2, 'bruit', 'bruit', (112, 84, 58),  (15, 13, 11)),
 ]
 
 def cases(im):
