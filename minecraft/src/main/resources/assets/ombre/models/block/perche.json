@@ -1,0 +1,106 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "bois": "minecraft:block/stripped_oak_log",
+  "fer": "minecraft:block/polished_blackstone",
+  "particle": "minecraft:block/stripped_oak_log"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    7,
+    7
+   ],
+   "to": [
+    16,
+    9,
+    9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  },
+  {
+   "from": [
+    0,
+    5,
+    6
+   ],
+   "to": [
+    1,
+    11,
+    10
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  },
+  {
+   "from": [
+    15,
+    5,
+    6
+   ],
+   "to": [
+    16,
+    11,
+    10
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  }
+ ]
+}

@@ -29,6 +29,7 @@ import net.minecraft.util.math.Vec3d;
  *           │      maison du capitaine (toit :      │
  *           │      la CIBLE + un garde)             │
  *           │                     grande tour 16 m ─┼─ poutre → foin (saut de la foi)
+ *           │                     (tyrolienne du sommet vers la tour NE ; monte-charge chez le capitaine)
  *           │  caserne        feu de camp           │
  *           │                                       │   hautes herbes dehors, côté est
  *           │  hautes herbes          poudrière     │
@@ -174,6 +175,11 @@ public final class Arene {
         // Le foin, sous le bout de la poutre (le saut de la foi)
         remplir(11, 0, -3, 13, 0, -1, Blocks.HAY_BLOCK);
         set(12, 1, -2, Blocks.HAY_BLOCK);
+        // Une tyrolienne du sommet jusqu'à la tour nord-est… où veille une sentinelle
+        set(9, 16, -3, fr.fenua.ombre.bloc.OmbreBlocs.POTEAU);
+        set(MUR - 1, 10, -MUR + 1, fr.fenua.ombre.bloc.OmbreBlocs.POTEAU);
+        fr.fenua.ombre.bloc.PoteauTyrolienne.relier(w, new BlockPos(ox + 9, oy + 16, oz - 3),
+                new BlockPos(ox + MUR - 1, oy + 10, oz - MUR + 1));
         // Le point de vue : un marqueur invisible au sommet
         MarkerEntity m = EntityType.MARKER.create(w);
         if (m != null) {
@@ -199,7 +205,10 @@ public final class Arene {
         for (int x = x0 + 2; x <= x1 - 2; x += 3) {                  // fenêtres
             set(x, 5, z0, Blocks.AIR); set(x, 5, z1, Blocks.AIR);
         }
-        set(-5, 3, z1 + 1, Blocks.LANTERN.getDefaultState().with(net.minecraft.block.LanternBlock.HANGING, false));
+        set(-3, 3, z1 + 1, Blocks.LANTERN.getDefaultState().with(net.minecraft.block.LanternBlock.HANGING, false));
+        // Un monte-charge sous la brèche du parapet : on monte droit sur le toit de la cible
+        set(-5, 0, z1 + 1, fr.fenua.ombre.bloc.OmbreBlocs.MONTE_CHARGE.getDefaultState()
+                .with(net.minecraft.state.property.Properties.HORIZONTAL_FACING, Direction.NORTH));
         set(-7, 1, z1 + 1, Blocks.BARREL);
         set(-8, 8, -12, Blocks.LANTERN);
     }

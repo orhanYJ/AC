@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "misc",
+ "ingredients": [
+  {
+   "item": "minecraft:lead"
+  },
+  {
+   "item": "minecraft:string"
+  },
+  {
+   "item": "minecraft:string"
+  }
+ ],
+ "result": {
+  "id": "ombre:corde_tyrolienne",
+  "count": 4
+ }
+}

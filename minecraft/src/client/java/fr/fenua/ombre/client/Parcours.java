@@ -1,43 +1,99 @@
 package fr.fenua.ombre.client;
 
 import fr.fenua.ombre.ActionPayload;
+import fr.fenua.ombre.bloc.CoteClient;
+import fr.fenua.ombre.bloc.OmbreBlocs;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.Input;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
- * Le parkour, calculé chez le joueur (c'est lui qui décide de ses mouvements dans Minecraft).
- * Chaque image du jeu (20 par seconde), on regarde où il est et on ajuste sa vitesse.
+ * Tout le parkour, calculé chez le joueur (dans Minecraft, c'est lui qui décide de ses mouvements).
+ * 20 fois par seconde, on regarde où il est, ce qu'il presse, et on règle sa vitesse.
  *
- *  - Rétablissement : en haut d'une escalade, on passe par-dessus le rebord tout seul.
- *  - Rebord : en tombant le long d'un mur dont le haut arrive aux mains, on s'y accroche.
- *      Espace = se hisser, Q/D = se déplacer le long, Maj = lâcher, S + Espace = saut arrière.
- *  - Course sur mur : en sprintant, saute le long d'un mur : on court dessus ~1,5 s.
- *      Espace = rebondir de l'autre côté (enchaîner deux murs face à face).
- *  - Saut arrière : contre un mur (escalade ou rebord), S + Espace = se jeter en arrière.
- *  - Bond : un saut en sprint porte plus loin.
+ * Les états :
+ *  LIBRE      : marche, course, saut. Le saut en sprint porte plus loin (bond).
+ *  MUR        : accroché à un mur, on reste en place. Z/S montent et descendent (vers le mur / à l'opposé),
+ *               Q/D se déplacent sur le côté. Espace : bond vers le haut ; avec Q/D, bond sur le côté ;
+ *               en tirant à l'opposé du mur, saut arrière vers le mur d'en face (on s'y raccroche).
+ *               Maj : lâcher. En haut, on se rétablit tout seul.
+ *  REBORD     : suspendu par les mains à un bord. Q/D glissent, Q/D + Espace sautent vers le bord voisin,
+ *               Z ou Espace se hissent, S redescend sur le mur, Maj lâche.
+ *  HISSE      : le rétablissement par-dessus un bord.
+ *  MUR_COURU  : course sur un mur, en sprint. Espace rebondit vers le mur d'en face.
+ *  TYRO       : glisse le long d'une tyrolienne. Espace saute, Maj lâche.
+ *  LIFT       : monte-charge, on monte jusqu'au toit.
+ *  PERCHE     : balancé sous une perche ou une enseigne ; Z donne de l'élan et projette, Espace saute, Maj lâche.
  */
 public final class Parcours {
     private Parcours() {}
 
-    private enum Etat { LIBRE, REBORD, MUR_COURU, HISSE }
+    enum Etat { LIBRE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE }
+
+    /** Poses reprises par les animations (Animations). */
+    public enum Pose { AUCUNE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, BOND }
 
     private static Etat etat = Etat.LIBRE;
-    private static double murX, murZ;          // direction du mur (vers lui), pour le rebord et la course
+    private static double murX, murZ;          // direction du mur (vers lui), vecteur unité
     private static int duree;                  // ticks passés dans l'état courant
-    private static int sansPrise;              // ticks pendant lesquels on ne peut pas se raccrocher
-    private static int contactMur;             // ticks depuis le dernier contact de face avec un mur
+    private static int sansPrise;              // ticks sans pouvoir s'accrocher (après un lâcher, un saut)
+    private static int chercheMur;             // ticks où l'on s'accroche au premier mur touché (après un saut)
+    private static int bondMur;                // ticks d'un bond vers le haut le long du mur
+    private static int poseBond;               // ticks de la pose de bond
+    private static double cible;               // hauteur visée (rétablissement, monte-charge)
     private static boolean sautAvant, solAvant;
-    private static double cible;               // hauteur du rebord vers lequel on se hisse
+
+    // Tyrolienne
+    private static Vec3d cableA, cableB;
+    private static double cableT, cableL, cableV;
+    private static BlockPos cableFin;
+    // Perche
+    private static Vec3d pivot;
+    private static double balX, balZ, theta, omega;
+
+    // Pour les animations
+    static float phase;                        // avance quand on bouge (bras et jambes alternent)
+    static int coteMur;                        // course sur mur : +1 mur à droite, -1 à gauche
+
+    private static final double MAINS = 1.85;  // hauteur des mains au-dessus des pieds, bras levés
+
+    public static Pose pose() {
+        return switch (etat) {
+            case MUR -> Pose.MUR;
+            case REBORD -> Pose.REBORD;
+            case HISSE -> Pose.HISSE;
+            case MUR_COURU -> Pose.MUR_COURU;
+            case TYRO -> Pose.TYRO;
+            case LIFT -> Pose.LIFT;
+            case PERCHE -> Pose.PERCHE;
+            default -> poseBond > 0 ? Pose.BOND : Pose.AUCUNE;
+        };
+    }
+
+    static double balancement() { return theta; }
+
+    /** Orientation du corps (en degrés) quand il fait face au mur, ou NaN. */
+    static float corpsVersMur() {
+        return switch (etat) {
+            case MUR, REBORD, HISSE, LIFT -> (float) Math.toDegrees(Math.atan2(-murX, murZ));
+            default -> Float.NaN;
+        };
+    }
+
+    // ───────────────────────── la boucle ─────────────────────────
 
     public static void tick(MinecraftClient client) {
         ClientPlayerEntity p = client.player;
@@ -47,131 +103,263 @@ public final class Parcours {
         boolean nouveauSaut = saut && !sautAvant;
         boolean sol = p.isOnGround();
         try {
-            if (p.getAbilities().flying || p.isSpectator() || p.isTouchingWater() || p.isFallFlying()
-                    || p.hasVehicle() || p.isUsingItem() && etat == Etat.LIBRE) {
+            if (p.getAbilities().flying || p.isSpectator() || p.isFallFlying() || p.hasVehicle() || p.isSleeping()
+                    || (p.isTouchingWater() && etat != Etat.TYRO)) {
                 etat = Etat.LIBRE;
                 return;
             }
             if (sansPrise > 0) sansPrise--;
-            double[] f = devant(p);
-            boolean murDevant = bloque(p, f[0] * 0.25, f[1] * 0.25);
-            contactMur = murDevant ? 0 : contactMur + 1;
-            if (sol && etat != Etat.HISSE) etat = Etat.LIBRE;
-
+            if (chercheMur > 0) chercheMur--;
+            if (poseBond > 0) poseBond--;
+            duree++;
             switch (etat) {
-                case LIBRE -> libre(p, in, f, murDevant, nouveauSaut, sol);
+                case LIBRE -> libre(client, p, in, nouveauSaut, sol);
+                case MUR -> mur(client, p, in, nouveauSaut, sol);
                 case REBORD -> rebord(p, in, nouveauSaut);
-                case MUR_COURU -> murCouru(p, in, nouveauSaut);
                 case HISSE -> hisse(p);
+                case MUR_COURU -> murCouru(p, in, nouveauSaut);
+                case TYRO -> tyro(p, in, nouveauSaut);
+                case LIFT -> lift(p);
+                case PERCHE -> perche(p, in, nouveauSaut);
             }
+            float corps = corpsVersMur();
+            if (!Float.isNaN(corps)) p.setBodyYaw(corps);
         } finally {
             sautAvant = saut;
             solAvant = sol;
         }
     }
 
-    // ───────────── en mouvement libre ─────────────
+    private static void changer(Etat e) {
+        etat = e;
+        duree = 0;
+    }
 
-    private static void libre(ClientPlayerEntity p, Input in, double[] f, boolean murDevant, boolean nouveauSaut, boolean sol) {
+    // ───────────────────────── LIBRE ─────────────────────────
+
+    private static void libre(MinecraftClient client, ClientPlayerEntity p, Input in, boolean nouveauSaut, boolean sol) {
         Vec3d v = p.getVelocity();
+        double[] e = entree(p, in);
+        double[] f = devant(p);
 
-        // Bond : le saut en sprint porte plus loin (au moment où l'on quitte le sol)
+        // Bond : le saut en sprint porte plus loin
         if (solAvant && !sol && v.y > 0.3 && p.isSprinting()) {
             p.setVelocity(v.x * 1.25, v.y + 0.04, v.z * 1.25);
+            poseBond = 10;
             return;
         }
 
-        // Saut arrière : contre un mur en l'air, S + Espace
-        if (!sol && nouveauSaut && in.movementForward < 0 && contactMur <= 3) {
-            sauterArriere(p, f[0], f[1]);
+        // Depuis le sol : Espace en poussant contre un mur haut = on s'y accroche
+        if (sol && nouveauSaut) {
+            double[] d = murAutour(p, norme(e) > 0.1 ? e : f);
+            if (d != null && dot(e, d) > 0.5 && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)) {
+                accrocher(p, d);
+                bondMur = 5;
+                p.setVelocity(d[0] * 0.04, 0.42, d[1] * 0.04);
+            }
             return;
         }
+        if (sol) return;
 
-        // Rétablissement en haut d'une escalade : pieds contre le mur, tête au-dessus
-        if (murDevant && !sol && in.jumping) {
-            double h = hauteurRebord(p, p.getX() + f[0] * 0.6, p.getZ() + f[1] * 0.6, 0.0, 1.05);
-            if (!Double.isNaN(h)) { hisser(p, f[0], f[1], h); return; }
-        }
+        // Une perche ou une enseigne à portée de main
+        if (sansPrise == 0 && attraperPerche(p)) return;
 
-        if (sol || sansPrise > 0) return;
-
-        // Accroche au rebord : on tombe, le haut du mur passe à hauteur des mains
-        if (murDevant && v.y < -0.05 && !in.sneaking && in.movementForward >= 0
-                && !Double.isNaN(hauteurRebord(p, p.getX() + f[0] * 0.6, p.getZ() + f[1] * 0.6, 1.1, 2.1))) {
-            etat = Etat.REBORD; duree = 0;
-            murX = f[0]; murZ = f[1];
-            p.setVelocity(0, 0, 0);
-            p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.6f, 0.8f);
-            rattrape();
-            return;
-        }
-
-        // Course sur mur : en sprint (ou lancé), en l'air, un mur sur le côté, Z enfoncé
+        if (sansPrise > 0 && chercheMur == 0) return;
         double vh = Math.sqrt(v.x * v.x + v.z * v.z);
-        if (in.movementForward > 0 && vh > 0.2 && v.y < 0.25 && duree >= 0) {
+        double[] pref = vh > 0.08 ? new double[]{v.x / vh, v.z / vh} : (norme(e) > 0.1 ? e : f);
+
+        // En tombant le long d'un mur dont le haut passe aux mains : on s'accroche au rebord
+        if (v.y < -0.05 && !in.sneaking) {
+            double[] d = murAutour(p, pref);
+            if (d != null && !Double.isNaN(hauteurRebord(p, p.getX() + d[0] * 0.6, p.getZ() + d[1] * 0.6, 1.1, 2.1))) {
+                murX = d[0]; murZ = d[1];
+                changer(Etat.REBORD);
+                p.setVelocity(0, 0, 0);
+                p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.6f, 0.8f);
+                rattrape();
+                return;
+            }
+        }
+
+        // Course sur mur : en sprint, en l'air, un mur sur le côté, Z enfoncé
+        if (in.movementForward > 0 && vh > 0.2 && v.y < 0.25 && chercheMur == 0) {
             for (int cote = -1; cote <= 1; cote += 2) {
                 double sx = -f[1] * cote, sz = f[0] * cote;          // perpendiculaire au regard
-                if (bloque(p, sx * 0.3, sz * 0.3) && bloque(p.getWorld(), p, sx, sz, 0.6)) {
-                    etat = Etat.MUR_COURU; duree = 0;
+                if (bloque(p, sx * 0.3, sz * 0.3) && bloqueBuste(p, sx * 0.6, sz * 0.6, 0.6)) {
                     murX = sx; murZ = sz;
+                    coteMur = -cote;
+                    changer(Etat.MUR_COURU);
                     rattrape();
                     return;
                 }
             }
         }
+
+        // S'accrocher à un mur en l'air : en poussant vers lui, ou juste après un saut de mur à mur
+        if (!in.sneaking) {
+            double[] d = murAutour(p, pref);
+            if (d != null && (chercheMur > 0 || dot(e, d) > 0.3) && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)) {
+                accrocher(p, d);
+                p.setVelocity(0, Math.max(v.y, -0.1), 0);
+            }
+        }
     }
 
-    // ───────────── suspendu à un rebord ─────────────
+    private static void accrocher(ClientPlayerEntity p, double[] d) {
+        murX = d[0]; murZ = d[1];
+        changer(Etat.MUR);
+        bondMur = 0;
+        p.playSound(SoundEvents.BLOCK_STONE_HIT, 0.5f, 1.2f);
+        rattrape();
+    }
 
-    private static void rebord(ClientPlayerEntity p, Input in, boolean nouveauSaut) {
-        duree++;
-        if (in.sneaking) {                                     // lâcher
-            etat = Etat.LIBRE; sansPrise = 12; return;
-        }
-        if (nouveauSaut && in.movementForward < 0) {           // saut arrière
-            sauterArriere(p, murX, murZ); return;
-        }
-        if (nouveauSaut) {                                     // se hisser
-            double h = hauteurRebord(p, p.getX() + murX * 0.6, p.getZ() + murZ * 0.6, 0.5, 2.3);
+    // ───────────────────────── MUR (escalade libre) ─────────────────────────
+
+    private static void mur(MinecraftClient client, ClientPlayerEntity p, Input in, boolean nouveauSaut, boolean sol) {
+        double[] e = entree(p, in);
+        double tx = -murZ, tz = murX;                            // le long du mur
+        double vers = dot(e, murX, murZ), cote = e[0] * tx + e[1] * tz;
+        Vec3d v = p.getVelocity();
+
+        if (in.sneaking) { lacher(10); return; }
+
+        // Le haut du mur est à portée : on se rétablit (en montant, ou à la fin d'un bond)
+        if (vers > 0.3 || bondMur > 0) {
+            double h = hauteurRebord(p, p.getX() + murX * 0.6, p.getZ() + murZ * 0.6, -0.3, 1.9);
             if (!Double.isNaN(h)) { hisser(p, murX, murZ, h); return; }
         }
-        // Se déplacer aux mains le long du rebord (Q / D)
-        double gx = 0, gz = 0;
-        if (in.movementSideways != 0) {
-            double s = in.movementSideways > 0 ? 1 : -1;       // positif = gauche
-            gx = murZ * s * 0.12; gz = -murX * s * 0.12;
-            // On ne file pas au-delà du bout du mur
-            if (Double.isNaN(hauteurRebord(p, p.getX() + gx * 4 + murX * 0.6, p.getZ() + gz * 4 + murZ * 0.6, 1.0, 2.2))) { gx = 0; gz = 0; }
+
+        // Plus de mur devant ?
+        if (!bloqueBuste(p, murX * 0.3, murZ * 0.3, 0.3) && !bloque(p, murX * 0.3, murZ * 0.3)) {
+            changer(Etat.LIBRE);
+            return;
         }
-        // Collé au mur, immobile en hauteur
-        p.setVelocity(gx + murX * 0.02, 0, gz + murZ * 0.02);
-        if (!bloque(p, murX * 0.3, murZ * 0.3)) etat = Etat.LIBRE;   // le mur a disparu
+
+        if (nouveauSaut) {
+            if (Math.abs(cote) > 0.5) {                          // bond sur le côté
+                double s = Math.signum(cote);
+                p.setVelocity(tx * s * 0.45 + murX * 0.08, 0.4, tz * s * 0.45 + murZ * 0.08);
+                sauter(p, 3, 14);
+            } else if (vers < -0.5) {                            // saut arrière, vers le mur d'en face
+                p.setVelocity(-murX * 0.55, 0.45, -murZ * 0.55);
+                sauter(p, 5, 18);
+            } else {                                             // bond vers le haut
+                bondMur = 9;
+                p.setVelocity(murX * 0.04, 0.62, murZ * 0.04);
+                p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.3f);
+            }
+            return;
+        }
+
+        if (bondMur > 0) {                                       // en l'air le long du mur : la gravité agit
+            bondMur--;
+            p.setVelocity(murX * 0.04, v.y, murZ * 0.04);
+            return;
+        }
+
+        boolean vite = client.options.sprintKey.isPressed();
+        double vy = vers > 0.3 ? (vite ? 0.2 : 0.13) : vers < -0.3 ? -0.17 : 0;
+        if (vy < 0 && sol) { changer(Etat.LIBRE); return; }
+        double lat = 0;
+        if (Math.abs(cote) > 0.3) {
+            double s = Math.signum(cote);
+            // On ne file pas au-delà du bout du mur
+            if (bloqueBuste(p, murX * 0.3 + tx * s * 0.45, murZ * 0.3 + tz * s * 0.45, 0.3)) lat = s * (vite ? 0.15 : 0.1);
+        }
+        p.setVelocity(murX * 0.05 + tx * lat, vy, murZ * 0.05 + tz * lat);
+        if (vy != 0 || lat != 0) {
+            phase += 0.35f;
+            if (duree % 6 == 0) p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.25f, 1.3f);
+        }
         if (duree % 10 == 0) rattrape();
     }
 
-    // ───────────── course sur mur ─────────────
+    // ───────────────────────── REBORD ─────────────────────────
 
-    private static void murCouru(ClientPlayerEntity p, Input in, boolean nouveauSaut) {
-        duree++;
-        Vec3d v = p.getVelocity();
-        if (nouveauSaut) {                                     // rebond : on se repousse du mur
-            double[] f = devant(p);
-            p.setVelocity(-murX * 0.5 + f[0] * 0.3, 0.55, -murZ * 0.5 + f[1] * 0.3);
-            p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.4f);
-            etat = Etat.LIBRE; sansPrise = 4;
+    private static void rebord(ClientPlayerEntity p, Input in, boolean nouveauSaut) {
+        double[] e = entree(p, in);
+        double tx = -murZ, tz = murX;
+        double vers = dot(e, murX, murZ), cote = e[0] * tx + e[1] * tz;
+
+        if (in.sneaking) { lacher(12); return; }
+        if (nouveauSaut) {
+            if (Math.abs(cote) > 0.5) {                          // saut vers le rebord voisin
+                double s = Math.signum(cote);
+                p.setVelocity(tx * s * 0.45 + murX * 0.06, 0.34, tz * s * 0.45 + murZ * 0.06);
+                sauter(p, 3, 0);
+            } else if (vers < -0.5) {                            // saut arrière
+                p.setVelocity(-murX * 0.55, 0.45, -murZ * 0.55);
+                sauter(p, 5, 18);
+            } else {
+                monterDuRebord(p);
+            }
             return;
         }
-        boolean finie = duree > 32 || in.movementForward <= 0 || !bloque(p, murX * 0.3, murZ * 0.3);
-        if (finie) { etat = Etat.LIBRE; sansPrise = 6; return; }
+        if (vers > 0.5 && duree > 6) { monterDuRebord(p); return; }
+        if (vers < -0.5 && duree > 6 && bloqueBuste(p, murX * 0.3, murZ * 0.3, 0.3)) {   // redescendre sur le mur
+            changer(Etat.MUR);
+            return;
+        }
+        // Glisser aux mains le long du bord
+        double gx = 0, gz = 0;
+        if (Math.abs(cote) > 0.3) {
+            double s = Math.signum(cote);
+            gx = tx * s * 0.12; gz = tz * s * 0.12;
+            if (Double.isNaN(hauteurRebord(p, p.getX() + gx * 4 + murX * 0.6, p.getZ() + gz * 4 + murZ * 0.6, 1.0, 2.2))) { gx = 0; gz = 0; }
+            else phase += 0.3f;
+        }
+        p.setVelocity(gx + murX * 0.02, 0, gz + murZ * 0.02);
+        if (!bloque(p, murX * 0.3, murZ * 0.3)) changer(Etat.LIBRE);
+        if (duree % 10 == 0) rattrape();
+    }
 
-        // On garde l'élan le long du mur, et on ne descend presque pas (un peu plus à la fin)
+    private static void monterDuRebord(ClientPlayerEntity p) {
+        double h = hauteurRebord(p, p.getX() + murX * 0.6, p.getZ() + murZ * 0.6, 0.5, 2.3);
+        if (!Double.isNaN(h)) hisser(p, murX, murZ, h);
+    }
+
+    // ───────────────────────── HISSE (rétablissement) ─────────────────────────
+
+    private static void hisser(ClientPlayerEntity p, double fx, double fz, double hauteur) {
+        changer(Etat.HISSE);
+        murX = fx; murZ = fz; cible = hauteur;
+        p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.6f, 1.0f);
+        sansPrise = 10;
+        hisse(p);
+        rattrape();
+    }
+
+    private static void hisse(ClientPlayerEntity p) {
+        if (duree > 18) { changer(Etat.LIBRE); return; }
+        if (p.getY() < cible + 0.02) {
+            p.setVelocity(murX * 0.03, Math.min(0.42, cible + 0.08 - p.getY()) + 0.05, murZ * 0.03);
+        } else {
+            p.setVelocity(murX * 0.28, 0.05, murZ * 0.28);       // on bascule par-dessus le bord
+            changer(Etat.LIBRE);
+        }
+    }
+
+    // ───────────────────────── MUR_COURU ─────────────────────────
+
+    private static void murCouru(ClientPlayerEntity p, Input in, boolean nouveauSaut) {
+        Vec3d v = p.getVelocity();
+        if (nouveauSaut) {                                       // rebond vers le mur d'en face
+            double[] f = devant(p);
+            p.setVelocity(-murX * 0.5 + f[0] * 0.3, 0.55, -murZ * 0.5 + f[1] * 0.3);
+            sauter(p, 4, 14);
+            return;
+        }
+        boolean finie = duree > 32 || in.movementForward <= 0 || !bloque(p, murX * 0.3, murZ * 0.3) || p.isOnGround();
+        if (finie) { changer(Etat.LIBRE); sansPrise = 6; return; }
+
         double[] f = devant(p);
         double ax = f[0] - murX * (f[0] * murX + f[1] * murZ), az = f[1] - murZ * (f[0] * murX + f[1] * murZ);
         double n = Math.sqrt(ax * ax + az * az);
-        if (n < 0.2) { etat = Etat.LIBRE; return; }            // on regarde le mur : ce n'est plus une course
+        if (n < 0.2) { changer(Etat.LIBRE); return; }            // on regarde le mur : ce n'est plus une course
         double vit = Math.max(Math.sqrt(v.x * v.x + v.z * v.z), 0.3);
         double vy = duree < 6 ? Math.max(v.y, 0.06) : -0.02 - duree * 0.003;
         p.setVelocity(ax / n * vit + murX * 0.04, vy, az / n * vit + murZ * 0.04);
+        phase += 0.6f;
         if (duree % 4 == 0) {
             BlockPos b = BlockPos.ofFloored(p.getX() + murX * 0.7, p.getY() + 0.5, p.getZ() + murZ * 0.7);
             p.getWorld().addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, p.getWorld().getBlockState(b)),
@@ -181,43 +369,161 @@ public final class Parcours {
         if (duree % 10 == 0) rattrape();
     }
 
-    // ───────────── gestes ─────────────
+    // ───────────────────────── TYROLIENNE ─────────────────────────
 
-    /** Commence le rétablissement : on monte jusqu'au niveau du rebord, puis on bascule dessus. */
-    private static void hisser(ClientPlayerEntity p, double fx, double fz, double hauteur) {
-        etat = Etat.HISSE; duree = 0;
-        murX = fx; murZ = fz; cible = hauteur;
-        p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.6f, 1.0f);
-        sansPrise = 10;
-        hisse(p);
-        rattrape();
-    }
-
-    private static void hisse(ClientPlayerEntity p) {
-        duree++;
-        if (duree > 16) { etat = Etat.LIBRE; return; }
-        if (p.getY() < cible + 0.02) {
-            p.setVelocity(murX * 0.03, Math.min(0.42, cible + 0.08 - p.getY()) + 0.05, murZ * 0.03);
-        } else {
-            p.setVelocity(murX * 0.28, 0.05, murZ * 0.28);   // on bascule par-dessus le rebord
-            etat = Etat.LIBRE;
+    public static void demarrerTyrolienne(BlockPos de, BlockPos vers) {
+        ClientPlayerEntity p = MinecraftClient.getInstance().player;
+        if (p == null || etat != Etat.LIBRE && etat != Etat.MUR) return;
+        Vec3d a = Vec3d.ofBottomCenter(de).add(0, CoteClient.ACCROCHE, 0);
+        Vec3d b = Vec3d.ofBottomCenter(vers).add(0, CoteClient.ACCROCHE, 0);
+        double l = a.distanceTo(b);
+        if (l < 2) return;
+        // On s'accroche au premier point du câble où le corps tient (pas dans le toit)
+        for (double t = 0.02; t < 0.4; t += 0.01) {
+            Vec3d pieds = CoteClient.pointCable(a, b, t).subtract(0, MAINS, 0);
+            Box boite = p.getBoundingBox().offset(pieds.subtract(p.getPos()));
+            if (p.getWorld().isSpaceEmpty(p, boite)) {
+                cableA = a; cableB = b; cableL = l; cableT = t; cableV = 0.25; cableFin = vers;
+                p.setPosition(pieds);
+                p.setVelocity(Vec3d.ZERO);
+                changer(Etat.TYRO);
+                p.playSound(SoundEvents.ENTITY_LEASH_KNOT_PLACE, 0.8f, 0.7f);
+                rattrape();
+                return;
+            }
         }
+        p.sendMessage(Text.literal("§7Pas la place de s'accrocher au câble ici."), true);
     }
 
-    private static void sauterArriere(ClientPlayerEntity p, double fx, double fz) {
-        p.setVelocity(-fx * 0.6, 0.5, -fz * 0.6);
-        p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.2f);
-        etat = Etat.LIBRE; sansPrise = 10;
+    private static void tyro(ClientPlayerEntity p, Input in, boolean nouveauSaut) {
+        Vec3d dir = cableB.subtract(cableA).normalize();
+        if (in.sneaking) { lacher(10); return; }
+        if (nouveauSaut) {
+            p.setVelocity(dir.x * cableV, 0.4, dir.z * cableV);
+            sauter(p, 8, 0);
+            return;
+        }
+        cableV = Math.min(0.95, cableV + 0.03 + Math.max(0, -dir.y) * 0.04);
+        cableT += cableV / cableL;
+        Vec3d pieds = CoteClient.pointCable(cableA, cableB, cableT).subtract(0, MAINS, 0);
+        Box boite = p.getBoundingBox().offset(pieds.subtract(p.getPos()));
+        if (cableT >= 1 - 0.6 / cableL || !p.getWorld().isSpaceEmpty(p, boite)) {
+            // Arrivée : on se hisse sur le toit du poteau d'arrivée, ou on se laisse tomber devant
+            double hx = dir.x, hz = dir.z, hn = Math.sqrt(hx * hx + hz * hz);
+            if (cableFin != null && cableFin.getY() > p.getY() - 0.5 && hn > 0.01) {
+                hisser(p, hx / hn, hz / hn, cableFin.getY());
+            } else {
+                p.setVelocity(dir.x * cableV * 0.6, 0.1, dir.z * cableV * 0.6);
+                lacher(8);
+            }
+            return;
+        }
+        p.setVelocity(pieds.subtract(p.getPos()));
+        phase += 0.1f;
+        if (duree % 5 == 0) p.playSound(SoundEvents.BLOCK_CHAIN_STEP, 0.25f, 0.6f + (float) cableV);
+        if (duree % 10 == 0) rattrape();
+    }
+
+    // ───────────────────────── MONTE-CHARGE ─────────────────────────
+
+    public static void demarrerMonteCharge(BlockPos pos, Direction mur, int sommet) {
+        ClientPlayerEntity p = MinecraftClient.getInstance().player;
+        if (p == null) return;
+        p.setPosition(pos.getX() + 0.5, pos.getY() + 0.13, pos.getZ() + 0.5);
+        murX = mur.getOffsetX(); murZ = mur.getOffsetZ();
+        cible = sommet;
+        changer(Etat.LIFT);
         rattrape();
+    }
+
+    private static void lift(ClientPlayerEntity p) {
+        if (p.getY() >= cible - 1.0) { hisser(p, murX, murZ, cible); return; }
+        if (duree > 6 && p.verticalCollision && p.getVelocity().y <= 0.01) { lacher(5); return; }  // bloqué en chemin
+        p.setVelocity(murX * 0.01, 0.75, murZ * 0.01);
+        if (duree % 4 == 0) p.playSound(SoundEvents.BLOCK_WOOD_STEP, 0.3f, 1.4f);
+        if (duree % 10 == 0) rattrape();
+        if (duree > 120) changer(Etat.LIBRE);
+    }
+
+    // ───────────────────────── PERCHE ─────────────────────────
+
+    private static boolean attraperPerche(ClientPlayerEntity p) {
+        World w = p.getWorld();
+        double mains = p.getY() + MAINS;
+        for (int by = (int) Math.floor(mains - 0.6); by <= (int) Math.floor(mains + 0.6); by++)
+            for (int bx = (int) Math.floor(p.getX() - 0.7); bx <= (int) Math.floor(p.getX() + 0.7); bx++)
+                for (int bz = (int) Math.floor(p.getZ() - 0.7); bz <= (int) Math.floor(p.getZ() + 0.7); bz++) {
+                    BlockPos b = new BlockPos(bx, by, bz);
+                    BlockState s = w.getBlockState(b);
+                    Direction.Axis axe;
+                    double cy;
+                    if (s.isOf(OmbreBlocs.PERCHE)) { axe = s.get(Properties.HORIZONTAL_AXIS); cy = by + 0.5; }
+                    else if (s.isOf(OmbreBlocs.ENSEIGNE)) { axe = s.get(Properties.HORIZONTAL_FACING).getAxis(); cy = by + 13 / 16.0; }
+                    else continue;
+                    if (Math.abs(mains - cy) > 0.7) continue;
+                    // Le balancement se fait en travers de la barre
+                    double sx = axe == Direction.Axis.X ? 0 : 1, sz = axe == Direction.Axis.X ? 1 : 0;
+                    Vec3d v = p.getVelocity();
+                    double vs = v.x * sx + v.z * sz;
+                    if (Math.abs(vs) < 0.05) { double[] f = devant(p); vs = f[0] * sx + f[1] * sz; }
+                    double signe = vs >= 0 ? 1 : -1;
+                    balX = sx * signe; balZ = sz * signe;
+                    pivot = axe == Direction.Axis.X ? new Vec3d(p.getX(), cy, bz + 0.5) : new Vec3d(bx + 0.5, cy, p.getZ());
+                    theta = -0.45;
+                    omega = Math.max(0.12, Math.abs(vs) / MAINS);
+                    changer(Etat.PERCHE);
+                    p.playSound(SoundEvents.BLOCK_WOOD_HIT, 0.6f, 1.2f);
+                    rattrape();
+                    return true;
+                }
+        return false;
+    }
+
+    private static void perche(ClientPlayerEntity p, Input in, boolean nouveauSaut) {
+        if (in.sneaking) { lacher(10); return; }
+        // Un pendule : la pesanteur ramène vers le bas, Z donne de l'élan
+        omega += -(0.08 / MAINS) * Math.sin(theta);
+        if (in.movementForward > 0 && omega * theta >= 0) omega *= 1.06;
+        omega = MathHelper.clamp(omega, -0.3, 0.3);
+        omega *= 0.995;
+        theta += omega;
+        boolean lancer = nouveauSaut || (in.movementForward > 0 && theta > 0.5 && omega > 0);
+        if (lancer) {
+            double vs = MAINS * omega * Math.cos(theta) + 0.3, vy = MAINS * omega * Math.sin(theta) + 0.3;
+            p.setVelocity(balX * vs, Math.max(vy, 0.35), balZ * vs);
+            poseBond = 10;
+            sauter(p, 7, 0);
+            return;
+        }
+        Vec3d pieds = pivot.add(balX * MAINS * Math.sin(theta), -MAINS * Math.cos(theta), balZ * MAINS * Math.sin(theta));
+        p.setVelocity(pieds.subtract(p.getPos()));
+        if (duree % 10 == 0) rattrape();
+        if (duree > 200) lacher(10);
+    }
+
+    // ───────────────────────── gestes communs ─────────────────────────
+
+    private static void sauter(ClientPlayerEntity p, int sans, int cherche) {
+        changer(Etat.LIBRE);
+        sansPrise = sans;
+        chercheMur = cherche;
+        p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.2f);
+        rattrape();
+    }
+
+    private static void lacher(int sans) {
+        changer(Etat.LIBRE);
+        sansPrise = sans;
+        chercheMur = 0;
     }
 
     /** Dit au serveur d'oublier la chute en cours (sinon il compterait les dégâts depuis le début). */
     private static void rattrape() {
-        if (ClientPlayNetworking.canSend(fr.fenua.ombre.ActionPayload.ID))
+        if (ClientPlayNetworking.canSend(ActionPayload.ID))
             ClientPlayNetworking.send(new ActionPayload(ActionPayload.RATTRAPE));
     }
 
-    // ───────────── outils de géométrie ─────────────
+    // ───────────────────────── géométrie ─────────────────────────
 
     /** Direction horizontale du regard (vecteur unité). */
     private static double[] devant(ClientPlayerEntity p) {
@@ -225,16 +531,45 @@ public final class Parcours {
         return new double[]{-MathHelper.sin(yaw), MathHelper.cos(yaw)};
     }
 
+    /** Direction voulue par les touches (Z/Q/S/D), dans le monde, selon le regard. Longueur 0 à 1. */
+    private static double[] entree(ClientPlayerEntity p, Input in) {
+        float yaw = p.getYaw() * MathHelper.RADIANS_PER_DEGREE;
+        double av = in.movementForward, co = in.movementSideways;
+        double x = co * MathHelper.cos(yaw) - av * MathHelper.sin(yaw);
+        double z = av * MathHelper.cos(yaw) + co * MathHelper.sin(yaw);
+        double n = Math.sqrt(x * x + z * z);
+        return n > 1 ? new double[]{x / n, z / n} : new double[]{x, z};
+    }
+
+    private static double norme(double[] v) { return Math.sqrt(v[0] * v[0] + v[1] * v[1]); }
+    private static double dot(double[] a, double[] b) { return a[0] * b[0] + a[1] * b[1]; }
+    private static double dot(double[] a, double x, double z) { return a[0] * x + a[1] * z; }
+
+    /** Un mur dans l'une des quatre directions, la plus proche de « pref » (et à moins de 75° d'elle). */
+    private static double[] murAutour(ClientPlayerEntity p, double[] pref) {
+        double[] meilleur = null;
+        double score = 0.25;
+        for (Direction d : Direction.Type.HORIZONTAL) {
+            double dx = d.getOffsetX(), dz = d.getOffsetZ();
+            double s = dot(pref, dx, dz);
+            if (s > score && bloqueBuste(p, dx * 0.25, dz * 0.25, 0.6)) {
+                score = s;
+                meilleur = new double[]{dx, dz};
+            }
+        }
+        return meilleur;
+    }
+
     /** Vrai si la boîte du joueur, décalée de (dx, dz), touche un bloc. */
     private static boolean bloque(ClientPlayerEntity p, double dx, double dz) {
         return !p.getWorld().isSpaceEmpty(p, p.getBoundingBox().offset(dx, 0, dz));
     }
 
-    /** Même chose, mais seulement à hauteur de buste : un vrai mur, pas une marche. */
-    private static boolean bloque(World w, ClientPlayerEntity p, double sx, double sz, double dist) {
+    /** Même chose, mais seulement à partir de « bas » au-dessus des pieds : un vrai mur, pas une marche. */
+    private static boolean bloqueBuste(ClientPlayerEntity p, double dx, double dz, double bas) {
         Box b = p.getBoundingBox();
-        Box buste = new Box(b.minX, b.minY + 0.6, b.minZ, b.maxX, b.maxY - 0.2, b.maxZ).offset(sx * dist, 0, sz * dist);
-        return !w.isSpaceEmpty(p, buste);
+        Box buste = new Box(b.minX, b.minY + bas, b.minZ, b.maxX, b.maxY - 0.1, b.maxZ).offset(dx, 0, dz);
+        return !p.getWorld().isSpaceEmpty(p, buste);
     }
 
     /**
@@ -248,7 +583,7 @@ public final class Parcours {
             BlockPos b = BlockPos.ofFloored(x, y, z);
             var forme = w.getBlockState(b).getCollisionShape(w, b);
             if (forme.isEmpty()) continue;
-            double top = y + forme.getMax(net.minecraft.util.math.Direction.Axis.Y);
+            double top = y + forme.getMax(Direction.Axis.Y);
             if (top < p.getY() + bas || top > p.getY() + haut) continue;
             BlockPos h1 = BlockPos.ofFloored(x, top + 0.5, z), h2 = h1.up();
             if (w.getBlockState(h1).getCollisionShape(w, h1).isEmpty() && w.getBlockState(h2).getCollisionShape(w, h2).isEmpty())

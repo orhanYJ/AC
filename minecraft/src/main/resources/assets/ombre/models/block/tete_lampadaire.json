@@ -1,0 +1,138 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "fer": "minecraft:block/polished_blackstone",
+  "verre": "minecraft:block/glowstone",
+  "particle": "minecraft:block/polished_blackstone"
+ },
+ "elements": [
+  {
+   "from": [
+    6,
+    0,
+    6
+   ],
+   "to": [
+    10,
+    4,
+    10
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  },
+  {
+   "from": [
+    4,
+    4,
+    4
+   ],
+   "to": [
+    12,
+    12,
+    12
+   ],
+   "faces": {
+    "north": {
+     "texture": "#verre"
+    },
+    "south": {
+     "texture": "#verre"
+    },
+    "east": {
+     "texture": "#verre"
+    },
+    "west": {
+     "texture": "#verre"
+    },
+    "up": {
+     "texture": "#verre"
+    },
+    "down": {
+     "texture": "#verre"
+    }
+   }
+  },
+  {
+   "from": [
+    3,
+    12,
+    3
+   ],
+   "to": [
+    13,
+    15,
+    13
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  },
+  {
+   "from": [
+    7,
+    15,
+    7
+   ],
+   "to": [
+    9,
+    16,
+    9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  }
+ ]
+}

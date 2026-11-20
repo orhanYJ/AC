@@ -1,0 +1,20 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "F",
+  "L"
+ ],
+ "key": {
+  "F": {
+   "item": "minecraft:feather"
+  },
+  "L": {
+   "tag": "minecraft:logs"
+  }
+ },
+ "result": {
+  "id": "ombre:perchoir",
+  "count": 1
+ }
+}

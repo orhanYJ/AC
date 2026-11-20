@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/enseigne"
+  },
+  "facing=east": {
+   "model": "ombre:block/enseigne",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/enseigne",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/enseigne",
+   "y": 270
+  }
+ }
+}

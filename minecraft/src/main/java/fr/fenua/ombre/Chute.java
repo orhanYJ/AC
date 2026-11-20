@@ -15,7 +15,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
-/** Saut de la foi (foin, feuillage) et roulade (accroupi à l'atterrissage). */
+/** Saut de la foi (foin, feuillage, auvent) et roulade (accroupi à l'atterrissage). */
 public final class Chute {
     private Chute() {}
 
@@ -27,7 +27,7 @@ public final class Chute {
         BlockPos dessous = BlockPos.ofFloored(joueur.getX(), joueur.getY() - 0.2, joueur.getZ());
         BlockState bloc = sw.getBlockState(dessous);
 
-        if (bloc.isOf(Blocks.HAY_BLOCK) || bloc.isIn(BlockTags.LEAVES)) {
+        if (bloc.isOf(Blocks.HAY_BLOCK) || bloc.isIn(BlockTags.LEAVES) || bloc.isOf(fr.fenua.ombre.bloc.OmbreBlocs.AUVENT)) {
             sw.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, bloc),
                     joueur.getX(), joueur.getY() + 0.3, joueur.getZ(), 40, 0.6, 0.4, 0.6, 0.1);
             sw.playSound(null, dessous, SoundEvents.BLOCK_GRASS_BREAK, SoundCategory.PLAYERS, 1f, 0.7f);

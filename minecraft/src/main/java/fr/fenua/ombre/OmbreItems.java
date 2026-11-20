@@ -1,15 +1,13 @@
 package fr.fenua.ombre;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
-/** Les deux objets du mod, rangés dans l'onglet « Combat » du mode créatif. */
+/** Les deux objets d'assassin (l'onglet « L'Ombre » du mode créatif est dans OmbreBlocs). */
 public final class OmbreItems {
     private OmbreItems() {}
 
@@ -22,9 +20,5 @@ public final class OmbreItems {
     public static void enregistrer() {
         Registry.register(Registries.ITEM, Identifier.of(Ombre.MOD_ID, "lame_de_nacre"), LAME);
         Registry.register(Registries.ITEM, Identifier.of(Ombre.MOD_ID, "bombe_fumee"), BOMBE_FUMEE);
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(e -> {
-            e.add(LAME);
-            e.add(BOMBE_FUMEE);
-        });
     }
 }

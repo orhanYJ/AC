@@ -6,11 +6,12 @@ public final class Aide {
 
     public static final String TEXTE = String.join("\n",
             "§6§lL'Ombre — Infiltration",
-            "§eEscalade§r : pousse contre un mur et garde §lEspace§r enfoncé. §lMaj§r contre le mur = rester accroché.",
+            "§6Touche H§r : l'écran avec toutes les commandes détaillées.",
+            "§eEscalade§r : Espace contre un mur pour s'y accrocher. Z/S monter-descendre, Q/D côté, Espace bondir, S+Espace saut arrière, Maj lâcher.",
             "§eCourse libre§r : en sprintant, tu montes les blocs d'un mètre sans sauter, et tes sauts portent plus loin.",
-            "§eRebords§r : en tombant le long d'un mur, tu t'accroches au bord. Espace = se hisser, Q/D = se déplacer, Maj = lâcher.",
+            "§eRebords§r : en tombant le long d'un mur, tu t'accroches au bord. Z/Espace se hisser, Q/D glisser, Q/D+Espace sauter, Maj lâcher.",
+            "§eObjets§r : tyrolienne (corde entre deux poteaux), monte-charge, perches, enseignes, corniches, auvents… (onglet « L'Ombre »).",
             "§eCourse sur mur§r : en sprint, saute le long d'un mur (Z enfoncé). Espace = rebondir vers le mur d'en face.",
-            "§eSaut arrière§r : contre un mur ou suspendu, S + Espace.",
             "§eLame de nacre§r : frappe une créature qui ne t'a pas repéré = assassinat. Depuis une chute = assassinat aérien.",
             "   Une lame dans chaque main = double assassinat.",
             "§eSaut de la foi§r : tombe dans une botte de foin, aucun dégât. §eRoulade§r : accroupi à l'atterrissage, chute de 9 blocs sans mal.",
@@ -19,5 +20,6 @@ public final class Aide {
             "§eBombe de fumée§r (clic droit) : les gardes autour perdent ta trace et sont aveuglés.",
             "§eInstinct§r (touche §lV§r) : révèle les gardes à travers les murs. §eSiffler§r (touche §lB§r) : attire le garde le plus proche.",
             "§ePoint de vue§r : monte tout en haut de la grande tour pour synchroniser et révéler le fortin.",
-            "§eArène§r : §l/ombre arene§r construit un fortin à 30 blocs devant toi (de préférence en monde plat).");
+            "§eArène§r : §l/ombre arene§r construit un fortin à 30 blocs devant toi (de préférence en monde plat).",
+            "§eParcours§r : §l/ombre parcours§r construit une grande carte d'entraînement (200 blocs, sans gardes) et t'y emmène.");
 }

@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "B",
+  "G",
+  "B"
+ ],
+ "key": {
+  "B": {
+   "item": "minecraft:polished_blackstone"
+  },
+  "G": {
+   "item": "minecraft:glowstone"
+  }
+ },
+ "result": {
+  "id": "ombre:tete_lampadaire",
+  "count": 1
+ }
+}

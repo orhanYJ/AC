@@ -1,7 +1,21 @@
 {
   "item.ombre.lame_de_nacre": "Lame de nacre",
   "item.ombre.bombe_fumee": "Bombe de fumée",
+  "item.ombre.corde_tyrolienne": "Corde de tyrolienne",
+  "block.ombre.poteau_tyrolienne": "Poteau de tyrolienne",
+  "block.ombre.monte_charge": "Monte-charge",
+  "block.ombre.perche": "Perche",
+  "block.ombre.perchoir": "Perchoir (point de vue)",
+  "block.ombre.poutre": "Poutre",
+  "block.ombre.corniche": "Corniche",
+  "block.ombre.enseigne": "Enseigne de boutique",
+  "block.ombre.auvent": "Auvent",
+  "block.ombre.echafaudage": "Échafaudage",
+  "block.ombre.lampadaire": "Lampadaire",
+  "block.ombre.tete_lampadaire": "Tête de lampadaire",
+  "itemGroup.ombre": "L'Ombre",
   "key.categories.ombre": "L'Ombre — Infiltration",
   "key.ombre.instinct": "Instinct (révéler les gardes)",
-  "key.ombre.siffler": "Siffler (attirer un garde)"
+  "key.ombre.siffler": "Siffler (attirer un garde)",
+  "key.ombre.aide": "Aide (toutes les commandes)"
 }

@@ -21,6 +21,10 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import fr.fenua.ombre.bloc.OmbreBlocs;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -72,6 +76,7 @@ public final class Gardes {
             }
             alarme(w, gardes);
             pointsDeVue(w, vues);
+            perchoirs(w);
         }
     }
 
@@ -109,16 +114,29 @@ public final class Gardes {
                         w.spawnParticles(p, ParticleTypes.END_ROD, true, v.getX(), v.getY() + 1.5, v.getZ(), 4, 0.15, 1.2, 0.15, 0.01);
                     if (d < 2.5 * 2.5 && p.isOnGround()) {
                         SYNCHRO.add(cle);
-                        synchroniser(w, p, v);
+                        synchroniser(w, p, v.getPos());
                     }
                 }
             }
         }
     }
 
-    private static void synchroniser(ServerWorld w, ServerPlayerEntity p, Entity v) {
+    /** Se tenir debout sur un bloc « perchoir » synchronise aussi (une fois par perchoir). */
+    private static void perchoirs(ServerWorld w) {
+        for (ServerPlayerEntity p : w.getPlayers()) {
+            BlockPos dessous = p.getBlockPos().down();
+            if (!p.isOnGround()) continue;
+            if (!w.getBlockState(dessous).isOf(OmbreBlocs.PERCHOIR)) {
+                dessous = BlockPos.ofFloored(p.getX(), p.getY() - 0.1, p.getZ());
+                if (!w.getBlockState(dessous).isOf(OmbreBlocs.PERCHOIR)) continue;
+            }
+            if (SYNCHRO.add(p.getUuidAsString() + "/" + dessous.asLong())) synchroniser(w, p, Vec3d.ofCenter(dessous));
+        }
+    }
+
+    private static void synchroniser(ServerWorld w, ServerPlayerEntity p, Vec3d centre) {
         int n = 0;
-        for (MobEntity m : w.getEntitiesByClass(MobEntity.class, v.getBoundingBox().expand(64),
+        for (MobEntity m : w.getEntitiesByClass(MobEntity.class, new Box(centre, centre).expand(64),
                 e -> e.isAlive() && e.getCommandTags().contains(GARDE))) {
             m.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 600, 0, false, false));
             n++;

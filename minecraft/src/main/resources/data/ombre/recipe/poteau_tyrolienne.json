@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "H",
+  "S",
+  "S"
+ ],
+ "key": {
+  "H": {
+   "item": "minecraft:tripwire_hook"
+  },
+  "S": {
+   "item": "minecraft:stick"
+  }
+ },
+ "result": {
+  "id": "ombre:poteau_tyrolienne",
+  "count": 2
+ }
+}

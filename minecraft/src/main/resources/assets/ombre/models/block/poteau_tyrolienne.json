@@ -1,0 +1,138 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "bois": "minecraft:block/stripped_spruce_log",
+  "fer": "minecraft:block/iron_block",
+  "particle": "minecraft:block/stripped_spruce_log"
+ },
+ "elements": [
+  {
+   "from": [
+    6,
+    0,
+    6
+   ],
+   "to": [
+    10,
+    13,
+    10
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    11,
+    7
+   ],
+   "to": [
+    14,
+    13,
+    9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  },
+  {
+   "from": [
+    7,
+    13,
+    7
+   ],
+   "to": [
+    9,
+    16,
+    9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  },
+  {
+   "from": [
+    5,
+    0,
+    5
+   ],
+   "to": [
+    11,
+    2,
+    11
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  }
+ ]
+}

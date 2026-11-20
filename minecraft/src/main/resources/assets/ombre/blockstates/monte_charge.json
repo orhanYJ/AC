@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/monte_charge"
+  },
+  "facing=east": {
+   "model": "ombre:block/monte_charge",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/monte_charge",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/monte_charge",
+   "y": 270
+  }
+ }
+}
