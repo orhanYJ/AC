@@ -85,6 +85,8 @@ Les poses du personnage (escalade, suspension, tyrolienne, perche, course sur mu
 
 ### Assassin
 
+![Un sapeur vu de dos, entouré de rouge, et l'invite « [R] Assassinat »](apercu-assassinat.jpg)
+
 Dès qu'un garde peut être tué, il est **entouré de rouge** et une invite s'affiche sous le viseur : **« [R] Assassinat »**. Appuie sur **R**. Il suffit d'avoir la lame de nacre dans l'inventaire.
 
 | Assassinat | Quand le contour rouge apparaît |

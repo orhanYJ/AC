@@ -71,6 +71,6 @@ public final class Assassin {
         Text t = Text.literal("§c✦ §f[" + touche + "] §c" + type + (cible instanceof MobEntity && cible.hasCustomName()
                 ? " §7— " + cible.getName().getString() : ""));
         int w = client.getWindow().getScaledWidth(), h = client.getWindow().getScaledHeight();
-        ctx.drawCenteredTextWithShadow(client.textRenderer, t, w / 2, h / 2 + 14, 0xFFFFFF);
+        ctx.drawCenteredTextWithShadow(client.textRenderer, t, w / 2, h / 2 + 26, 0xFFFFFF);
     }
 }
