@@ -55,6 +55,9 @@ C'est toi qui décides quand t'accrocher : **le clic droit attrape**. Sans lui, 
 
 Avec un **bloc en main**, le clic droit sert à construire, comme d'habitude. Quand il attrape quelque chose, l'objet en main n'est pas utilisé (pas de couteau lancé par erreur).
 
+![Escalade au clic droit : accroché, il monte avec Z jusqu'au sommet de la tour](apercu-escalade.jpg)
+![Les perches : saisie au clic droit, balancement, envol vers la suivante, arrivée](apercu-perches.jpg)
+
 ### Escalade (on reste là où on est)
 
 | Geste | Touches |

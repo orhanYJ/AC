@@ -469,7 +469,7 @@ public final class Parcours {
     private static boolean attraperPerche(ClientPlayerEntity p) {
         World w = p.getWorld();
         double mains = p.getY() + MAINS;
-        for (int by = (int) Math.floor(mains - 0.6); by <= (int) Math.floor(mains + 0.6); by++)
+        for (int by = (int) Math.floor(mains - 0.9); by <= (int) Math.floor(mains + 0.9); by++)
             for (int bx = (int) Math.floor(p.getX() - 0.7); bx <= (int) Math.floor(p.getX() + 0.7); bx++)
                 for (int bz = (int) Math.floor(p.getZ() - 0.7); bz <= (int) Math.floor(p.getZ() + 0.7); bz++) {
                     BlockPos b = new BlockPos(bx, by, bz);
@@ -479,7 +479,7 @@ public final class Parcours {
                     if (s.isOf(OmbreBlocs.PERCHE)) { axe = s.get(Properties.HORIZONTAL_AXIS); cy = by + 0.5; }
                     else if (s.isOf(OmbreBlocs.ENSEIGNE)) { axe = s.get(Properties.HORIZONTAL_FACING).getAxis(); cy = by + 13 / 16.0; }
                     else continue;
-                    if (Math.abs(mains - cy) > 0.7) continue;
+                    if (Math.abs(mains - cy) > 0.9) continue;
                     // Le balancement se fait en travers de la barre
                     double sx = axe == Direction.Axis.X ? 0 : 1, sz = axe == Direction.Axis.X ? 1 : 0;
                     Vec3d v = p.getVelocity();
@@ -508,8 +508,9 @@ public final class Parcours {
         theta += omega;
         boolean lancer = nouveauSaut || (in.movementForward > 0 && theta > 0.5 && omega > 0);
         if (lancer) {
-            double vs = MAINS * omega * Math.cos(theta) + 0.3, vy = MAINS * omega * Math.sin(theta) + 0.3;
-            p.setVelocity(balX * vs, Math.max(vy, 0.35), balZ * vs);
+            // Un élan fixe, réglé sur la physique de Minecraft : les mains arrivent à hauteur
+            // d'une perche placée 5 blocs plus loin (voir CarteParcours, épreuve des perches)
+            p.setVelocity(balX * 0.56, 0.34, balZ * 0.56);
             poseBond = 10;
             sauter(p, 7);
             return;
