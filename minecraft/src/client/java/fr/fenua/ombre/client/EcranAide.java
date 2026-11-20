@@ -14,11 +14,8 @@ public class EcranAide extends Screen {
 
     /** Chaque ligne : { touche, explication } ; une touche commençant par « # » est un titre de section. */
     private static final List<String[]> LIGNES = List.of(
-            new String[]{"#Le clic droit attrape", ""},
-            new String[]{"Clic droit face à un mur", "S'y accrocher (un mur bas : s'y rétablir)"},
-            new String[]{"Clic droit maintenu en l'air", "Attraper ce qui passe aux mains : mur, rebord, perche, enseigne, câble"},
-            new String[]{"(un bloc en main)", "Le clic droit pose le bloc, comme d'habitude"},
             new String[]{"#Escalade", ""},
+            new String[]{"Espace contre un mur", "S'accrocher (en sautant contre un mur, on s'y accroche aussi)"},
             new String[]{"Z / S", "Monter / descendre le long du mur (Ctrl : plus vite)"},
             new String[]{"Q / D", "Se déplacer sur le côté"},
             new String[]{"Espace", "Bondir vers la prise du dessus"},
@@ -27,14 +24,15 @@ public class EcranAide extends Screen {
             new String[]{"Maj", "Lâcher prise"},
             new String[]{"(en haut)", "On se rétablit tout seul par-dessus le bord"},
             new String[]{"#Rebords", ""},
-            new String[]{"Clic droit maintenu", "En passant devant un bord à hauteur des mains, on le saisit"},
+            new String[]{"(automatique)", "En tombant le long d'un mur, on saisit le bord qui passe aux mains"},
             new String[]{"Z ou Espace", "Se hisser"},
             new String[]{"Q / D", "Glisser aux mains le long du bord"},
             new String[]{"Q ou D + Espace", "Sauter vers le rebord voisin"},
             new String[]{"S", "Redescendre sur le mur"},
             new String[]{"#Course", ""},
             new String[]{"Saut en sprint", "Un bond qui porte plus loin ; les marches d'un bloc se montent seules"},
-            new String[]{"Sprint + saut le long d'un mur", "Courir sur le mur (Z et clic droit maintenus, environ 1,5 s)"},
+            new String[]{"Sprint + saut le long d'un mur", "Courir sur le mur (Z enfoncé, environ 1,5 s)"},
+            new String[]{"Gouttière", "On y grimpe deux fois plus vite"},
             new String[]{"Espace sur le mur", "Rebondir vers le mur d'en face"},
             new String[]{"Maj en touchant le sol", "Roulade : jusqu'à 9 blocs de chute sans mal"},
             new String[]{"Meule, foin, feuillage, auvent", "Saut de la foi : aucune chute n'y fait mal"},
@@ -43,11 +41,13 @@ public class EcranAide extends Screen {
             new String[]{"  ou au vol", "Saute sur le câble, clic droit maintenu : on glisse vers le bas"},
             new String[]{"  pendant la glisse", "Espace : sauter (assassinat aérien possible) ; Maj : lâcher"},
             new String[]{"Monte-charge", "Posé au pied d'un mur. Clic droit dessus : on monte jusqu'au toit"},
-            new String[]{"Perche, enseigne", "Saute dessus, clic droit maintenu : on se balance. Z : élan et projection"},
+            new String[]{"Perche, enseigne, réverbère", "Saute dessus, clic droit maintenu : on se balance. Z : élan et projection"},
+            new String[]{"Lance-grappin", "Clic droit vers le bord d'un toit (40 blocs) : on est tiré jusqu'en haut"},
             new String[]{"Poutre, corniche", "Pour courir et s'accrocher ; échafaudages et lampadaires s'escaladent"},
             new String[]{"Perchoir", "Point de vue : s'y tenir révèle les gardes pendant 30 s"},
             new String[]{"#Assassin", ""},
             new String[]{"R", "Assassiner le garde entouré de rouge (la lame doit être dans l'inventaire)"},
+            new String[]{"(mise en scène)", "Chaque assassinat a son geste ; la caméra passe en vue extérieure le temps du coup"},
             new String[]{"  au sol", "Il ne t'a pas repéré et il est devant toi, à 3 blocs"},
             new String[]{"  aérien", "Il est sous toi (toit, rebord, chute) : tu plonges sur lui, même s'il t'a vu"},
             new String[]{"  depuis un rebord", "Suspendu sous un garde qui marche au bord du toit"},
@@ -55,6 +55,10 @@ public class EcranAide extends Screen {
             new String[]{"  double", "Une lame dans chaque main (F) : un 2ᵉ garde distrait tout près tombe aussi"},
             new String[]{"Clic gauche (lame)", "Marche aussi : frapper un garde distrait le tue d'un coup"},
             new String[]{"Clic droit (couteaux)", "Couteau de lancer : tue à distance, sans bruit"},
+            new String[]{"Clic droit (fléchettes)", "Soporifique : le garde s'endort 30 s. Empoisonnée : il tombe 4 s plus tard"},
+            new String[]{"Clic droit (écus)", "Jetés au sol : la foule accourt, les gardes viennent voir"},
+            new String[]{"Clic droit (pétard)", "Bruit et fumée : la foule s'enfuit, les gardes accourent"},
+            new String[]{"Tenue de gardien", "Déguisé : les gardes ne te voient qu'à 2 blocs (perdu si tu cours, grimpes, frappes)"},
             new String[]{"Clic droit (bombe)", "Fumée : les gardes autour perdent ta trace 5 s"},
             new String[]{"V", "Instinct : voir les ennemis à travers les murs (toutes les 15 s)"},
             new String[]{"B", "Siffler : attirer le garde le plus proche"},
@@ -62,14 +66,20 @@ public class EcranAide extends Screen {
             new String[]{"Meule de foin", "On y entre, on y plonge de haut sans mal, on s'y cache même debout"},
             new String[]{"Puits", "Saute dedans : caché, les yeux au ras de la margelle ; un saut pour en sortir"},
             new String[]{"Cabine à rideau", "Entre par le rideau : caché debout"},
+            new String[]{"Banc public", "Clic droit : assis, on se fond dans le décor. Maj pour se relever"},
+            new String[]{"Charrette de foin", "On y plonge sans mal ; accroupi dedans, on est caché"},
+            new String[]{"Dans la foule", "Marche parmi deux passants ou plus (sans courir) : invisible"},
             new String[]{"#Commandes du chat", ""},
+            new String[]{"/ombre paris", "Un quartier de Paris en 1889 : foule, gardes, tour de fer, une cible"},
+            new String[]{"/ombre kit", "Tout l'équipement de l'assassin"},
+            new String[]{"/ombre vitrine", "Tous les blocs du mod exposés en rangées"},
             new String[]{"/ombre parcours", "Grande carte d'entraînement au parkour (sans gardes)"},
             new String[]{"/ombre arene", "Un fortin à infiltrer, 9 gardes, une cible"},
             new String[]{"/ombre aide", "Le rappel des commandes dans le chat"},
             new String[]{"H", "Cet écran"}
     );
 
-    public EcranAide() { super(Text.literal("L'Ombre — toutes les commandes")); }
+    public EcranAide() { super(Text.literal("L'Ombre — Paris 1889 — toutes les commandes")); }
 
     @Override
     protected void init() {
