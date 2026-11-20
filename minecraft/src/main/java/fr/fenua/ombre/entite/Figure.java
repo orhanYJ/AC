@@ -109,6 +109,10 @@ public class Figure extends PathAwareEntity {
             int i = suite.getOrDefault(joueur.getUuid(), 0);
             joueur.sendMessage(Text.literal("§6" + NOMS[qui()] + " §7: §f" + p[i % p.length]), false);
             suite.put(joueur.getUuid(), i + 1);
+            if (joueur instanceof net.minecraft.server.network.ServerPlayerEntity sp) {
+                if (qui() == TYCHO) fr.fenua.ombre.ac.Mission.marquer(sp, "ombre_m_tycho");
+                if (qui() == KEPLER) fr.fenua.ombre.ac.Mission.marquer(sp, "ombre_m_kepler");
+            }
             getLookControl().lookAt(joueur);
         }
         return ActionResult.success(getWorld().isClient());

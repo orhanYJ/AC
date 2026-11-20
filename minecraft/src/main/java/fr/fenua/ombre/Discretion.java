@@ -32,6 +32,9 @@ public final class Discretion {
         // Déguisé en hallebardier : les gardes ne te remarquent qu'à 2 blocs
         if (joueur.hasStatusEffect(Effets.DEGUISE) && observateur != null && estGarde(observateur)) return 0.0;
 
+        // Recherché : les gardes te reconnaissent de plus loin
+        if (observateur != null && estGarde(observateur)) f *= fr.fenua.ombre.ac.Notoriete.facteur(joueur);
+
         if (joueur.isSneaking()) f *= 0.75;          // s'ajoute au ×0,8 de Minecraft
         if (joueur.isSprinting()) f *= 1.3;          // courir attire l'œil
 

@@ -619,6 +619,25 @@ modele("pupitre", {"bois": "dark_oak_planks", "page": "white_wool", "cuir": "red
         el([7.75, 13, 3.5], [8.25, 13.6, 12.5], "cuir", ["up"], rot={"origin": [8, 12, 8], "axis": "x", "angle": -22.5})])
 oriente("pupitre"); objet_bloc("pupitre"); butin("pupitre"); sans_forme("pupitre", ["lectern", "book"])
 
+# Étendard de la garde : il marque une zone interdite (14 blocs autour)
+t = Image.new("RGBA", (16, 16), (150, 22, 26, 255)); d = ImageDraw.Draw(t)
+d.rectangle((0, 0, 15, 15), outline=(214, 170, 52, 255))
+for x in range(1, 15, 2): d.point((x, 14), fill=(214, 170, 52, 255))
+aigle = ["......#.#.......", ".....#####......", "..#..#####..#...", ".###.#####.###..", "#####.###.#####.", ".####.###.####..",
+         "..###.###.###...", "...##.###.##....", "......###.......", ".....#.#.#......", "....#.....#....."]
+for j, ligne in enumerate(aigle):
+    for i, c in enumerate(ligne):
+        if c == "#": d.point((i + 1, j + 2), fill=(24, 20, 20, 255))
+d.point((7, 7), fill=(214, 170, 52, 255)); d.point((8, 7), fill=(214, 170, 52, 255))
+t.save(f"{A}/textures/block/etendard.png")
+modele("etendard", {"hampe": "stripped_dark_oak_log", "or": "gold_block", "toile": "ombre:block/etendard", "socle": "polished_blackstone"},
+       [el([5, 0, 5], [11, 2, 11], "socle"), el([7.25, 2, 7.25], [8.75, 31, 8.75], "hampe"), el([7, 31, 7], [9, 32, 9], "or"),
+        el([1, 28, 7.5], [15, 29, 8.5], "hampe"), el([1.5, 12, 7.9], [14.5, 28, 8.1], "toile", ["north", "south"], uv=[0, 0, 16, 16]),
+        el([0.5, 27.5, 7.25], [1.5, 29.5, 8.75], "or"), el([14.5, 27.5, 7.25], [15.5, 29.5, 8.75], "or")])
+oriente("etendard"); objet_bloc("etendard"); butin("etendard"); sans_forme("etendard", ["red_banner", "gold_ingot", "stick"])
+NOMS.update({"block.ombre.etendard": "Étendard de la garde (zone interdite)", "block.ombre.affiche_recherche": "Avis de recherche (clic droit : l'arracher)",
+             "key.ombre.roue": "Roue des outils (maintenir)", "key.ombre.voyage": "Carte et voyage rapide"})
+
 # Les noms des blocs écrits à la main, selon le thème de 1600
 NOMS.update({
     "block.ombre.reverbere": "Lanterne à potence", "block.ombre.reverbere_vert": "Lanterne à potence verte", "block.ombre.reverbere_dore": "Lanterne à potence dorée",

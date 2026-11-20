@@ -11,6 +11,7 @@ import java.util.List;
 public class EcranAide extends Screen {
     private static final int TITRE = 0xFFD27F, TOUCHE = 0xFFFFFF, TEXTE = 0xB8C4CC, SECTION = 0x7FD8FF;
     private double defile;
+    private int hauteurTotale = 2000;
 
     /** Chaque ligne : { touche, explication } ; une touche commençant par « # » est un titre de section. */
     private static final List<String[]> LIGNES = List.of(
@@ -20,7 +21,7 @@ public class EcranAide extends Screen {
             new String[]{"Q / D", "Se déplacer sur le côté"},
             new String[]{"Espace", "Bondir vers la prise du dessus"},
             new String[]{"Q ou D + Espace", "Bondir sur le côté"},
-            new String[]{"S + Espace", "Saut arrière vers le mur d'en face (clic droit pour s'y raccrocher)"},
+            new String[]{"S + Espace", "Saut arrière vers le mur d'en face (on s'y raccroche tout seul)"},
             new String[]{"Maj", "Lâcher prise"},
             new String[]{"(en haut)", "On se rétablit tout seul par-dessus le bord"},
             new String[]{"#Rebords", ""},
@@ -44,7 +45,7 @@ public class EcranAide extends Screen {
             new String[]{"Perche, enseigne, lanterne", "Saute dessus, clic droit maintenu : on se balance. Z : élan et projection"},
             new String[]{"Arbalète à grappin", "Clic droit vers le bord d'un toit (40 blocs) : on est tiré jusqu'en haut"},
             new String[]{"Poutre, corniche", "Pour courir et s'accrocher ; échafaudages et lampadaires s'escaladent"},
-            new String[]{"Perchoir", "Point de vue : s'y tenir révèle les gardes pendant 30 s"},
+            new String[]{"Perchoir, gargouille", "Point de vue : s'y tenir révèle les gardes 30 s et ouvre le voyage rapide"},
             new String[]{"#Assassin", ""},
             new String[]{"R", "Assassiner le garde entouré de rouge (la lame doit être dans l'inventaire)"},
             new String[]{"(mise en scène)", "Chaque assassinat a son geste ; la caméra passe en vue extérieure le temps du coup"},
@@ -70,6 +71,22 @@ public class EcranAide extends Screen {
             new String[]{"Charrette de foin", "On y plonge sans mal ; accroupi dedans, on est caché"},
             new String[]{"Dans la foule", "Marche parmi deux passants ou plus (sans courir) : invisible"},
             new String[]{"Clic droit sur Tycho, Kepler…", "Les personnages réels racontent leur histoire et donnent les missions"},
+            new String[]{"#Comme dans Assassin's Creed", ""},
+            new String[]{"G (maintenir)", "Roue des outils : le jeu se fige, montre un outil à la souris, relâche : il passe en main"},
+            new String[]{"J", "Carte : points de vue, cibles, journal. Clic (ou 1 à 9) sur un point de vue : voyage rapide"},
+            new String[]{"Détection", "Un garde qui te voit se méfie peu à peu : « ? » blanc, puis jaune (il vient voir), « ! » rouge (alerte)"},
+            new String[]{"  flèches du viseur", "Elles montrent d'où l'on t'observe et se remplissent avec le soupçon"},
+            new String[]{"  pour s'en défaire", "Sors de sa vue, cache-toi, ou lance une bombe de fumée : le soupçon retombe"},
+            new String[]{"Zone interdite", "Autour d'un étendard rouge de la garde (14 blocs). Barre jaune : tout près ; rouge : dedans"},
+            new String[]{"  dedans", "Les gardes te repèrent deux fois plus vite"},
+            new String[]{"Boussole (en haut)", "◆ cibles et personnages à voir, avec la distance ; ✦ points de vue ; ▼ gardes en alerte"},
+            new String[]{"Notoriété", "Chaque alerte la fait monter, un innocent tué la fait bondir. À 75 : RECHERCHÉ"},
+            new String[]{"  la faire baisser", "Clic droit sur un avis de recherche pour l'arracher (−30), ou se faire oublier"},
+            new String[]{"Désynchronisation", "Tuer un passant : l'Ombre ne tue pas d'innocents (notoriété +50)"},
+            new String[]{"Vol à la tire", "Accroupi dans le dos d'un passant, main vide, clic droit : sa bourse. Vu de face : « Au voleur ! »"},
+            new String[]{"Enchaînement", "Après un assassinat, 2,5 s pour en enchaîner un autre au sol, même sur un garde qui t'a vu"},
+            new String[]{"Saut de la foi", "Au bord d'un vide, une invite dorée dit quand une meule ou l'eau t'attend en bas"},
+            new String[]{"Journal (à gauche)", "Les objectifs de la mission de Prague ; ils se cochent tout seuls"},
             new String[]{"#Commandes du chat", ""},
             new String[]{"/ombre prague", "La Vieille-Ville de Prague en 1600 : foule, gardes, Týn, pont Charles, cibles"},
             new String[]{"/ombre kit", "Tout l'équipement de l'assassin"},
@@ -90,7 +107,7 @@ public class EcranAide extends Screen {
 
     @Override
     public boolean mouseScrolled(double x, double y, double h, double v) {
-        defile = Math.max(0, Math.min(defile - v * 18, Math.max(0, LIGNES.size() * 12 + 80 - (height - 60))));
+        defile = Math.max(0, Math.min(defile - v * 18, Math.max(0, hauteurTotale - (height - 60))));
         return true;
     }
 
@@ -108,10 +125,16 @@ public class EcranAide extends Screen {
                 ctx.drawTextWithShadow(textRenderer, Text.literal("— " + l[0].substring(1) + " —"), x0, y, SECTION);
             } else {
                 ctx.drawTextWithShadow(textRenderer, Text.literal(l[0]), x0 + 6, y, TOUCHE);
-                ctx.drawTextWithShadow(textRenderer, Text.literal(l[1]), x0 + col, y, TEXTE);
+                // Les explications trop longues passent à la ligne
+                var lignes = textRenderer.wrapLines(Text.literal(l[1]), Math.max(120, width - (x0 + col) - 10));
+                for (int i = 0; i < lignes.size(); i++) {
+                    ctx.drawTextWithShadow(textRenderer, lignes.get(i), x0 + col, y, TEXTE);
+                    if (i < lignes.size() - 1) y += 10;
+                }
             }
             y += 12;
         }
+        hauteurTotale = y + (int) defile;
         ctx.disableScissor();
     }
 

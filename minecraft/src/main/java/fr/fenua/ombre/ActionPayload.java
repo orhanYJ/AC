@@ -14,6 +14,8 @@ public record ActionPayload(int action, int cible) implements CustomPayload {
     public static final int RATTRAPE = 2;
     /** Touche R : assassiner la créature marquée en rouge (cible = son numéro). */
     public static final int ASSASSINER = 3;
+    /** Roue des outils : mettre en main l'objet de la case n° cible de l'inventaire. */
+    public static final int OUTIL = 4;
 
     public ActionPayload(int action) { this(action, -1); }
 

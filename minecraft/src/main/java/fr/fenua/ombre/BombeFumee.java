@@ -35,6 +35,7 @@ public class BombeFumee extends Item {
 
             for (MobEntity m : sw.getEntitiesByClass(MobEntity.class, joueur.getBoundingBox().expand(RAYON), e -> e.isAlive())) {
                 m.setTarget(null);
+                fr.fenua.ombre.ac.Detection.fixer(m, 0f);
                 m.getNavigation().stop();
                 m.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 100, 0));
                 m.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 100, 3));

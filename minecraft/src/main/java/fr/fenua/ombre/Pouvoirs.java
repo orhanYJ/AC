@@ -37,6 +37,18 @@ public final class Pouvoirs {
             }
         }
         else if (action == ActionPayload.ASSASSINER) Assassinat.parTouche(p, cible);
+        else if (action == ActionPayload.OUTIL && cible >= 0 && cible < 36) {
+            // Roue des outils : l'objet choisi passe dans la main (échangé avec ce qu'on tenait)
+            var inv = p.getInventory();
+            if (cible < 9) inv.selectedSlot = cible;
+            else {
+                var tenu = inv.getStack(inv.selectedSlot);
+                inv.setStack(inv.selectedSlot, inv.getStack(cible));
+                inv.setStack(cible, tenu);
+            }
+            p.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket(inv.selectedSlot));
+            p.playerScreenHandler.sendContentUpdates();
+        }
     }
 
     /** Révèle 10 s les gardes et les monstres à 40 blocs, à travers les murs. */

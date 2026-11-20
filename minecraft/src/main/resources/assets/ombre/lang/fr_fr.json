@@ -128,7 +128,7 @@
   "block.ombre.cheminee_pierre": "Cheminée en pierre",
   "block.ombre.cheminee_terre_cuite": "Cheminée en terre cuite",
   "block.ombre.cheminee_ardoise": "Cheminée en ardoise",
-  "block.ombre.affiche_recherche": "Affiche : Recherché",
+  "block.ombre.affiche_recherche": "Avis de recherche (clic droit : l'arracher)",
   "block.ombre.affiche_proclamation": "Affiche : Proclamation impériale",
   "block.ombre.fanion_rouge": "Fanion rouge",
   "block.ombre.fanion_bleu": "Fanion bleu",
@@ -223,5 +223,8 @@
   "block.ombre.alambic": "Alambic d'alchimiste",
   "block.ombre.etagere_fioles": "Étagère de fioles",
   "block.ombre.tonneau_biere": "Tonneau de bière",
-  "block.ombre.pupitre": "Pupitre d'astronome"
+  "block.ombre.pupitre": "Pupitre d'astronome",
+  "block.ombre.etendard": "Étendard de la garde (zone interdite)",
+  "key.ombre.roue": "Roue des outils (maintenir)",
+  "key.ombre.voyage": "Carte et voyage rapide"
 }

@@ -41,11 +41,15 @@ public class Ombre implements ModInitializer {
 
         // Touches spéciales envoyées par le client (instinct, siffler, assassiner)
         PayloadTypeRegistry.playC2S().register(ActionPayload.ID, ActionPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(VigilancePayload.ID, VigilancePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(fr.fenua.ombre.ac.EtatPayload.ID, fr.fenua.ombre.ac.EtatPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(fr.fenua.ombre.ac.JournalPayload.ID, fr.fenua.ombre.ac.JournalPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(fr.fenua.ombre.ac.VoyagePayload.ID, fr.fenua.ombre.ac.VoyagePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ExecutionPayload.ID, ExecutionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SynchroPayload.ID, SynchroPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ActionPayload.ID,
                 (payload, context) -> Pouvoirs.agir(context.player(), payload.action(), payload.cible()));
+        ServerPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.VoyagePayload.ID,
+                (payload, context) -> fr.fenua.ombre.ac.Voyage.partir(context.player(), payload.pos()));
 
         // Commandes /ombre arene et /ombre aide
         CommandRegistrationCallback.EVENT.register((dispatcher, registres, env) ->

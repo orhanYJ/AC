@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:red_banner"
+  },
+  {
+   "item": "minecraft:gold_ingot"
+  },
+  {
+   "item": "minecraft:stick"
+  }
+ ],
+ "result": {
+  "id": "ombre:etendard",
+  "count": 1
+ }
+}

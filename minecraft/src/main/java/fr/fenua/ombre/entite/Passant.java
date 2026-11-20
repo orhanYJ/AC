@@ -81,6 +81,39 @@ public class Passant extends PathAwareEntity {
 
     @Override public boolean canImmediatelyDespawn(double distance) { return false; }
 
+    /**
+     * Le vol à la tire : accroupi, dans son dos, un clic droit les mains vides lui prend sa bourse.
+     * Vu de face, il crie au voleur et les gardes proches deviennent soupçonneux.
+     */
+    @Override
+    protected net.minecraft.util.ActionResult interactMob(PlayerEntity joueur, net.minecraft.util.Hand main) {
+        if (main != net.minecraft.util.Hand.MAIN_HAND || !joueur.getMainHandStack().isEmpty() || !joueur.isSneaking())
+            return super.interactMob(joueur, main);
+        if (getWorld().isClient()) return net.minecraft.util.ActionResult.SUCCESS;
+        if (getCommandTags().contains("ombre_vole")) {
+            joueur.sendMessage(net.minecraft.text.Text.literal("§7Sa bourse est déjà vide."), true);
+            return net.minecraft.util.ActionResult.SUCCESS;
+        }
+        if (fr.fenua.ombre.Discretion.dansLeDos(this, joueur)) {
+            addCommandTag("ombre_vole");
+            int n = 2 + random.nextInt(5);
+            joueur.getInventory().offerOrDrop(new net.minecraft.item.ItemStack(fr.fenua.ombre.objet.Objets.THALERS, n));
+            joueur.sendMessage(net.minecraft.text.Text.literal("§6Bourse volée : " + n + " thalers"), true);
+            playSound(SoundEvents.ENTITY_ITEM_PICKUP, 0.4f, 1.6f);
+        } else {
+            // Pris la main dans le sac !
+            getLookControl().lookAt(joueur);
+            playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.2f, 1.1f);
+            joueur.sendMessage(net.minecraft.text.Text.literal("§c« Au voleur ! » — les gardes se retournent."), true);
+            for (MobEntity m : getWorld().getEntitiesByClass(MobEntity.class, getBoundingBox().expand(16), fr.fenua.ombre.Discretion::estGarde)) {
+                fr.fenua.ombre.ac.Detection.fixer(m, Math.max(fr.fenua.ombre.ac.Detection.niveau(m), 0.7f));
+                m.getNavigation().startMovingTo(joueur.getX(), joueur.getY(), joueur.getZ(), 0.9);
+            }
+            fuir(joueur.getPos());
+        }
+        return net.minecraft.util.ActionResult.SUCCESS;
+    }
+
     /** S'enfuir loin d'un danger, en criant. */
     public void fuir(Vec3d danger) {
         Vec3d loin = NoPenaltyTargeting.findFrom(this, 16, 6, danger);

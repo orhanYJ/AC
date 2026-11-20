@@ -1,7 +1,6 @@
 package fr.fenua.ombre.client;
 
 import fr.fenua.ombre.ActionPayload;
-import fr.fenua.ombre.VigilancePayload;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import fr.fenua.ombre.bloc.CoteClient;
@@ -25,7 +24,7 @@ import org.lwjgl.glfw.GLFW;
 
 /** Côté joueur : les touches (modifiables dans Options › Commandes), le parkour, la cible d'assassinat, le dessin des cordes. */
 public class OmbreClient implements ClientModInitializer {
-    private static KeyBinding instinct, siffler, aide, assassiner;
+    private static KeyBinding instinct, siffler, aide, assassiner, roue, voyage;
 
     /** Le nom de la touche d'assassinat (R par défaut, modifiable). */
     static String toucheAssassiner() { return assassiner.getBoundKeyLocalizedText().getString().toUpperCase(); }
@@ -36,10 +35,16 @@ public class OmbreClient implements ClientModInitializer {
         siffler = touche("key.ombre.siffler", GLFW.GLFW_KEY_B);
         aide = touche("key.ombre.aide", GLFW.GLFW_KEY_H);
         assassiner = touche("key.ombre.assassiner", GLFW.GLFW_KEY_R);
+        roue = touche("key.ombre.roue", GLFW.GLFW_KEY_G);       // (X est déjà pris par Minecraft)
+        voyage = touche("key.ombre.voyage", GLFW.GLFW_KEY_J);   // J : même place en AZERTY et en QWERTY
+
+        // Ce que pensent les gardes, la zone, la notoriété ; le journal et les points de vue
+        ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.EtatPayload.ID, (payload, ctx) -> EtatAC.recevoir(payload));
+        ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.JournalPayload.ID, (payload, ctx) -> EtatAC.recevoir(payload));
+        WorldRenderEvents.AFTER_ENTITIES.register(HudAC::dessinerMonde);
 
         // Le serveur dit qui nous a repérés ; l'invite d'assassinat s'affiche sous le viseur
-        ClientPlayNetworking.registerGlobalReceiver(VigilancePayload.ID, (payload, ctx) -> Assassin.recevoir(payload.reperes()));
-        ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ExecutionPayload.ID, (payload, ctx) -> Parcours.executer(payload));
+        ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ExecutionPayload.ID, (payload, ctx) -> { Parcours.executer(payload); Assassin.apresExecution(payload.type()); });
         ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.SynchroPayload.ID, (payload, ctx) -> Parcours.synchro());
 
         // La corde du lance-grappin, de la main jusqu'au crochet
@@ -54,15 +59,20 @@ public class OmbreClient implements ClientModInitializer {
             RenduCordes.dessiner(ctx.matrixStack(), ctx.consumers(), mc.world, BlockPos.ORIGIN, main, ancre, false);
             ctx.matrixStack().pop();
         });
-        HudRenderCallback.EVENT.register((ctx, compteur) -> Assassin.dessiner(ctx, MinecraftClient.getInstance()));
+        HudRenderCallback.EVENT.register((ctx, compteur) -> {
+            HudAC.dessiner(ctx, MinecraftClient.getInstance());
+            Assassin.dessiner(ctx, MinecraftClient.getInstance());
+        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
-            if (!client.isPaused()) { Parcours.tick(client); Assassin.tick(client); }
+            if (!client.isPaused()) { Parcours.tick(client); Assassin.tick(client); HudAC.tick(client); }
             while (assassiner.wasPressed()) Assassin.frapper();
             while (instinct.wasPressed()) ClientPlayNetworking.send(new ActionPayload(ActionPayload.INSTINCT));
             while (siffler.wasPressed()) ClientPlayNetworking.send(new ActionPayload(ActionPayload.SIFFLER));
             while (aide.wasPressed()) client.setScreen(new EcranAide());
+            while (roue.wasPressed()) if (client.currentScreen == null) client.setScreen(new RoueOutils(roue));
+            while (voyage.wasPressed()) if (client.currentScreen == null) client.setScreen(new EcranVoyage());
         });
 
         // Les blocs appellent ici quand le joueur part en tyrolienne ou en monte-charge

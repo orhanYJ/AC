@@ -150,6 +150,9 @@ public final class OmbreBlocs {
             CORDE_LINGE, BARRICADE, COLONNE, HORLOGE, AFFICHE, CHARPENTE, VOLETS, FONTAINE, DRAPEAU, CARROSSE,
             STATUE, SPHERE, ALAMBIC, ETAGERE, TONNEAU, PUPITRE};
 
+    /** Étendard de la garde : une zone interdite de 14 blocs autour de lui. */
+    public static final fr.fenua.ombre.ac.Etendard ETENDARD = new fr.fenua.ombre.ac.Etendard(metal().nonOpaque());
+
     public static BlockEntityType<PoteauTyrolienne.Entite> POTEAU_ENTITE;
     public static BlockEntityType<MonteCharge.Entite> MONTE_CHARGE_ENTITE;
 
@@ -193,6 +196,7 @@ public final class OmbreBlocs {
         bloc("etagere_fioles", ETAGERE);
         bloc("tonneau_biere", TONNEAU);
         bloc("pupitre", PUPITRE);
+        bloc("etendard", ETENDARD);
 
         Registry.register(Registries.ITEM, id("corde_tyrolienne"), CORDE);
 
@@ -200,6 +204,9 @@ public final class OmbreBlocs {
                 BlockEntityType.Builder.create(PoteauTyrolienne.Entite::new, POTEAU).build(null));
         MONTE_CHARGE_ENTITE = Registry.register(Registries.BLOCK_ENTITY_TYPE, id("monte_charge"),
                 BlockEntityType.Builder.create(MonteCharge.Entite::new, MONTE_CHARGE).build(null));
+
+        fr.fenua.ombre.ac.Etendard.TYPE = Registry.register(Registries.BLOCK_ENTITY_TYPE, id("etendard"),
+                BlockEntityType.Builder.create(fr.fenua.ombre.ac.Etendard.Entite::new, ETENDARD).build(null));
 
         Variantes.enregistrer();
 
@@ -213,7 +220,7 @@ public final class OmbreBlocs {
                     e.add(OmbreItems.COUTEAUX);
                     for (Block b : new Block[]{POTEAU, MONTE_CHARGE, PERCHE, PERCHOIR, MEULE, PUITS, CABINE, POUTRE, CORNICHE,
                             ENSEIGNE, AUVENT, ECHAFAUDAGE, LAMPADAIRE, TETE_LAMPADAIRE, GOUTTIERE, BALCON, REVERBERE, BANC,
-                            CHARRETTE, GARGOUILLE, CHARPENTE}) e.add(b);
+                            CHARRETTE, GARGOUILLE, CHARPENTE, ETENDARD}) e.add(b);
                     e.add(CORDE);
                     for (Block b : Variantes.PARKOUR) e.add(b);
                 })

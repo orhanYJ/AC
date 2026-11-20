@@ -39,6 +39,16 @@ public final class Assassin {
 
     public static void recevoir(List<Integer> ids) { reperes = new HashSet<>(ids); }
 
+    /** L'enchaînement : juste après un assassinat, on peut en enchaîner un autre au sol, même sur un garde qui t'a vu. */
+    private static long chaineJusqua = -1;
+
+    public static void apresExecution(int type) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.world != null) chaineJusqua = mc.world.getTime() + fr.fenua.ombre.ExecutionPayload.DUREE[type] + Assassinat.CHAINE;
+    }
+
+    private static boolean enChaine(MinecraftClient mc) { return mc.world != null && mc.world.getTime() <= chaineJusqua; }
+
     /** Chaque tick : choisir la meilleure cible. */
     public static void tick(MinecraftClient client) {
         cible = null;
@@ -51,13 +61,15 @@ public final class Assassin {
         boolean cache = Discretion.dansCachette(p);
         for (Entity e : client.world.getOtherEntities(p, p.getBoundingBox().expand(4, 10, 4), Assassinat::visable)) {
             LivingEntity v = (LivingEntity) e;
-            String t = Assassinat.typePossible(p, v, reperes.contains(e.getId()), cache);
+            boolean chaine = enChaine(client);
+            String t = Assassinat.typePossible(p, v, reperes.contains(e.getId()) && !chaine, cache);
             if (t == null || !p.canSee(v)) continue;
+            if (chaine && t.equals("Assassinat")) t = Assassinat.ENCHAINEMENT;
             double dx = v.getX() - p.getX(), dz = v.getZ() - p.getZ();
             double h = Math.sqrt(dx * dx + dz * dz);
             // Au sol, il faut l'avoir devant soi ; en l'air ou au rebord, on prend le plus proche
             double face = h > 0.01 ? (dx * fx + dz * fz) / h : 1;
-            if (t.equals("Assassinat") && face < 0.2) continue;
+            if ((t.equals("Assassinat") || t.equals(Assassinat.ENCHAINEMENT)) && face < 0.2) continue;
             double score = h - face * 1.5;
             if (score < meilleur) { meilleur = score; cible = e; type = t; }
         }

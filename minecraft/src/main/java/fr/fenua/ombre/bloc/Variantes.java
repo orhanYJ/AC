@@ -87,9 +87,12 @@ public final class Variantes {
             AJOURES.add(b);
         }
         for (String c : CHEMINEES) decor("cheminee_" + c, new Decor.Cheminee(OmbreBlocs.pierre()).formes(OmbreBlocs.CHEMINEE_CONTOUR, null));
-        for (String a : AFFICHES)
-            decor("affiche_" + a, new Decor.Oriente(AbstractBlock.Settings.create().strength(0.2f).sounds(BlockSoundGroup.WOOL)
-                    .nonOpaque().noCollision()).formes(true, Decor.b(1, 1, 0, 15, 15, 1), Decor.VIDE));
+        for (String a : AFFICHES) {
+            AbstractBlock.Settings r = AbstractBlock.Settings.create().strength(0.2f).sounds(BlockSoundGroup.WOOL).nonOpaque().noCollision();
+            // L'avis de recherche s'arrache d'un clic droit (il fait baisser la notoriété)
+            Decor.Oriente b = a.equals("recherche") ? new fr.fenua.ombre.ac.AvisRecherche(r) : new Decor.Oriente(r);
+            decor("affiche_" + a, b.formes(true, Decor.b(1, 1, 0, 15, 15, 1), Decor.VIDE));
+        }
         for (String f : FANIONS) decor("fanion_" + f, new Decor.Simple(OmbreBlocs.bois()).formes(Decor.b(7, 0, 7, 9, 16, 9), null));
 
         for (String c : CONSTRUCTION) {

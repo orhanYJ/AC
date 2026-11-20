@@ -35,9 +35,12 @@ public final class Entites {
         CAPITAINE = type("capitaine", EntityType.Builder.create(Gardes.Capitaine::new, SpawnGroup.MONSTER));
         FabricDefaultAttributeRegistry.register(PASSANT, Passant.attributs());
         FabricDefaultAttributeRegistry.register(FIGURE, Figure.attributs());
-        FabricDefaultAttributeRegistry.register(HALLEBARDIER, VindicatorEntity.createVindicatorAttributes());
+        // Moins brutaux que les vindicateurs : un coup de hallebarde enlève 4 cœurs, pas 6 et demi
+        FabricDefaultAttributeRegistry.register(HALLEBARDIER, VindicatorEntity.createVindicatorAttributes()
+                .add(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE, 0.0));
         FabricDefaultAttributeRegistry.register(ARBALETRIER, PillagerEntity.createPillagerAttributes());
-        FabricDefaultAttributeRegistry.register(CAPITAINE, VindicatorEntity.createVindicatorAttributes());
+        FabricDefaultAttributeRegistry.register(CAPITAINE, VindicatorEntity.createVindicatorAttributes()
+                .add(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0));
         oeuf("passant", PASSANT, 0x3B3B46, 0xD8B48C);
         oeuf("personnage", FIGURE, 0x1C1C1C, 0xD4AF37);
         oeuf("hallebardier", HALLEBARDIER, 0xB52A2A, 0xF0C419);

@@ -90,14 +90,28 @@ public final class Assassinat {
         return joueur.getInventory().containsAny(s -> s.isOf(OmbreItems.LAME));
     }
 
+    /**
+     * L'enchaînement, comme dans Assassin's Creed : pendant 2,5 s après un assassinat, on peut en enchaîner
+     * un autre au sol, même sur un garde qui t'a vu (il est encore saisi).
+     */
+    public static final int CHAINE = 50;
+    public static final String ENCHAINEMENT = "Enchaînement";
+    private static final java.util.Map<java.util.UUID, Long> CHAINE_JUSQUA = new java.util.HashMap<>();
+
+    public static boolean enChaine(PlayerEntity p) {
+        return p.getWorld().getTime() <= CHAINE_JUSQUA.getOrDefault(p.getUuid(), -1L);
+    }
+
     /** Touche R : le joueur demande à assassiner la créature n° id (celle qu'il voit en rouge). */
     public static void parTouche(net.minecraft.server.network.ServerPlayerEntity joueur, int id) {
         ServerWorld sw = joueur.getServerWorld();
         Entity e = sw.getEntityById(id);
         if (!aLaLame(joueur) || !visable(e) || joueur.isSpectator()) return;
         LivingEntity v = (LivingEntity) e;
-        String nom = typePossible(joueur, v, repere(v, joueur), Discretion.dansCachette(joueur));
+        boolean chaine = enChaine(joueur);
+        String nom = typePossible(joueur, v, repere(v, joueur) && !chaine, Discretion.dansCachette(joueur));
         if (nom == null || !joueur.canSee(v)) return;
+        if (chaine && nom.equals("Assassinat")) nom = ENCHAINEMENT;
 
         // L'assassinat est mis en scène : la victime est figée, le joueur fait son geste, puis le coup tombe
         int type = nom.equals("Assassinat aérien") ? ExecutionPayload.AERIEN : nom.equals(CACHETTE) ? ExecutionPayload.CACHETTE
@@ -172,6 +186,7 @@ public final class Assassinat {
                     }
                 }
                 x.joueur.sendMessage(Text.literal("§7✦ " + nom), true);
+                CHAINE_JUSQUA.put(x.joueur.getUuid(), sw.getTime() + CHAINE);
             }
         }
     }

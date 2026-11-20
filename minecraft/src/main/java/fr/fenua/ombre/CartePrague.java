@@ -12,6 +12,7 @@ import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.registry.Registries;
@@ -64,10 +65,16 @@ public final class CartePrague {
             j.teleport(src.getWorld(), d.getX() + 0.5, d.getY(), d.getZ() + 0.5, 180f, 0f);
             j.setSpawnPoint(src.getWorld().getRegistryKey(), d, 180f, true, false);
             Kit.donner(j);
+            // La mission recommence : journal vierge, points de vue à refaire, notoriété effacée
+            for (String t : new java.util.ArrayList<>(j.getCommandTags()))
+                if (t.startsWith("ombre_m_") || t.startsWith(Gardes.VUE_SYNCHRO)) j.removeCommandTag(t);
+            j.addCommandTag(fr.fenua.ombre.ac.Mission.ACTIVE);
+            fr.fenua.ombre.ac.Notoriete.ajouter(j, -100, null);
         }
         src.sendFeedback(() -> Text.literal("§6Prague, 1600.§r La Vieille-Ville s'élève au nord-est, la Vltava coule à l'est.\n"
                 + "§eMission§r : parle à §6Tycho Brahe§r et à §6Johannes Kepler§r, au pied de l'horloge astronomique (clic droit).\n"
                 + "§eCibles§r (dorées avec l'Instinct) : Ottokar von Rabenstein au sommet de la tour du pont, et l'alchimiste Melchior Kragl dans la tour nord de Týn.\n"
+                + "§cZones interdites§r : autour des étendards rouges de la garde, on te repère deux fois plus vite.\n"
                 + "§7Fonds-toi dans la foule, grimpe par les gouttières, synchronise aux gargouilles, plonge dans la Vltava. Touche H : toutes les commandes."), true);
         return 1;
     }
@@ -94,6 +101,9 @@ public final class CartePrague {
     // ───────────────────────── l'ensemble ─────────────────────────
 
     private void batir() {
+        // Une Prague rebâtie remplace l'ancienne : on retire ses habitants (sauf les joueurs)
+        net.minecraft.util.math.Box zone = new net.minecraft.util.math.Box(ox - 2, oy - 4, oz - 2, ox + LARGEUR + 2, oy + 70, oz + PROFONDEUR + 2);
+        for (Entity e : w.getEntitiesByClass(Entity.class, zone, e -> !(e instanceof net.minecraft.entity.player.PlayerEntity))) e.discard();
         aplanir();
         rues();
         for (int i = 0; i < N; i++)
@@ -109,6 +119,37 @@ public final class CartePrague {
         mobilierDeRue();
         tyroliennes();
         gens();
+        zones();
+    }
+
+    // ───────────────────────── zones interdites et noms des lieux ─────────────────────────
+
+    /** Les étendards de la garde (zones interdites) et les repères qui nomment les points de vue. */
+    private void zones() {
+        // La tour du pont, repaire du grand maître : un étendard au sommet
+        set(tourPontA0 + 6, tourPontH, tourPontC0 + 7, vers(OmbreBlocs.ETENDARD, Direction.WEST));
+        // Týn : un étendard au pied de la tour nord, où se cache l'alchimiste
+        set(tynX - 2, 0, tynZ - 7, vers(OmbreBlocs.ETENDARD, Direction.WEST));
+        // Des avis de recherche : au pied de la tour du pont, et sous l'horloge
+        set(tourPontA0 - 1, 1, tourPontC0 + 1, vers(b("affiche_recherche"), Direction.EAST));   // sur les piliers de la porte, côté rue
+        set(tourPontA0 - 1, 1, tourPontC0 + 7, vers(b("affiche_recherche"), Direction.EAST));
+        set(orlojTx1 + 1, 1, orlojZ + 1, vers(b("affiche_recherche"), Direction.WEST));
+        // Les repères nommés : les points de vue proches prennent leur nom
+        BlockPos coin = new BlockPos(ox, oy - 4, oz), fin = new BlockPos(ox + LARGEUR, oy + 60, oz + PROFONDEUR);
+        for (Entity e : w.getEntitiesByType(EntityType.MARKER, new net.minecraft.util.math.Box(coin.toCenterPos(), fin.toCenterPos()),
+                e -> e.getCommandTags().contains(Gardes.LIEU))) e.discard();
+        lieu("Horloge astronomique", orlojX, orlojH, orlojZ);
+        lieu("Église de Týn", tynX, tynH + 6, tynZ);
+        lieu("Tour du pont Charles", tourPontX, tourPontH, tourPontZ);
+    }
+
+    private void lieu(String nom, int x, int y, int z) {
+        Entity m = EntityType.MARKER.create(w);
+        if (m == null) return;
+        m.refreshPositionAndAngles(ox + x + 0.5, oy + y, oz + z + 0.5, 0, 0);
+        m.setCustomName(Text.literal(nom));
+        m.addCommandTag(Gardes.LIEU);
+        w.spawnEntity(m);
     }
 
     private void aplanir() {
@@ -187,7 +228,7 @@ public final class CartePrague {
             if (boutique && u == posEnseigne) set(xo, 3, zo, vers(enseigne, versMur));
             else if (boutique && u != porte && r.nextInt(3) > 0) set(xo, 3, zo, vers(auvent, versMur));
             else if (r.nextInt(4) == 0) set(xo, 2, zo, vers(OmbreBlocs.REVERBERE, versMur));
-            else if (r.nextInt(5) == 0) set(xo, 1, zo, vers(b(hasard(AFFICHES)), versMur));
+            else if (r.nextInt(5) == 0) set(xo, 1, zo, vers(b(r.nextInt(3) == 0 ? "affiche_recherche" : hasard(AFFICHES)), versMur));
             for (int k = 0; k < etages; k++) {
                 int yb = 4 + k * 3;
                 boolean fenetre = (u - debut) % 2 == 1;
@@ -257,7 +298,7 @@ public final class CartePrague {
     // ───────────────────────── la place et l'horloge astronomique ─────────────────────────
 
     private static final String[] ETALS = {"etal", "etal_fruits", "etal_poisson", "etal_fleurs", "etal_pain", "etal_etoffes", "etal_legumes"};
-    private int orlojX, orlojZ, orlojH, tychoX, tychoZ;
+    private int orlojX, orlojZ, orlojH, orlojTx1, tychoX, tychoZ;
 
     private void place() {
         int x0 = RUE + PAS, x1 = RUE + 2 * PAS + ILOT - 1, z0 = RUE + PAS, z1 = z0 + ILOT - 1;
@@ -288,10 +329,10 @@ public final class CartePrague {
         set(tx1 + 2, h - 2, tz1, vers(OmbreBlocs.GARGOUILLE, Direction.WEST));
         set(tx0 - 2, h - 2, tz0, vers(OmbreBlocs.GARGOUILLE, Direction.EAST));
         for (int y = 0; y < h - 1; y++) set(tx1 + 1, y, tz1, vers(OmbreBlocs.GOUTTIERE, Direction.WEST));
-        orlojX = (tx0 + tx1) / 2; orlojZ = tz0 - 1; orlojH = h;
+        orlojX = (tx0 + tx1) / 2; orlojZ = tz0 - 1; orlojH = h; orlojTx1 = tx1;
         // Les astronomes et leurs instruments, au pied de l'horloge
         set(tx1 + 3, 0, tz0 - 2, OmbreBlocs.SPHERE);
-        set(tx1 + 3, 0, tz1 + 2, vers(OmbreBlocs.PUPITRE, Direction.EAST));
+        set(tx1 + 3, 0, tz1 + 7, vers(OmbreBlocs.PUPITRE, Direction.EAST));
         tychoX = tx1 + 4; tychoZ = tz0 + 4;
         // Le marché, la fontaine, les arbres, les bancs
         int cx = (x0 + x1) / 2 + 4, cz = (z0 + z1) / 2;
@@ -310,7 +351,7 @@ public final class CartePrague {
         set(x1 - 6, 0, z0 + 1, OmbreBlocs.COLONNE);
         set(cx + 7, 0, cz + 3, vers(OmbreBlocs.CHARRETTE, Direction.NORTH));
         set(cx + 6, 0, cz - 4, vers(OmbreBlocs.TONNEAU, Direction.WEST));
-        boite(tx1 + 2, 0, tz1 + 4, tx1 + 4, 1, tz1 + 6, OmbreBlocs.MEULE);                    // sous les gargouilles
+        boite(tx1 + 2, 0, tz1 + 1, tx1 + 4, 1, tz1 + 3, OmbreBlocs.MEULE);                    // juste sous la gargouille sud
     }
 
     // ───────────────────────── l'église de Týn ─────────────────────────
@@ -535,10 +576,12 @@ public final class CartePrague {
         garde(Entites.HALLEBARDIER, tychoX + 3, 0, tychoZ - 6, 6, "Hallebardier de l'hôtel de ville", rouges, false);
         garde(Entites.ARBALETRIER, orlojX - 4, orlojH, orlojZ + 3, 1, "Arbalétrier de l'horloge", rouges, false);
         // Les cibles (personnages inventés) et leur garde
-        garde(Entites.CAPITAINE, tourPontA0 + 1, tourPontH, tourPontC0 + 1, 2, "Ottokar von Rabenstein, grand maître du Corbeau", ors, true);
+        garde(Entites.CAPITAINE, tourPontA0 + 1, tourPontH, tourPontC0 + 1, 2, "Ottokar von Rabenstein, grand maître du Corbeau", ors, true)
+                .addCommandTag("ombre_cible_ottokar");
         garde(Entites.ARBALETRIER, tourPontA0 + 1, tourPontH, tourPontC0 + 7, 2, "Arbalétrier du Corbeau", rouges, false);
         garde(Entites.HALLEBARDIER, tourPontX - 6, 0, tourPontZ - 6, 4, "Hallebardier du pont", rouges, false);
-        garde(Entites.CAPITAINE, laboX, laboY, laboZ, 1, "Melchior Kragl, alchimiste du Corbeau", ors, true);
+        garde(Entites.CAPITAINE, laboX, laboY, laboZ, 1, "Melchior Kragl, alchimiste du Corbeau", ors, true)
+                .addCommandTag("ombre_cible_kragl");
     }
 
     private void passant(int x, int z) {
@@ -570,9 +613,9 @@ public final class CartePrague {
         return t;
     }
 
-    private <T extends PathAwareEntity> void garde(EntityType<T> type, int x, int y, int z, int rayon, String nom, Team equipe, boolean cible) {
+    private <T extends PathAwareEntity> Entity garde(EntityType<T> type, int x, int y, int z, int rayon, String nom, Team equipe, boolean cible) {
         T g = type.create(w);
-        if (g == null) return;
+        if (g == null) return EntityType.MARKER.create(w);   // (ne devrait pas arriver)
         BlockPos pos = new BlockPos(ox + x, oy + y, oz + z);
         g.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360, 0);
         g.initialize(w, w.getLocalDifficulty(pos), SpawnReason.COMMAND, null);
@@ -583,5 +626,6 @@ public final class CartePrague {
         if (cible) g.addCommandTag(Gardes.CIBLE);
         w.spawnEntityAndPassengers(g);
         w.getScoreboard().addScoreHolderToTeam(g.getNameForScoreboard(), equipe);
+        return g;
     }
 }
