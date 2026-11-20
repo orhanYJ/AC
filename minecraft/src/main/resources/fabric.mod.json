@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "ombre",
+  "version": "${version}",
+  "name": "L'Ombre — Infiltration",
+  "description": "Jouer en assassin discret : escalade des murs, lame de nacre, assassinats, cachettes, fumée, instinct, points de vue et un fortin à infiltrer (/ombre arene).",
+  "authors": ["orhanYJ"],
+  "license": "Tous droits réservés",
+  "icon": "assets/ombre/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["fr.fenua.ombre.Ombre"],
+    "client": ["fr.fenua.ombre.client.OmbreClient"]
+  },
+  "mixins": ["ombre.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
