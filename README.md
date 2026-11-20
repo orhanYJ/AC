@@ -10,7 +10,7 @@ Tout le jeu tient dans **un seul fichier HTML autonome**, `docs/fenua.html`.
 Aucune compilation : on l'ouvre dans un navigateur et ça marche. Three.js est
 chargé depuis cdnjs, avec jsdelivr en secours.
 
-## Les cinq missions
+## Les six missions
 
 | | Lieu | Contrat |
 |---|---|---|
@@ -19,6 +19,7 @@ chargé depuis cdnjs, avec jsdelivr en secours.
 | 3 | **Le fortin du récif** | Deux officiers sur deux toits opposés, une nuit. |
 | 4 | **Fautaua** | Décembre 1846, les falaises. Le commandant Lorrain. |
 | 5 | **Taravao** | Janvier 1847, l'isthme. Le dernier passage vers la presqu'île. |
+| 6 | **Paris** | Février 1845, l'île de la Cité. Les toits, Notre-Dame en chantier, les ordres du convoi. |
 
 ## Comment on joue
 
@@ -33,6 +34,12 @@ geste tout seul : il franchit un muret, se rétablit sur un mur à hauteur
 d'homme, escalade un mur plus haut, saute d'un toit à l'autre s'il y a un
 appui en face, et s'arrête au bord d'un grand vide. Au mur, Z et S montent et
 descendent, Q et D longent, Espace bondit vers la prise du dessus, C lâche.
+
+**Descente libre** — Maj + C en courant vers le bord d'un toit : on saute sur le
+balcon ou l'auvent d'en dessous, ou l'on se pend au rebord et l'on descend de
+bandeau en bandeau jusqu'au sol, sans bruit. **Saut de la foi** : Espace au
+bord d'un vide, au-dessus d'une charrette de foin ou de l'eau. **Barres** : on
+les saisit au vol, on s'élance plus loin.
 
 **Repéré ?** Ce n'est plus perdu d'avance : tu as trois forces (◆◆◆). Les
 fusiliers épaulent puis tirent, les autres frappent au corps à corps — et

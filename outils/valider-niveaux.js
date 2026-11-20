@@ -6,7 +6,9 @@
 const fs=require('fs'), path=require('path');
 const h=fs.readFileSync(path.join(__dirname,'..','docs','fenua.html'),'utf8');
 const code=h.slice(h.indexOf('function b(x,z,w,d,y0,y1,type){'),h.indexOf('/* ============================================================\n   3. Géométrie'));
-const {LEVELS,HAZARDS,hillAt}=new Function('const TAU=Math.PI*2;'+code+';return {LEVELS,HAZARDS,hillAt};')();
+const {LEVELS,HAZARDS,hillAt,topAt}=new Function('const TAU=Math.PI*2;'+code+';return {LEVELS,HAZARDS,hillAt,topAt};')();
+// le dessus d'une boîte : plat, ou la pente d'un toit à quatre pans
+const dessus=(q,x,z)=>q.ridge?topAt(q,x,z):q.y1;
 const SLOPE_MAX=1.2;                                   // comme dans le jeu
 const inB=(x,z,q,m)=>x>q.minX-m&&x<q.maxX+m&&z>q.minZ-m&&z<q.maxZ+m;
 const inW=(lv,x,z,m)=>(lv.water||[]).some(w=>Math.abs(x-w.x)<w.w/2+m&&Math.abs(z-w.z)<w.d/2+m);
@@ -39,7 +41,9 @@ LEVELS.forEach((F,li)=>{const lv=F(), bad=[], B=lv.boxes, HL=lv.hills||[];
     ...B.filter(q=>q.type==="palm"||q.type==="ora"||q.type==="uru").map(q=>['arbre '+q.type,q])];
   for(const [n,p] of pts){
     const arbre=n.startsWith('arbre');
-    if(!arbre){ const q=solid(p.x,relief(p.x,p.z),p.z,n.startsWith('cachette')?0:0.3); if(q) bad.push(n+' dans '+q.type+' en '+p.x+','+p.z); }
+    // une lanterne de rue est accrochée à son réverbère : ce n'est pas un conflit
+    if(!arbre){ const q=solid(p.x,relief(p.x,p.z),p.z,n.startsWith('cachette')?0:0.3);
+      if(q&&!(n==='flambeau'&&q.type==='reverbere')) bad.push(n+' dans '+q.type+' en '+p.x+','+p.z); }
     const kind=n.startsWith('cachette')?p.kind:null;
     if(!SUR_PENTE[kind]&&relief(p.x,p.z)>0.15) bad.push(n+' posé sur une colline en '+p.x+','+p.z+' (il y serait enterré)');
   }
@@ -51,7 +55,7 @@ LEVELS.forEach((F,li)=>{const lv=F(), bad=[], B=lv.boxes, HL=lv.hills||[];
   (lv.water||[]).forEach((w,wi)=>{ let pire=0;
     for(let i=0;i<=8;i++) for(let j=0;j<=8;j++) pire=Math.max(pire,relief(w.x-w.w/2+w.w*i/8,w.z-w.d/2+w.d*j/8));
     if(pire>0.05) bad.push('eau '+wi+' recouverte par une colline ('+pire.toFixed(2)+' m)'); });
-  const appui=(x,y,z,m)=>B.some(q=>inB(x,z,q,m)&&Math.abs(q.y1-y)<0.8)||Math.abs(relief(x,z)-y)<0.8;
+  const appui=(x,y,z,m)=>B.some(q=>inB(x,z,q,m)&&Math.abs(dessus(q,x,z)-y)<0.8)||Math.abs(relief(x,z)-y)<0.8;
   (lv.ropes||[]).forEach((r,ri)=>[r.a,r.b].forEach(e=>{ if(!appui(e[0],e[1],e[2],0.45)) bad.push('corde '+ri+' : extrémité sans appui'); }));
   if(lv.vista&&!B.some(q=>inB(lv.vista.x,lv.vista.z,q,0)&&Math.abs(q.y1-lv.vista.y)<0.1)
      &&Math.abs(relief(lv.vista.x,lv.vista.z)-lv.vista.y)>0.3) bad.push('point de vue sans sommet');

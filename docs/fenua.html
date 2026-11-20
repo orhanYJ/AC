@@ -688,6 +688,80 @@ const PEINTES_MELEE={lime:0.45};
 })();
 // le sable se répète tous les 7 m (au lieu d'une seule fois sur tout le terrain)
 TEX.sand.repeat.set(30,30);
+/* ---- matières de la ville (Paris, 1845) ---- */
+// les pavés : des rangées de pierres bombées, joints de terre noire
+TEX.paves=canvasTex(512,512,(x,w,h)=>{
+  x.fillStyle="#2a2723"; x.fillRect(0,0,w,h);
+  const rows=22, rh=h/rows;
+  for(let r=0;r<rows;r++){ let px=(r%2)*rh*0.6-Math.random()*8;
+    while(px<w){ const lw=rh*(0.9+Math.random()*0.7), t=Math.random();
+      const c=Math.round(88+t*46), g2=x.createRadialGradient(px+lw/2,r*rh+rh*0.4,1,px+lw/2,r*rh+rh/2,lw*0.7);
+      g2.addColorStop(0,"rgb("+(c+14)+","+(c+10)+","+(c+2)+")"); g2.addColorStop(1,"rgb("+(c-26)+","+(c-28)+","+(c-30)+")");
+      wrap(w,h,(dx,dy)=>{ x.fillStyle=g2; x.beginPath();
+        if(x.roundRect) x.roundRect(px+1.5+dx,r*rh+1.5+dy,lw-3,rh-3,4); else x.rect(px+1.5+dx,r*rh+1.5+dy,lw-3,rh-3); x.fill(); });
+      px+=lw; } }
+  for(let i=0;i<40;i++){ const r=20+Math.random()*70,px=Math.random()*w,py=Math.random()*h;      // flaques et crasse
+    wrap(w,h,(dx,dy)=>{ const g=x.createRadialGradient(px+dx,py+dy,0,px+dx,py+dy,r);
+      g.addColorStop(0,Math.random()<.5?"rgba(20,18,14,.3)":"rgba(140,130,110,.12)"); g.addColorStop(1,"rgba(0,0,0,0)");
+      x.fillStyle=g; x.fillRect(px+dx-r,py+dy-r,r*2,r*2); }); }
+  speckle(x,w,h,9000,.18);
+});
+TEX.paves.repeat.set(58,58);
+// la pierre de taille : des assises régulières, le calcaire blond de Paris
+function pierreTex(base,joint){ return canvasTex(512,512,(x,w,h)=>{
+  x.fillStyle=joint; x.fillRect(0,0,w,h);
+  const rows=10, rh=h/rows;
+  for(let r=0;r<rows;r++){ let px=(r%2)*40-Math.random()*20;
+    while(px<w){ const lw=60+Math.random()*60, t=Math.random()*24-12;
+      const c=base.map(v=>Math.round(v+t));
+      x.fillStyle="rgb("+c+")"; x.fillRect(px+1.5,r*rh+1.5,lw-3,rh-3);
+      if(Math.random()<.35){ x.fillStyle="rgba(60,50,35,.12)"; x.fillRect(px+1.5,r*rh+rh*0.6,lw-3,rh*0.4-1.5); }
+      px+=lw; } }
+  for(let k=0;k<16;k++){ const px=Math.random()*w, l=80+Math.random()*260, g2=x.createLinearGradient(0,0,0,l);  // coulures
+    g2.addColorStop(0,"rgba(40,34,26,.25)"); g2.addColorStop(1,"rgba(40,34,26,0)"); x.fillStyle=g2; x.fillRect(px,0,4+Math.random()*10,l); }
+  speckle(x,w,h,12000,.12);
+}); }
+TEX.pierre=pierreTex([186,172,146],"#6d6253");
+TEX.pierreGrise=pierreTex([150,148,140],"#4a4844");
+// l'ardoise : des rangs d'écailles grises, posées en quinconce
+TEX.ardoise=canvasTex(256,256,(x,w,h)=>{
+  x.fillStyle="#23272c"; x.fillRect(0,0,w,h);
+  const rows=16, rh=h/rows, cw=w/10;
+  for(let r=0;r<rows;r++) for(let c=-1;c<11;c++){ const t=Math.random()*26;
+    const px=c*cw+(r%2)*cw/2;
+    x.fillStyle="rgb("+(70+t|0)+","+(78+t|0)+","+(88+t|0)+")";
+    x.fillRect(px+1,r*rh+1,cw-2,rh-1.5);
+    x.fillStyle="rgba(0,0,0,.35)"; x.fillRect(px+1,r*rh+rh-2.5,cw-2,1.5); }
+  speckle(x,w,h,2500,.12);
+});
+// le zinc : des feuilles grises, agrafées en longues lignes
+TEX.zinc=canvasTex(256,256,(x,w,h)=>{
+  x.fillStyle="#7d8288"; x.fillRect(0,0,w,h);
+  for(let i=0;i<8;i++){ const px=i*w/8; x.fillStyle="rgba(30,32,36,.5)"; x.fillRect(px,0,3,h); x.fillStyle="rgba(220,226,232,.25)"; x.fillRect(px+3,0,2,h); }
+  for(let i=0;i<30;i++){ const r=10+Math.random()*40,px=Math.random()*w,py=Math.random()*h;
+    const g=x.createRadialGradient(px,py,0,px,py,r); g.addColorStop(0,"rgba(40,40,40,.18)"); g.addColorStop(1,"rgba(0,0,0,0)");
+    x.fillStyle=g; x.fillRect(px-r,py-r,r*2,r*2); }
+  speckle(x,w,h,2500,.1);
+});
+// la brique des souches de cheminée
+TEX.brique=canvasTex(128,128,(x,w,h)=>{
+  x.fillStyle="#3a2a22"; x.fillRect(0,0,w,h);
+  for(let r=0;r<16;r++) for(let c=-1;c<5;c++){ const t=Math.random()*30;
+    x.fillStyle="rgb("+(120+t|0)+","+(62+t*0.5|0)+","+(46+t*0.4|0)+")";
+    x.fillRect(c*32+(r%2)*16+1,r*8+1,30,6); }
+  speckle(x,w,h,900,.15);
+});
+// les toiles des boutiques : rayures
+function rayures(a,c){ return canvasTex(64,64,(x,w,h)=>{ for(let i=0;i<8;i++){ x.fillStyle=i%2?a:c; x.fillRect(i*8,0,8,h); }
+  speckle(x,w,h,300,.12); }); }
+TEX.toileR=rayures("#8e2b24","#d8cdb3"); TEX.toileV=rayures("#2e5a3c","#d8cdb3"); TEX.toileB=rayures("#2b3d63","#d8cdb3");
+// les façades de la rive d'en face, la nuit : quelques fenêtres encore allumées
+TEX.rive=canvasTex(128,128,(x,w,h)=>{
+  x.fillStyle="#0c0c10"; x.fillRect(0,0,w,h);
+  for(let r=0;r<6;r++) for(let c=0;c<8;c++){
+    x.fillStyle=Math.random()<.16?"rgba(255,190,110,.95)":"rgba(40,44,52,.9)";
+    x.fillRect(c*16+5,r*21+5,6,11); }
+});
 const TATAU={};
 function tatauMat(skin){
   if(TATAU[skin]) return TATAU[skin];
@@ -723,6 +797,20 @@ Object.assign(MAT,{
   pareu:new THREE.MeshLambertMaterial({map:TEX.pareu,side:THREE.DoubleSide}),
   bark:P({map:TEX.bark,bumpMap:TEX.bark,bumpScale:0.07}),
   stipe:P({map:TEX.stipe,bumpMap:TEX.stipe,bumpScale:0.04}),
+  pierre:P({map:TEX.pierre,bumpMap:TEX.pierre,bumpScale:0.03}),
+  pierreGrise:P({map:TEX.pierreGrise,bumpMap:TEX.pierreGrise,bumpScale:0.03}),
+  ardoise:P({map:TEX.ardoise,bumpMap:TEX.ardoise,bumpScale:0.02,shininess:28,specular:0x30363d,side:THREE.DoubleSide}),
+  zinc:P({map:TEX.zinc,shininess:40,specular:0x50555c}),
+  brique:P({map:TEX.brique,bumpMap:TEX.brique,bumpScale:0.02}),
+  terre_cuite:L(0x9a5a3a), fer:P({color:0x1b1c20,shininess:30,specular:0x333333}),
+  devanture:P({color:0x3a2416}), corniche:P({color:0xc2b69c}),
+  vitrail:new THREE.MeshBasicMaterial({color:0x5a2a3c,toneMapped:false}),
+  vitre:P({color:0x161c26,shininess:90,specular:0x4a5a6e}),
+  toileR:new THREE.MeshLambertMaterial({map:TEX.toileR,side:THREE.DoubleSide}),
+  toileV:new THREE.MeshLambertMaterial({map:TEX.toileV,side:THREE.DoubleSide}),
+  toileB:new THREE.MeshLambertMaterial({map:TEX.toileB,side:THREE.DoubleSide}),
+  rive:new THREE.MeshLambertMaterial({map:TEX.rive,emissive:0xffffff,emissiveMap:TEX.rive,emissiveIntensity:0.5}),
+  silhouette:new THREE.MeshBasicMaterial({color:0x0c0d14,fog:false}),
   barkTop:P({map:TEX.bark,bumpMap:TEX.bark,bumpScale:0.05,color:0xb9b28f}),
   nacre:P({color:0xe8f0f4,shininess:120,specular:0xb0e0ff}),
   terrain:P({map:TEX.sand,bumpMap:TEX.sand,bumpScale:0.05,vertexColors:true}),
@@ -735,6 +823,9 @@ Object.assign(MAT,{
   hullM:P({map:TEX.planks,color:0x5a4634}),
   deck:P({map:TEX.planks,color:0x9a8260})
 });
+// les façades de Paris : pierre blonde, enduits crème, gris, ocre, pierre grise
+const FACADES=[MAT.pierre,P({map:TEX.lime,bumpMap:TEX.lime,bumpScale:0.02,color:0xf2e6cf}),
+  P({map:TEX.lime,bumpMap:TEX.lime,bumpScale:0.02,color:0xc9c6c0}),P({map:TEX.lime,bumpMap:TEX.lime,bumpScale:0.02,color:0xe2c79a}),MAT.pierreGrise];
 /* Le sol et les collines partagent UNE matière : le sable, et l'herbe mêlée par
    un attribut de sommet (aHerbe, de 0 à 1). Même projection des coordonnées
    partout, donc aucune couture entre le sol plat et le pied des collines.   */
@@ -851,6 +942,16 @@ function hillAt(x,z,hills){
   }
   return y;
 }
+/* Un toit à quatre pans (« croupe ») : une boîte qui porte ridge = "x" ou "z",
+   le sens du faîtage. Son dessus n'est pas plat : il descend du faîtage (y1)
+   jusqu'à l'égout (y0) sur les quatre côtés. On y marche, on y court, on
+   s'arrête dans la noue entre deux toits voisins.                          */
+function topAt(bx,x,z){
+  if(!bx.ridge) return bx.y1;
+  const hx=bx.w/2, hz=bx.d/2, dx=Math.abs(x-bx.x), dz=Math.abs(z-bx.z);
+  const t=bx.ridge==="x"?Math.max(dz/hz,(dx-(hx-hz))/hz):Math.max(dx/hx,(dz-(hz-hx))/hx);
+  return bx.y1-(bx.y1-bx.y0)*Math.max(0,Math.min(1,t));
+}
 // Un escalier : des marches de moins de 40 cm, qu'on monte sans rien presser —
 // les gardes aussi. (x,z) = pied ; dir = sens de la montée ("x+", "x-", "z+", "z-").
 // Chaque marche doit faire au moins 50 cm de profondeur, sinon on bute.
@@ -861,6 +962,96 @@ function escalier(out,x,z,dir,len,h,w){
     out.push(b(x+(ax?off:0),z+(ax?0:off),ax?st:w,ax?w:st,0,h*(k+1)/n,"marche"));
   }
 }
+
+/* ---- La ville : immeubles, toits, ruelles -----------------------------------
+   Un immeuble parisien : un rez-de-chaussée de boutiques, des étages de 3,1 m
+   marqués chacun d'un bandeau de pierre où les mains trouvent prise, et un
+   toit — à quatre pans d'ardoise, mansardé (on court dans la gouttière au
+   pied de la mansarde), ou en terrasse de zinc. Des souches de cheminée, des
+   balcons de fer forgé, des auvents de toile au-dessus des boutiques.     */
+const ETAGE=3.1, REZ=3.7;
+const FN2={"x-":[-1,0],"x+":[1,0],"z-":[0,-1],"z+":[0,1]};
+// un hasard qui donne toujours la même ville : le niveau est relu par le menu et le validateur
+function alea(seed){ let a=seed|0; return ()=>{ a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function toitPente(out,x,z,w,d,y0,rise){
+  const t=b(x,z,w,d,y0,y0+rise,"toit"); t.ridge=w>=d?"x":"z"; out.push(t); return t;
+}
+function cheminee(out,x,z,y0,haut,axeX){
+  out.push(b(x,z,axeX?1.1:0.6,axeX?0.6:1.1,y0,y0+haut,"cheminee"));
+}
+function immeuble(out,x,z,w,d,n,o){
+  o=o||{};
+  const H=REZ+(n-1)*ETAGE, R=o.r||alea(Math.round(x*131+z*71+n));
+  const bx=b(x,z,w,d,0,H,"immeuble");
+  bx.ledges=[]; for(let k=1;k<n;k++) bx.ledges.push(REZ+(k-1)*ETAGE+0.02);
+  bx.teinte=o.teinte===undefined?Math.floor(R()*5):o.teinte; bx.etages=n;
+  out.push(bx);
+  const toit=o.toit||"pente";
+  if(toit==="mansarde"){
+    const m=b(x,z,w-1.5,d-1.5,H,H+2.7,"mansarde"); m.ledges=[]; out.push(m);
+    const nc=1+Math.floor(R()*2);
+    for(let k=0;k<nc;k++){ const ax=w>=d, s=(k?1:-1)*(ax?w:d)*0.28;
+      cheminee(out,x+(ax?s:0),z+(ax?0:s),H+2.7,1.3,ax); }
+    bx.haut=H+2.7;
+  }else if(toit==="terrasse"){
+    const nc=o.chem===false?0:1+Math.floor(R()*2);
+    for(let k=0;k<nc;k++){ const ax=w>=d;
+      cheminee(out,x+(ax?(k?1:-1)*w*0.3:(R()-0.5)*w*0.4),z+(ax?(R()-0.5)*d*0.4:(k?1:-1)*d*0.3),H,1.5,ax); }
+    bx.terrasse=true; bx.haut=H;
+  }else{
+    const rise=o.rise||Math.max(1.4,Math.min(3.0,Math.min(w,d)*0.3));
+    const t=toitPente(out,x,z,w+0.3,d+0.3,H,rise);
+    const ax=t.ridge==="x", demi=(ax?w-d:d-w)/2;
+    if(demi>0.8){ const s=demi*(R()<0.5?0.6:-0.6); cheminee(out,x+(ax?s:0),z+(ax?0:s),H+rise-0.3,1.6,ax); }
+    bx.haut=H+rise;
+  }
+  return bx;
+}
+// un balcon de fer forgé, filant sur une façade, au premier étage noble
+function balconFer(out,bx,side,etage){
+  const y1=REZ+(etage-1)*ETAGE, n=FN2[side], prof=0.95;
+  const along=n[0]===0, len=(along?bx.w:bx.d)-0.8;
+  const cx=n[0]?bx.x+n[0]*(bx.w/2+prof/2):bx.x, cz=n[1]?bx.z+n[1]*(bx.d/2+prof/2):bx.z;
+  const q=b(cx,cz,along?len:prof,along?prof:len,y1-0.22,y1,"balcon"); q.fer=true; out.push(q); return q;
+}
+// un auvent de toile au-dessus d'une boutique : il amortit une chute et sert de marche
+function toileBoutique(out,bx,side,couleur){
+  const n=FN2[side], prof=1.6, along=n[0]===0, len=Math.min((along?bx.w:bx.d)-1.2,6);
+  const cx=n[0]?bx.x+n[0]*(bx.w/2+prof/2):bx.x, cz=n[1]?bx.z+n[1]*(bx.d/2+prof/2):bx.z;
+  const q=b(cx,cz,along?len:prof,along?prof:len,2.62,2.74,"toile"); q.couleur=couleur; q.side=side; out.push(q); return q;
+}
+/* Un îlot : un pâté de maisons entre quatre rues, découpé en lots de 5,5 à
+   9 m de façade, sur un ou deux rangs adossés. Chaque maison a sa hauteur,
+   son toit, sa teinte ; la ligne des toits monte et descend, et c'est par là
+   qu'on passe.                                                              */
+function ilot(out,x0,z0,x1,z1,seed,o){
+  o=o||{}; const R=alea(seed), nMin=o.nMin||3, nMax=o.nMax||5, maisons=[];
+  const axeX=(x1-x0)>=(z1-z0), long0=axeX?x0:z0, long1=axeX?x1:z1, c0=axeX?z0:x0, c1=axeX?z1:x1;
+  const prof=c1-c0, rangs=prof>13?[[c0,c0+prof/2],[c0+prof/2,c1]]:[[c0,c1]];
+  rangs.forEach(([r0,r1],ri)=>{
+    let a=long0;
+    while(a<long1-0.1){
+      let l=5.5+R()*3.5; if(long1-(a+l)<4.5) l=long1-a;
+      const n=nMin+Math.floor(R()*(nMax-nMin+1)), t=R();
+      const toit=t<0.5?"pente":(t<0.85?"mansarde":"terrasse");
+      const cx=axeX?a+l/2:(r0+r1)/2, cz=axeX?(r0+r1)/2:a+l/2, w=axeX?l:r1-r0, d=axeX?r1-r0:l;
+      const m=immeuble(out,cx,cz,w,d,n,{toit,r:R});
+      // les façades sur rue : balcons et auvents
+      const cotes=[];
+      if(axeX){ if(r0===c0) cotes.push("z-"); if(r1===c1) cotes.push("z+"); }
+      else{ if(r0===c0) cotes.push("x-"); if(r1===c1) cotes.push("x+"); }
+      cotes.forEach(s=>{
+        if(n>=3&&R()<(o.balcons===undefined?0.4:o.balcons)) balconFer(out,m,s,2);
+        if(R()<(o.toiles===undefined?0.3:o.toiles)) toileBoutique(out,m,s,["R","V","B"][Math.floor(R()*3)]);
+      });
+      maisons.push(m); a+=l;
+    }
+  });
+  return maisons;
+}
+// un parapet de quai : un muret de pierre qu'on franchit d'un appui de main
+function parapet(out,x0,z0,x1,z1){ out.push(b((x0+x1)/2,(z0+z1)/2,Math.abs(x1-x0)||0.6,Math.abs(z1-z0)||0.6,0,0.9,"stone")); }
 
 // l'armée du protectorat : chaque unité voit, marche et réagit autrement
 const KIND={
@@ -1306,6 +1497,144 @@ function(){
       {id:"exit",label:"Rejoindre les pirogues, sur la baie sud",done:false,exit:true}
     ]
   };
+},
+/* ---------------- 6 · Paris, l'île de la Cité ---------------- */
+function(){
+  const boxes=[],hides=[],guards=[],pickups=[],inter=[],barres=[],echelles=[],lifts=[];
+  // le haut de ce qu'on trouve en (x,z) : toit, terrasse, faîtage
+  const sommet=(x,z)=>{ let g=0; for(const q of boxes){ if(x<q.minX||x>q.maxX||z<q.minZ||z>q.maxZ) continue;
+    const t=q.ridge?topAt(q,x,z):q.y1; if(t>g) g=t; } return g; };
+  const corn=(x,z)=>{ let g=0; for(const q of boxes) if(q.type==="immeuble"&&x>=q.minX&&x<=q.maxX&&z>=q.minZ&&z<=q.maxZ) g=Math.max(g,q.y1); return g; };
+  // ---- la Seine, et les bornes du niveau ----
+  boxes.push(b(0,-64,182,2,0,6,"void")); boxes.push(b(0,64,182,2,0,6,"void"));
+  boxes.push(b(-91,0,2,130,0,6,"void")); boxes.push(b(91,0,2,130,0,6,"void"));
+  // les parapets des quais, avec des descentes vers l'eau
+  [[-60,-34],[-26,-6],[6,30],[38,60]].forEach(([a,c])=>{ boxes.push(b((a+c)/2,-39.7,c-a,0.6,0,0.9,"quai")); boxes.push(b((a+c)/2,39.7,c-a,0.6,0,0.9,"quai")); });
+  [[-40,-20],[-14,14],[20,40]].forEach(([a,c])=>{ boxes.push(b(-59.7,(a+c)/2,0.6,c-a,0,0.9,"quai")); boxes.push(b(59.7,(a+c)/2,0.6,c-a,0,0.9,"quai")); });
+  // les ponts : le pont Notre-Dame au nord, le Petit-Pont au sud (fermés la nuit par une barrière)
+  boxes.push(b(-30,-52,8,24,0,0.5,"pile")); boxes.push(b(-33.7,-52,0.6,24,0.5,1.4,"pile")); boxes.push(b(-26.3,-52,0.6,24,0.5,1.4,"pile"));
+  boxes.push(b(8,52,8,24,0,0.5,"pile")); boxes.push(b(4.3,52,0.6,24,0.5,1.4,"pile")); boxes.push(b(11.7,52,0.6,24,0.5,1.4,"pile"));
+
+  // ---- Notre-Dame, que Viollet-le-Duc commence à restaurer ----
+  const F=b(16,0,8,22,0,24,"cathedrale"); F.ledges=[6,11,17]; boxes.push(F);                      // la façade ouest
+  const TN=b(16,-6.75,7,7.5,24,36,"cathedrale"); TN.ledges=[28,32]; boxes.push(TN);                 // la tour nord
+  const TS=b(16,6.75,7,7.5,24,36,"cathedrale"); TS.ledges=[28,32]; boxes.push(TS);                  // la tour sud
+  const NEF=b(34,0,28,14,0,20,"cathedrale"); NEF.ledges=[6,10,14]; boxes.push(NEF);
+  toitPente(boxes,34,0,28,14,20,6);
+  [-1,1].forEach(s=>{ const bc=b(34,s*9.5,28,5,0,10,"cathedrale"); bc.ledges=[5]; boxes.push(bc); });   // bas-côtés, terrasses de plomb
+  const TR=b(35,0,6,32,0,20,"cathedrale"); TR.ledges=[6,10,14]; boxes.push(TR); toitPente(boxes,35,0,6,32,20,5);   // le transept
+  const AB=b(51.5,0,7,12,0,18,"cathedrale"); AB.ledges=[6,12]; boxes.push(AB); toitPente(boxes,51.5,0,7,12,18,4); // le chevet
+  [23,29,41,47].forEach(px=>[-1,1].forEach(s=>{
+    const c=b(px,s*13.1,1.4,2.2,0,16,"cathedrale"); c.ledges=[5,10]; boxes.push(c);              // les culées
+    boxes.push(b(px,s*9.5,0.8,5,15.6,16,"beam"));                                                  // les arcs-boutants : on y court
+  }));
+  // échafaudages de la restauration, contre la tour sud et le transept nord
+  const E1=b(16,11.8,7,1.6,0,33.6,"echaf"); E1.ledges=[]; for(let y=2.4;y<33;y+=2.4) E1.ledges.push(y); boxes.push(E1);
+  const E2=b(35,-16.8,6,1.6,0,20,"echaf"); E2.ledges=[]; for(let y=2.4;y<19.5;y+=2.4) E2.ledges.push(y); boxes.push(E2);
+  // les chimères : des perchoirs au-dessus du parvis
+  boxes.push(b(11.9,-9.9,1.2,0.5,35.6,36,"beam")); boxes.push(b(11.9,-3.6,1.2,0.5,35.6,36,"beam"));
+  boxes.push(b(11.9,3.6,1.2,0.5,35.6,36,"beam"));
+
+  // ---- l'ouest : la Préfecture de police, la Sainte-Chapelle, le jardin ----
+  immeuble(boxes,-50,-33,16,10,5,{toit:"mansarde",teinte:4});
+  immeuble(boxes,-55,-9,6,38,5,{toit:"pente",teinte:4});
+  immeuble(boxes,-50,15,16,10,5,{toit:"mansarde",teinte:4});
+  const SC=b(-47.5,-15,5,14,0,17,"cathedrale"); SC.ledges=[5,9,13]; boxes.push(SC); toitPente(boxes,-47.5,-15,5,14,17,5);
+  boxes.push(b(-42.2,-20,0.4,16,0,3.2,"stone")); boxes.push(b(-42.2,2,0.4,16,0,3.2,"stone"));         // la grille de la cour
+  arbre(boxes,-53,28,6,[[0.5,3,4.6],[2.6,3,4.2]]); arbre(boxes,-46,33,6.5,[[3.8,3.2,5]]); arbre(boxes,-50,24,5.5,[[1.6,2.6,4.2]]);
+  boxes.filter(q=>q.type==="uru").forEach(q=>q.essence="tilleul");
+
+  // ---- l'hôtel Sarrazac : quatre ailes autour d'une cour fermée ----
+  const NORD=immeuble(boxes,-31,1,14,4,4,{toit:"terrasse",teinte:0,chem:false});                   // sa terrasse reste nette
+  immeuble(boxes,-31,13,14,4,4,{toit:"pente",teinte:0});
+  immeuble(boxes,-36,7,4,8,4,{toit:"mansarde",teinte:0});
+  immeuble(boxes,-26,7,4,8,3,{toit:"pente",teinte:0});
+
+  // ---- les îlots du vieux quartier ----
+  ilot(boxes,-38,-38,-24,-27,11); ilot(boxes,-20,-38,-10,-27,12);
+  ilot(boxes,-38,-23,-24,-5,13); ilot(boxes,-20,-23,-10,-5,14);
+  ilot(boxes,-20,-1,-10,15,16); ilot(boxes,-38,19,-24,38,17); ilot(boxes,-20,19,-10,38,18);
+  ilot(boxes,-10,-38,12,-24,19,{toiles:0.5});
+  ilot(boxes,14,-38,56,-30,21,{nMin:3,nMax:4}); ilot(boxes,14,-26,56,-18,22,{nMin:3,nMax:4,balcons:0.2});
+  const HD=immeuble(boxes,5,32.5,30,11,5,{toit:"mansarde",teinte:1});                           // l'Hôtel-Dieu
+  // le jardin de l'Archevêché
+  arbre(boxes,30,26,6,[[0.4,3,4.6],[3.4,3,4.4]]); arbre(boxes,42,30,6.5,[[1.2,3.2,5],[4.2,2.8,4.4]]);
+  arbre(boxes,52,22,6,[[2,3,4.6]]); arbre(boxes,46,36,5.5,[[5,2.6,4]]);
+  boxes.filter(q=>q.type==="uru").forEach(q=>q.essence="tilleul");
+  // le parvis : un puits, des réverbères
+  boxes.push(b(-2,10,1.6,1.6,0,1.0,"stone"));
+  [[-8,-16],[8,-16],[-8,22],[8,22],[2,-2],[-34,-4.6],[-23.5,-10],[-23.5,10],[-41.5,-14],[30,-29.6],[44,-29.6],[-23.5,26]]
+    .forEach(([x,z])=>boxes.push(b(x,z,0.3,0.3,0,2.9,"reverbere")));
+
+  // ---- barres, cordes, échelles, monte-charges : les voies du parcours ----
+  const barreRue=(x,z,axis,len)=>{ const n=axis==="x"?[0,1]:[1,0];
+    const h1=corn(x-n[0]*3.2,z-n[1]*3.2), h2=corn(x+n[0]*3.2,z+n[1]*3.2);
+    barres.push({x,z,axis,len,y:Math.max(4,Math.min(h1,h2)-0.3)}); };
+  barreRue(-31,-25,"x",4); barreRue(-15,17,"x",4); barreRue(-22,-14,"z",4); barreRue(-22,24,"z",4); barreRue(-31,-3,"x",4);
+  barres.push({x:1,z:-22.6,axis:"x",len:3.2,y:7.5});                                             // une hampe au-dessus du parvis
+  barres.push({x:11.3,z:0,axis:"z",len:3,y:13.2});                                                // la galerie des rois
+  echelles.push({x:0,z:26.62,y0:0,y1:HD.y1});                                                    // l'échelle des couvreurs, sur l'Hôtel-Dieu
+  echelles.push({x:-41.6,z:-16,y0:0,y1:3.2});
+  const leve=(x,z,nx,nz)=>{ const top=corn(x+nx*1.5,z+nz*1.5); lifts.push({x,z,y0:0,y1:top,tx:x+nx*1.4,tz:z+nz*1.4}); };
+  leve(-23.5,-30,-1,0); leve(-9.5,8,-1,0); leve(13.5,-22,1,0);
+  const pt=(x,z)=>[x,sommet(x,z),z], ropes=[];
+  ropes.push(R(pt(12.6,1.2),pt(6,30)));                                                            // de la galerie au toit de l'Hôtel-Dieu
+  ropes.push(R(pt(-50,-29),pt(-50,-21)));                                                          // de la Préfecture à la Sainte-Chapelle
+  ropes.push(R(pt(-31,14.5),pt(-31,22)));
+  ropes.push(R(pt(16,-10.2),pt(16,-34)));                                                          // de la tour nord vers le cloître
+
+  pickups.push({x:-31,z:7,oid:"ordres",label:"les ordres du convoi"});
+  inter.push({x:-46.5,z:-2,r:1.8,oid:"matelot",look:"captif",prompt:"trancher les liens du matelot",toast:"Le matelot file vers le quai"});
+  // ---- cachettes ----
+  hides.push({x:10.3,z:-9.2,w:2.2,d:3,kind:"hay"}); hides.push({x:10.3,z:-3.2,w:2.2,d:3,kind:"hay"});   // sous les chimères : le saut de la foi
+  hides.push({x:-23,z:-20,w:1.6,d:3,kind:"hay"}); hides.push({x:-41.2,z:6,w:1.4,d:3,kind:"hay"});
+  hides.push({x:-31,z:-25,w:3,d:2,kind:"hay"}); hides.push({x:40,z:-28,w:3,d:2,kind:"hay"});
+  hides.push({x:-4,z:-12,w:3,d:2.2,kind:"stall"}); hides.push({x:4,z:-12,w:3,d:2.2,kind:"stall"}); hides.push({x:-4,z:16,w:3,d:2.2,kind:"stall"});
+  hides.push({x:-33.3,z:10.3,w:1.2,d:1.2,kind:"jar"}); hides.push({x:-8.6,z:-22,w:1.6,d:2,kind:"jar"}); hides.push({x:-50.8,z:-26.5,w:1.6,d:2,kind:"jar"});
+  hides.push({x:32,z:20,w:3.4,d:3.4,kind:"bush"}); hides.push({x:50,z:30,w:3.4,d:3.4,kind:"bush"}); hides.push({x:-56,z:34,w:3.2,d:3,kind:"bush"});
+  hides.push({x:20,z:38.9,w:3,d:1.4,kind:"vaa"}); hides.push({x:-46,z:-38.9,w:3,d:1.4,kind:"vaa"});
+
+  // ---- la garde ----
+  const gm=(x,z,o)=>guards.push(guard(x,z,Object.assign({name:"Garde municipal"},o)));
+  gm(-6,-17,{path:[[-6,-17],[9,-17],[9,-15],[-6,-15]],speed:1.8});
+  gm(-7,25,{kind:"torche",path:[[-7,25],[10,25],[10,21],[-7,21]],name:"Patrouille de nuit"});
+  gm(-37,-3,{kind:"torche",path:[[-37,-3],[-11,-3]],name:"Patrouille de nuit"});
+  gm(-21.2,-36,{path:[[-21.2,-36],[-21.2,36]],speed:2});
+  gm(-39.4,-36,{path:[[-39.4,-36],[-39.4,36]],speed:1.9});
+  gm(-55,-38.9,{path:[[-55,-38.9],[55,-38.9]],speed:2.1,name:"Garde du quai"});
+  gm(16,-28,{kind:"torche",path:[[16,-28],[54,-28]],name:"Patrouille du cloître"});
+  gm(30,24,{kind:"eclaireur",path:[[25,17],[56,17],[56,37],[25,37]],name:"Sergent de ville"});
+  gm(-5,-5,{kind:"eclaireur",path:[[-5,-7],[7.6,-7],[7.6,8],[-5,8]],name:"Sergent de ville"});
+  gm(-8,29,{kind:"guetteur",y:HD.haut,path:[[-8,29],[18,29]],range:24,name:"Guetteur de l'Hôtel-Dieu"});
+  gm(13,0,{kind:"guetteur",y:24,path:[[13,-2],[13,2]],range:26,name:"Guetteur de la galerie"});
+  gm(-32.6,4.6,{path:[[-32.6,4.6],[-29.4,4.6],[-29.4,9.4],[-32.6,9.4]],speed:1.5,name:"Valet en armes"});
+  gm(-37,0,{y:NORD.y1,path:[[-37,0],[-25,0]],wait:2.5,name:"Garde du corps"});
+  gm(-26,2,{y:NORD.y1,path:[[-26,2],[-37,2]],wait:3,isTarget:true,oid:"sarrazac",name:"Edmond Sarrazac"});
+  gm(-44,-9,{kind:"brute",path:[[-44,-9],[-44,-5]],wait:3,name:"Le sapeur de la grille"});
+  gm(-49,-4,{path:[[-49,-4],[-44,-4],[-44,8],[-51,8]],speed:1.6,name:"Gardien de la Préfecture"});
+
+  return {
+    name:"Paris", tag:"L'île de la Cité, 1845", urbain:true, ground:0xbab6ae, eau:0x1d3a42,
+    brief:"Février 1845. À la Chambre, on se dispute Tahiti ; au ministère de la Marine, on arme le convoi qui portera des renforts au Pacifique. Ses ordres, signés, dorment cette nuit dans la cour de l'hôtel d'Edmond Sarrazac, chef de bureau, sur l'île de la Cité. Toi, matelot venu du fenua sur un navire de la station, tu connais les toits mieux que les rues. Vole les ordres, fais taire Sarrazac sur sa terrasse — et si tu le peux, tire de la Préfecture le matelot tahitien qu'on y retient. La Cité est un dédale : les toits d'ardoise, les mansardes et leurs gouttières, les balcons de fer, les auvents des boutiques, les échafaudages de Notre-Dame. Monte par les tours, descends d'un bandeau à l'autre, saute dans le foin. La barque t'attend sur le grand bras de la Seine.",
+    start:{x:44,z:47,yaw:Math.PI}, exit:{x:-46,z:-47,r:3},
+    tools:{stone:8,coins:4,knife:3,dart:3,smoke:3,cracker:3},
+    lights:[T(-8,-16,9,"lan"),T(8,-16,9,"lan"),T(-8,22,9,"lan"),T(8,22,9,"lan"),T(2,-2,9,"lan"),T(-34,-4.6,8,"lan"),
+            T(-23.5,-10,8,"lan"),T(-23.5,10,8,"lan"),T(-41.5,-14,8,"lan"),T(30,-29.6,8,"lan"),T(44,-29.6,8,"lan"),T(-23.5,26,8,"lan"),
+            T(-28.6,5.5,7,"lan"),T(-46,-1,8,"lan"),T(-30,-38.9,8,"lan"),T(22,38.9,8,"lan"),T(10,-38.9,8,"lan")],
+    ropes, barres, echelles, lifts,
+    vista:{x:16,y:36,z:-6.75},
+    water:[{x:0,z:-52,w:182,d:24},{x:0,z:52,w:182,d:24},{x:-75,z:0,w:30,d:80},{x:75,z:0,w:30,d:80}],
+    prairies:[{x:40,z:28,rx:16,rz:10},{x:-50,z:29,rx:8,rz:8}],
+    boxes,hides,guards,pickups,inter,
+    epilogue:"Le convoi partira avec un mois de retard, sans ses ordres. À Tahiti, la guerre durera encore deux ans ; mais cette nuit-là, les toits de la Cité ont vu passer une ombre du fenua.",
+    objectives:[
+      {id:"vista",label:"Synchroniser les tours de Notre-Dame (facultatif)",done:false,optional:true},
+      {id:"ordres",label:"Voler les ordres du convoi, dans la cour de l'hôtel Sarrazac",done:false},
+      {id:"sarrazac",label:"Éliminer Edmond Sarrazac, sur sa terrasse",done:false},
+      {id:"matelot",label:"Délivrer le matelot tahitien, à la Préfecture (facultatif)",done:false,optional:true},
+      {id:"exit",label:"Rejoindre la barque, sur la Seine",done:false,exit:true}
+    ]
+  };
 }
 ];
 // charges suspendues (filets de noix de coco) : x,z = point d'impact ; px,pz = poteau où couper la corde
@@ -1314,7 +1643,8 @@ const HAZARDS=[
  [{x:-8.2,z:-20,px:-10,pz:-20},{x:0,z:27,px:0,pz:28.4}],
  [{x:23,z:-9.2,px:21.2,pz:-9.2},{x:-23,z:3.2,px:-21.2,pz:3.2}],
  [{x:-17,z:-2,px:-17,pz:-3.8},{x:4.3,z:21,px:4.3,pz:22.8}],
- [{x:-17,z:-13.5,px:-17,pz:-11.7},{x:19.5,z:-10.8,px:19.5,pz:-9.1}]
+ [{x:-17,z:-13.5,px:-17,pz:-11.7},{x:19.5,z:-10.8,px:19.5,pz:-9.1}],
+ []
 ];
 
 // décor purement visuel (sans collision)
@@ -1439,6 +1769,13 @@ const DECO=[
   {t:"buissons",x:-24,z:10,r:4,n:8},{t:"buissons",x:-36,z:22,r:3,n:6},{t:"buissons",x:37,z:-6,r:3,n:6},
   {t:"buissons",x:-14,z:-24,r:3,n:5},{t:"buissons",x:-6,z:18,r:3,n:5},{t:"buissons",x:33,z:22,r:3,n:5},
   {t:"buissons",x:-38,z:-12,r:2.5,n:4},{t:"buissons",x:30,z:-30,r:3,n:5},{t:"buissons",x:-6,z:-4,r:2,n:4}
+ ],
+ [ // Paris : barques sur la Seine, drapeaux sur les toits, le puits du parvis, les massifs du jardin
+  {t:"vaa",x:-46,z:-46,rot:0.3,water:true},{t:"vaa",x:32,z:45,rot:1.2,water:true},{t:"vaa",x:-8,z:47,rot:-0.4,water:true},
+  {t:"vaa",x:44,z:-46,rot:2.1,water:true},
+  {t:"flag",x:-50,y:18.8,z:-33},{t:"flag",x:5,y:18.8,z:30},{t:"flag",x:-50,y:18.8,z:15},
+  {t:"puits",x:-2,z:10},{t:"barrels",x:-14,z:-39,n:3},{t:"barrels",x:28,z:39,n:2},{t:"barrels",x:-36,z:17.2,n:3},
+  {t:"buissons",x:38,z:24,r:3,n:6},{t:"buissons",x:48,z:34,r:3,n:5},{t:"buissons",x:-52,z:32,r:3,n:5},{t:"buissons",x:26,z:32,r:2.5,n:4}
  ]
 ];
 
@@ -1451,6 +1788,7 @@ function circleVsBoxes(pos,r,feetY,headY,boxes){
     if(bx.y1<=feetY+0.45) continue;
     if(bx.y0>=headY) continue;
     const cx=clamp(pos.x,bx.minX,bx.maxX), cz=clamp(pos.z,bx.minZ,bx.maxZ);
+    if(bx.ridge&&topAt(bx,cx,cz)<=feetY+0.45) continue;      // sur la pente : on y marche
     const dx=pos.x-cx, dz=pos.z-cz, d2=dx*dx+dz*dz;
     if(d2>r*r) continue;
     if(d2>1e-8){ const d=Math.sqrt(d2),push=r-d; pos.x+=dx/d*push; pos.z+=dz/d*push; }
@@ -1469,8 +1807,9 @@ function groundAt(x,z,fromY,boxes,sansRelief){
   for(let i=0;i<boxes.length;i++){
     const bx=boxes[i];
     if(x<bx.minX||x>bx.maxX||z<bx.minZ||z>bx.maxZ) continue;
-    if(bx.y1>fromY+0.45) continue;
-    if(bx.y1>g) g=bx.y1;
+    const top=bx.ridge?topAt(bx,x,z):bx.y1;
+    if(top>fromY+0.45) continue;
+    if(top>g) g=top;
   }
   return g;
 }
@@ -1752,7 +2091,7 @@ function heroMesh(){
   const SK=new THREE.Color(0x8a5a3c).convertSRGBToLinear().getHex();
   const skin=new THREE.MeshLambertMaterial({color:SK}), tat=tatauMat(0x8a5a3c);
   const hood=new THREE.MeshLambertMaterial({map:TEX.canvas,color:0xe9dfca,side:THREE.DoubleSide});   // capuche de tapa blanchi, unie
-  const g=new THREE.Group();
+  const g=new THREE.Group(); g.rotation.order="YXZ";           // le cap d'abord, puis le balancement
   const add=(par,geo,mat,x,y,z,rx,ry,rz)=>{ const m=new THREE.Mesh(geo,mat); m.position.set(x||0,y||0,z||0);
     m.rotation.set(rx||0,ry||0,rz||0); m.castShadow=true; par.add(m); return m; };
   const CY=(a,b,h,n,open,t0,tl)=>new THREE.CylinderGeometry(a,b,h,n||10,1,!!open,t0||0,tl===undefined?TAU:tl);
@@ -1903,7 +2242,7 @@ function heroPose(p,dt){
   let rate=12, dy=0;                               // dy : le corps s'enfonce (nage, plongée)
   T.aLZ=-0.09; T.aRZ=0.09; T.aLl=-0.18; T.aRl=-0.18; T.lLl=0.06; T.lRl=0.06;
   const walk=clamp(s/3.1,0,1), run=clamp((s-3.3)/2,0,1);
-  const air=!p.onGround&&!p.hang&&!p.wall&&!p.climbing&&!p.gliding&&!p.lunge&&!p.vault&&!p.saut&&!p.bond&&!p.swim;
+  const air=!p.onGround&&!p.hang&&!p.wall&&!p.climbing&&!p.gliding&&!p.lunge&&!p.vault&&!p.saut&&!p.bond&&!p.swim&&!p.swing&&!p.lift;
   const diving=air&&p.vy<-5&&(p.fallFrom-p.pos.y)>2;
   if(p.lunge){
     const ty=p.lunge.pending.type; rate=26;
@@ -1914,9 +2253,30 @@ function heroPose(p,dt){
     const k=Math.sin(p.phase)*(s>0.1?0.5:0.12); rate=14;
     T.aLX=-2.95+k*0.25; T.aRX=-2.95-k*0.25; T.aLZ=0.12; T.aRZ=-0.12; T.aLl=-0.05; T.aRl=-0.05;
     T.lLX=0.22+k*0.4; T.lRX=0.22-k*0.4; T.lLl=0.45-k*0.3; T.lRl=0.45+k*0.3; T.sX=-0.05;
+  }else if(p.swing){
+    // au balancier : les mains serrées sur la barre, les jambes qui donnent l'élan
+    const th=p.swing.th||0; rate=20;
+    T.aLX=-3.05; T.aRX=-3.05; T.aLl=0; T.aRl=0; T.aLZ=0.08; T.aRZ=-0.08;
+    T.lLX=-0.35-th*0.8; T.lRX=-0.15-th*0.8; T.lLl=0.25+Math.max(0,th)*0.6; T.lRl=0.15+Math.max(0,th)*0.6; T.sX=-th*0.25;
+  }else if(p.lift){
+    // hissé par la corde : un bras haut, l'autre qui tient, les jambes ramassées
+    rate=16; T.aRX=-3.0; T.aRl=0; T.aLX=-2.6; T.aLl=-0.4; T.lLX=-0.7; T.lLl=1.0; T.lRX=-0.2; T.lRl=0.5; T.hX=-0.4;
+  }else if(p.wall&&p.wall.glisse){
+    // glissade le long du mur : les mains freinent, les pieds raclent la pierre
+    rate=16; T.aLX=-2.4; T.aRX=-2.5; T.aLl=-0.5; T.aRl=-0.6; T.lLX=-0.5; T.lRX=-0.25; T.lLl=0.9; T.lRl=0.6; T.sX=0.1; T.hX=0.3;
+  }else if(p.wall&&p.wall.lat){
+    // bond de côté le long du mur
+    rate=24; const d=p.wall.lat.dir;
+    T.aLX=-2.8; T.aRX=-2.8; T.aLZ=d<0?-0.5:0.1; T.aRZ=d>0?0.5:-0.1; T.lLX=-0.3; T.lRX=-0.3; T.lLZ=-0.35*d; T.lRZ=-0.35*d; T.lLl=0.5; T.lRl=0.5;
+  }else if(p.wall&&p.wall.elan>0){
+    // course sur le mur : trois foulées à la verticale avant que les mains ne prennent le relais
+    const q=p.wall.cyc*1.4, k=Math.sin(q); rate=22;
+    T.lLX=-1.2-k*0.6; T.lRX=-1.2+k*0.6; T.lLl=1.0+Math.max(0,k)*0.9; T.lRl=1.0+Math.max(0,-k)*0.9;
+    T.aLX=-1.8+k*0.7; T.aRX=-1.8-k*0.7; T.aLl=-0.6; T.aRl=-0.6; T.sX=-0.1; T.hX=-0.5;
   }else if(p.wall){
-    const q=p.wall.cyc, k=Math.sin(q), c2=Math.cos(q); rate=16;
-    T.aLX=-2.55+k*0.45; T.aRX=-2.55-k*0.45; T.aLl=-0.55-Math.max(0,k)*0.5; T.aRl=-0.55-Math.max(0,-k)*0.5;
+    const q=p.wall.cyc, k=Math.sin(q), c2=Math.cos(q); rate=p.wall.echelle?22:16;
+    const ech=p.wall.echelle?0.7:1;
+    T.aLX=-2.55+k*0.45*ech; T.aRX=-2.55-k*0.45*ech; T.aLl=-0.55-Math.max(0,k)*0.5; T.aRl=-0.55-Math.max(0,-k)*0.5;
     T.aLZ=0.1; T.aRZ=-0.1;
     T.lLX=-0.75-k*0.45; T.lRX=-0.75+k*0.45; T.lLl=1.25+k*0.35; T.lRl=1.25-k*0.35;
     T.lLZ=-0.12; T.lRZ=0.12; T.sX=0.05; T.hX=-0.35; T.pZ=c2*0.04*Math.abs(p.wall.side_v||0);
@@ -1932,13 +2292,24 @@ function heroPose(p,dt){
       T.sX=0.45*Math.sin(k*Math.PI); }
   }else if(p.gliding){
     T.aLX=-2.95; T.aRX=-2.95; T.aLl=0; T.aRl=0; T.lLX=-0.55; T.lRX=-0.25; T.lLl=0.5; T.lRl=0.3; T.sX=-0.1;
+  }else if(p.vault&&p.vault.kong){
+    // saut de chat : les deux mains sur l'obstacle, les jambes ramassées passent entre les bras
+    const t=Math.sin(p.vault.t/p.vault.dur*Math.PI); rate=26;
+    T.aLX=-1.7+t*0.9; T.aRX=-1.7+t*0.9; T.aLl=0; T.aRl=0; T.aLZ=-0.25; T.aRZ=0.25;
+    T.lLX=-1.7*t; T.lRX=-1.7*t; T.lLl=2.1*t; T.lRl=2.1*t; T.bX=0.55*t; T.sX=0.3; T.hX=-0.4*t;
   }else if(p.vault){
     const t=Math.sin(p.vault.t/p.vault.dur*Math.PI); rate=24;
     T.aRX=-1.9-t*0.7; T.aRl=0; T.aLX=-0.6; T.aLZ=-0.6;
     T.lLX=-1.0*t; T.lRX=-1.3*t; T.lLl=1.6*t; T.lRl=1.8*t; T.lLZ=-0.3*t; T.lRZ=-0.3*t; T.bX=0.3*t; T.sX=0.2;
   }else if(p.saut||p.bond){
     rate=18;
-    if(p.saut){ T.aLX=-2.8; T.aRX=-2.8; T.aLl=0; T.aRl=0; T.lLX=0.5; T.lRX=0.2; T.lLl=0.9; T.lRl=0.5; }
+    if(p.saut&&p.saut.chute){ T.aLX=-2.9; T.aRX=-2.9; T.aLl=-0.1; T.aRl=-0.1; T.lLX=-0.2; T.lRX=0.1; T.lLl=0.6; T.lRl=0.4; T.hX=0.4; }
+    else if(p.saut){ T.aLX=-2.8; T.aRX=-2.8; T.aLl=0; T.aRl=0; T.lLX=0.5; T.lRX=0.2; T.lLl=0.9; T.lRl=0.5; }
+    else if(p.bond.foi){ const t=p.bond.t/p.bond.dur; rate=8;
+      T.bX=t<0.12?0.15:(t<0.86?1.3:2.9); T.aLZ=-1.5; T.aRZ=1.5; T.aLX=-0.2; T.aRX=-0.2; T.aLl=0; T.aRl=0;
+      T.lLl=0.1; T.lRl=0.1; T.hX=-0.5; }
+    else if(p.bond.doux){ const t=p.bond.t/p.bond.dur;     // on se laisse tomber, jambes prêtes à fléchir
+      T.lLX=-0.6; T.lRX=-0.3; T.lLl=0.8+t*0.6; T.lRl=0.6+t*0.6; T.aLX=-1.4; T.aRX=-1.2; T.aLZ=-0.6; T.aRZ=0.6; T.sX=0.2; }
     else{ const t=p.bond.t/p.bond.dur;       // bond en course : foulée allongée, bras en balancier
       T.lLX=-1.1+t*0.8; T.lLl=1.4-t*0.9; T.lRX=0.6-t*0.9; T.lRl=0.9; T.aLX=0.9; T.aRX=-1.4; T.aLl=-0.6; T.aRl=-0.9;
       T.sX=0.3; T.aLZ=-0.35; T.aRZ=0.35; }
@@ -1969,6 +2340,8 @@ function heroPose(p,dt){
       T.pY-=0.34; T.lLX-=0.95; T.lRX-=0.95; T.lLl+=1.6; T.lRl+=1.6; T.lLZ=-0.1; T.lRZ=0.1;
       T.sX=0.55; T.hX=-0.5; T.aLX+=-0.45; T.aRX+=-0.35; T.aLl=-0.9; T.aRl=-1.0; T.aLZ=-0.2; T.aRZ=0.2; }
     if(p.carrying){ T.aRX=-2.5; T.aRl=-1.3; T.aRZ=0.25; T.sX+=0.15; }
+    if(p.equilibre&&!cr){ // sur une poutre ou un faîtage : les bras écartés pour l'équilibre
+      const o=Math.sin(VT*1.7)*0.12; T.aLZ=-1.15+o; T.aRZ=1.15+o; T.aLX=-0.2; T.aRX=-0.2; T.aLl=-0.15; T.aRl=-0.15; T.pZ+=o*0.2; }
   }
   if(p.roll>0){                                   // roulade : un tour complet autour des hanches, en boule
     const k=1-clamp(p.roll/0.5,0,1); rate=30;
@@ -2253,6 +2626,7 @@ function planeUV(geo,w,d,s){ const uv=geo.attributes.uv; for(let i=0;i<uv.count;
 let ACC=null;
 function buildHide(h,hi){
   const A=ACC;
+  if(G.level&&G.level.urbain&&(h.kind==="hay"||h.kind==="stall")){ cachetteVille(h,hi); return; }
   if(h.kind==="stall"){
     const rg=new THREE.PlaneGeometry(h.w+1,h.d+1); planeUV(rg,h.w+1,h.d+1,2.2);
     const roof=new THREE.Mesh(rg,MAT.thatch);
@@ -2534,10 +2908,17 @@ function fondSources(lv){
   // les rondes au sol tassent la terre : un chemin battu suit chaque garde
   lv.guards.forEach(g=>{ if(g.y) return; const P=g.path;
     for(let k=0;k<P.length;k++){ const A=P[k], B=P[(k+1)%P.length]; if(Math.hypot(B[0]-A[0],B[1]-A[1])>1) ronde.push([A[0],A[1],B[0],B[1]]); } });
-  return {lis,arb,bat,ronde,pr:lv.prairies||[],eau:lv.water||[],hills:lv.hills||[]};
+  return {lis,arb,bat,ronde,pr:lv.prairies||[],eau:lv.water||[],hills:lv.hills||[],urbain:!!lv.urbain};
 }
 const _fc=new THREE.Color(); let _ft=0;         // teinte et part de terre battue du dernier point peint
 function fondAt(S,x,z){
+  if(S.urbain){
+    let hb=0;
+    for(const q of S.pr){ const d=Math.hypot((x-q.x)/q.rx,(z-q.z)/(q.rz||q.rx)); if(d<1) hb=Math.max(hb,0.95*Math.min(1,(1-d)*2.5)); }
+    _ft=hb>0.1?0:clamp((Math.sin(x*0.13-z*0.11)*Math.sin(x*0.07+z*0.17)-0.35)*1.4,0,0.4);
+    const v=0.88+0.12*Math.sin(x*0.21+z*0.17)*Math.sin(x*0.11-z*0.19); _fc.setRGB(v,v,v);
+    return hb;
+  }
   let hb=0.5+0.5*Math.sin(x*0.071+z*0.043)*Math.sin(x*0.052-z*0.089)+0.18*Math.sin(x*0.31+z*0.27);
   hb=clamp((hb-0.62)*2.2,0,0.7);                        // prairies spontanées, en taches
   for(const q of S.lis){ const dx=Math.max(q.minX-x,0,x-q.maxX), dz=Math.max(q.minZ-z,0,z-q.maxZ);
@@ -2776,9 +3157,32 @@ function arbreVisual(bx){
     bras.push({x:bx.x+Math.cos(a)*0.9,y:h-0.8,z:bx.z+Math.sin(a)*0.9,sx:0.12,sy:2.4,sz:0.12,rx:Math.sin(a)*0.9,rz:-Math.cos(a)*0.9}); }
   for(let k=0;k<10;k++){ const a=k/10*TAU+Math.random()*0.4, r=1+Math.random()*1.9, sz=1.2+Math.random()*0.7;
     foli.push({x:bx.x+Math.cos(a)*r,y:h+0.2+Math.random()*1.3,z:bx.z+Math.sin(a)*r,sx:sz,sy:sz*0.7,sz:sz}); }
-  for(let k=0;k<8;k++){ const a=Math.random()*TAU, r=1+Math.random()*1.6;
+  if(bx.essence!=="tilleul") for(let k=0;k<8;k++){ const a=Math.random()*TAU, r=1+Math.random()*1.6;
     fr.push({x:bx.x+Math.cos(a)*r,y:h-0.3+Math.random()*0.8,z:bx.z+Math.sin(a)*r,s:0.18}); }
+  else for(let k=0;k<8;k++){ const a=k/8*TAU, r=2.2+Math.random(), sz=1.4+Math.random()*0.6;     // la couronne ronde du tilleul
+    foli.push({x:bx.x+Math.cos(a)*r,y:h+0.6+Math.random()*1.4,z:bx.z+Math.sin(a)*r,sx:sz,sy:sz*0.8,sz:sz}); }
   batch(CYL6,MAT.bark,bras,true); leafBatch(foli,true); batch(SPH8,MAT.bush2,fr);
+}
+// à Paris : la charrette de foin, l'étal du marchand sous sa toile rayée
+function cachetteVille(h,hi){
+  const A=ACC, g=new THREE.Group(); g.position.set(h.x,0,h.z);
+  const long=h.w>=h.d; if(!long) g.rotation.y=Math.PI/2;
+  const L=Math.max(h.w,h.d), l=Math.min(h.w,h.d);
+  if(h.kind==="hay"){
+    const caisse=new THREE.Mesh(new THREE.BoxGeometry(L*0.9,0.45,l*0.85),MAT.planks); caisse.position.y=0.75; caisse.castShadow=true; g.add(caisse);
+    [-1,1].forEach(s=>{ const r=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.06,6,14),MAT.wood); r.position.set(0,0.5,s*l*0.46); g.add(r);
+      const ry=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.9,0.06),MAT.wood); ry.position.set(0,0.5,s*l*0.46); g.add(ry); });
+    [-1,1].forEach(s=>{ const br=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.07,0.07),MAT.wood); br.position.set(L*0.45+0.75,0.55,s*0.32); br.rotation.z=0.25; g.add(br); });
+    for(let k=0;k<3;k++){ const m=new THREE.Mesh(new THREE.SphereGeometry(l*0.45,10,7,0,TAU,0,Math.PI/2),MAT.hay);
+      m.scale.set(1.15,0.95,1); m.position.set((k-1)*L*0.28,0.95,0); m.castShadow=true; g.add(m); }
+  }else{
+    const t=new THREE.Mesh(new THREE.PlaneGeometry(L+0.8,l+0.8),MAT.toileR); t.rotation.x=-Math.PI/2+0.22; t.position.y=2.2; t.castShadow=true; g.add(t);
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(c=>{ const ph=2.2-c[1]*0.4;
+      const p2=new THREE.Mesh(new THREE.BoxGeometry(0.07,ph,0.07),MAT.wood); p2.position.set(c[0]*(L/2+0.3),ph/2,c[1]*(l/2+0.3)); g.add(p2); });
+    const tbl=new THREE.Mesh(new THREE.BoxGeometry(L*0.85,0.9,l*0.45),MAT.planks); tbl.position.set(0,0.45,-l*0.2); tbl.castShadow=true; g.add(tbl);
+    for(let k=0;k<3;k++){ const c=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.3,0.4),MAT.crate); c.position.set((k-1)*L*0.3,1.05,-l*0.2); g.add(c); }
+  }
+  G.root.add(g);
 }
 // un balcon, une galerie : plancher, poutres de soutien, garde-corps côté vide
 function balconVisual(bx,boxes){
@@ -3261,8 +3665,12 @@ function ropeOK(p,from,to){
   const dx=to.x-from.x, dz=to.z-from.z, l=Math.hypot(dx,dz)||1;
   return to.y<=from.y+0.5&&(dx*Math.sin(p.yaw)+dz*Math.cos(p.yaw))/l>0.3;
 }
-const CLIMBABLE={stone:1,wood:1,rock:1,tower:1,hull:1,fare:1};
-const POLE={palm:1.3,mast:1.3,ora:1.9,uru:1.4};
+/* Tout ce qui se grimpe. Ne se grimpent pas : les lisières, les falaises de bord,
+   le mur invisible côté mer et les murs d'enceinte, qui bornent le niveau ; les
+   marae, tapu ; une tente ou une toile, qui ne portent pas un homme.        */
+const CLIMBABLE={stone:1,wood:1,rock:1,tower:1,hull:1,fare:1,palis:1,crate:1,
+  immeuble:1,mansarde:1,echaf:1,cheminee:1,pile:1,cathedrale:1};
+const POLE={palm:1.3,mast:1.3,ora:1.9,uru:1.4,reverbere:1.0};
 function poleNear(p){
   return G.boxes.find(bx=>POLE[bx.type]&&Math.hypot(p.pos.x-bx.x,p.pos.z-bx.z)<POLE[bx.type]
     &&p.pos.y>=bx.y0-0.3&&p.pos.y<=bx.y1+0.3);
@@ -3272,7 +3680,7 @@ function palmClimb(p){
   if(Math.abs(p.pos.y-pb.y1)<0.3){
     const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw), tx=pb.x+fx*0.85, tz=pb.z+fz*0.85;
     const gy=groundAt(tx,tz,pb.y1-0.5,G.boxes);
-    p.climbing={t:0,dur:0.35+0.17*(pb.y1-gy),from:p.pos.clone(),to:new THREE.Vector3(tx,gy,tz),tree:true};
+    p.climbing={t:0,dur:0.3+0.12*(pb.y1-gy),from:p.pos.clone(),to:new THREE.Vector3(tx,gy,tz),tree:true,glisse:true};
     sfx("rope"); return true;
   }
   if(p.pos.y<pb.y1-0.5){
@@ -3292,27 +3700,19 @@ function wallClimb(p){
   }
   return wall;
 }
-function startWallClimb(p,wall){
-  const cx=clamp(p.pos.x,wall.minX,wall.maxX), cz=clamp(p.pos.z,wall.minZ,wall.maxZ);
-  let ox=p.pos.x-cx, oz=p.pos.z-cz; const ol=Math.hypot(ox,oz)||1; ox/=ol; oz/=ol;
-  const from=new THREE.Vector3(cx+ox*0.4,p.pos.y,cz+oz*0.4);
-  const ins=wall.type==="fare"?0.3:0.8;       // sous le chaume, on s'arrête au bord du premier gradin
-  const tx=clamp(cx-ox*ins,wall.minX+0.35,wall.maxX-0.35), tz=clamp(cz-oz*ins,wall.minZ+0.35,wall.maxZ-0.35);
-  const ty=Math.max(wall.y1,groundAt(tx,tz,wall.y1+0.3,G.boxes));
-  p.yaw=Math.atan2(-ox,-oz);
-  p.climbing={t:0,dur:0.45+0.26*(ty-p.pos.y),from,to:new THREE.Vector3(tx,ty,tz),tree:true,wall:true};
-  p.vy=0; sfx("stone");
-}
+// la surface où l'on se retrouve debout en se hissant en (x,z) : un toit en pente compris
+function standAt(x,z,y){ return groundAt(x,z,y+1.1,G.boxes); }
 /* ---- Franchissement -----------------------------------------------------
    Un muret, une caisse, un bastingage : en courant, on passe par-dessus d'un
-   appui de main sans s'arrêter. Au-delà, c'est de l'escalade.              */
+   appui de main sans s'arrêter (saut de chat si l'obstacle est profond).
+   Au-delà, c'est de l'escalade.                                            */
 const VAULT_MAX=1.35;
 const SLOPE_MAX=1.2;                       // au-delà (environ 50°), une pente ne se monte plus à pied
 function lowObstacle(p,fx,fz){
   const px=p.pos.x+fx*0.7, pz=p.pos.z+fz*0.7;
   let best=null,bd=1e9;
   for(const bx of G.boxes){
-    if(bx.type==="void"||bx.type==="palm"||bx.type==="mast"||bx.type==="ora") continue;
+    if(bx.type==="void"||POLE[bx.type]||bx.type==="toile"||bx.ridge) continue;
     const h=bx.y1-p.pos.y;
     if(h<0.55||h>VAULT_MAX) continue;
     const cx=clamp(px,bx.minX,bx.maxX), cz=clamp(pz,bx.minZ,bx.maxZ);
@@ -3326,17 +3726,21 @@ function lowObstacle(p,fx,fz){
   return best;
 }
 function startVault(p,bx,fx,fz){
-  const to=new THREE.Vector3(p.pos.x+fx*2.1,0,p.pos.z+fz*2.1);
+  // profondeur de l'obstacle dans le sens de la course : au-delà d'un mètre, saut de chat à deux mains
+  let prof=0; for(let s=0;s<3;s+=0.1){ if(insideBox(p.pos.x+fx*(0.7+s),p.pos.z+fz*(0.7+s),bx,0)) prof+=0.1; }
+  const portee=Math.max(2.1,prof+1.4);
+  const to=new THREE.Vector3(p.pos.x+fx*portee,0,p.pos.z+fz*portee);
   to.y=groundAt(to.x,to.z,bx.y1+0.3,G.boxes);
-  p.vault={t:0,dur:0.42,from:p.pos.clone(),to,haut:bx.y1+0.35};
+  p.vault={t:0,dur:0.36+portee*0.03,from:p.pos.clone(),to,haut:bx.y1+0.35,kong:prof>0.9};
   p.noGrab=0.5; sfx("stone"); makeNoise(p.pos.x,p.pos.z,5,0.12);
 }
 
 /* ---- Rebords ------------------------------------------------------------
-   Tout ce qui s'escalade a désormais une corniche : on s'y suspend par les
-   mains, on se déplace de côté, on passe les angles, on se rétablit sur le
-   toit ou on lâche. Suspendu, on n'est pas visible de celui qui marche
-   au-dessus : le toit lui coupe la vue.                                    */
+   Tout ce qui s'escalade a une corniche en haut, et les immeubles, les tours
+   et les échafaudages en ont une à chaque étage : on s'y suspend par les
+   mains, on se déplace de côté, on passe les angles, on saute de l'une à
+   l'autre, on se rétablit ou on lâche. Suspendu, on n'est pas visible de
+   celui qui marche au-dessus : le toit lui coupe la vue.                   */
 const HANG_DROP=1.85;                       // les mains au rebord, les pieds dans le vide
 const LEDGE_MIN=2.6;                        // plus bas, on enjambe au lieu de se suspendre
 const FACE_N={"x-":[-1,0],"x+":[1,0],"z-":[0,-1],"z+":[0,1]};
@@ -3345,14 +3749,25 @@ const hangAxisX=side=>side==="z-"||side==="z+";
 function hangSpan(bx,side){
   return hangAxisX(side)?[bx.minX+0.35,bx.maxX-0.35]:[bx.minZ+0.35,bx.maxZ-0.35];
 }
+// les hauteurs où les mains trouvent prise : le haut, et un bandeau par étage
+function corniches(bx){
+  if(bx._corn) return bx._corn;
+  let L=[];
+  if(bx.ledges) L=bx.ledges.slice();
+  else if((bx.type==="stone"||bx.type==="wood"||bx.type==="tower")&&!isRingWall(bx)&&bx.y1-bx.y0>=6.2)
+    for(let y=bx.y0+3.3;y<bx.y1-1.6;y+=3.2) L.push(y);
+  L=L.filter(y=>y>=LEDGE_MIN-0.01&&y<bx.y1-1.2); L.push(bx.y1);
+  return (bx._corn=L);
+}
 function hangPos(h){
   const bx=h.bx, n=FACE_N[h.side], sp=hangSpan(bx,h.side), u=clamp(h.u,sp[0],sp[1]);
+  const y=(h.y===undefined?bx.y1:h.y)-HANG_DROP;
   return n[0]
-    ? new THREE.Vector3(bx.x+n[0]*(bx.w/2+0.34),bx.y1-HANG_DROP,u)
-    : new THREE.Vector3(u,bx.y1-HANG_DROP,bx.z+n[1]*(bx.d/2+0.34));
+    ? new THREE.Vector3(bx.x+n[0]*(bx.w/2+0.34),y,u)
+    : new THREE.Vector3(u,y,bx.z+n[1]*(bx.d/2+0.34));
 }
 function hangable(bx){
-  return CLIMBABLE[bx.type]&&bx.type!=="fare"&&!isRingWall(bx)&&bx.y1>=LEDGE_MIN
+  return CLIMBABLE[bx.type]&&bx.type!=="fare"&&bx.type!=="palis"&&bx.type!=="crate"&&!isRingWall(bx)&&bx.y1>=LEDGE_MIN
     &&Math.min(bx.w,bx.d)>0.9&&Math.max(bx.w,bx.d)>1.4;
 }
 // la face de bx dont on est le plus près, vue du dehors
@@ -3368,24 +3783,27 @@ function faceOutside(bx,x,z,reach){
   }
   return best;
 }
-// un rebord à portée de main, pendant qu'on descend le long d'un mur
+// une corniche à portée de main, pendant qu'on tombe ou qu'on descend le long d'un mur
 function ledgeGrab(x,y,z){
   let best=null,bd=1e9;
   for(const bx of G.boxes){
     if(!hangable(bx)) continue;
-    const drop=bx.y1-y;
-    if(drop<1.35||drop>2.3) continue;
-    const f=faceOutside(bx,x,z,0.85);
-    if(f&&f.d<bd){bd=f.d;best={bx,side:f.side,u:f.u};}
+    if(bx.y1<y+1.35||bx.y0>y+2.3) continue;
+    for(const ly of corniches(bx)){
+      const drop=ly-y;
+      if(drop<1.35||drop>2.3) continue;
+      const f=faceOutside(bx,x,z,0.85);
+      if(f&&f.d<bd){bd=f.d;best={bx,side:f.side,u:f.u,y:ly};}
+    }
   }
   return best;
 }
-// le rebord du toit où l'on se tient, dans la direction du regard
-function ledgeUnder(p){
-  if(!p.onGround||p.carrying||p.speedNow>2.2) return null;
-  const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw);
+// le rebord du toit où l'on se tient, dans la direction du regard (ou de la course)
+function ledgeUnder(p,fx,fz,vite){
+  if(!p.onGround||p.carrying||(!vite&&p.speedNow>2.2)) return null;
+  if(fx===undefined){ fx=Math.sin(p.yaw); fz=Math.cos(p.yaw); }
   for(const bx of G.boxes){
-    if(!hangable(bx)||Math.abs(bx.y1-p.pos.y)>0.35) continue;
+    if(!hangable(bx)||p.pos.y<bx.y1-0.35||p.pos.y>bx.y1+0.9) continue;
     if(!insideBox(p.pos.x,p.pos.z,bx,0.4)) continue;
     for(const side in FACE_N){
       const n=FACE_N[side];
@@ -3393,8 +3811,10 @@ function ledgeUnder(p){
       const d=n[0]?(n[0]>0?bx.maxX-p.pos.x:p.pos.x-bx.minX)
                   :(n[1]>0?bx.maxZ-p.pos.z:p.pos.z-bx.minZ);
       if(d<-0.15||d>1.05) continue;
-      const h={bx,side,u:n[0]?p.pos.z:p.pos.x}, sp=hangSpan(bx,side);
+      const h={bx,side,u:n[0]?p.pos.z:p.pos.x,y:bx.y1}, sp=hangSpan(bx,side);
       if(h.u<sp[0]-0.3||h.u>sp[1]+0.3) continue;
+      // un toit voisin collé contre ce bord : ce n'est pas un vide
+      const q=hangPos(h); if(groundAt(q.x+n[0]*0.3,q.z+n[1]*0.3,bx.y1+0.2,G.boxes)>bx.y1-1.5) continue;
       return h;
     }
   }
@@ -3402,11 +3822,15 @@ function ledgeUnder(p){
 }
 function startHang(p,h){
   if(h.push===undefined) h.push=-1;
-  p.hang=h; p.wall=null; p.climbing=null; p.gliding=null; p.bond=null; p.vy=0; p.onGround=false; p.crouch=false;
+  if(h.y===undefined) h.y=h.bx.y1;
+  h.t=0;
+  p.hang=h; p.wall=null; p.climbing=null; p.gliding=null; p.bond=null; p.swing=null; p.saut=null;
+  p.vy=0; p.onGround=false; p.crouch=false;
   p.pos.copy(hangPos(h)); p.yaw=hangYaw(h.side); p.noGrab=0; sfx("stone");
 }
 function releaseHang(){
   const p=G.player; if(p.wall){ wallLetGo(p,false); return; }
+  if(p.swing){ p.swing=null; p.vy=-1; p.onGround=false; p.fallFrom=p.pos.y; p.noGrab=0.3; return; }
   if(!p.hang) return;
   const n=FACE_N[p.hang.side];
   p.pos.x+=n[0]*0.2; p.pos.z+=n[1]*0.2;
@@ -3414,9 +3838,14 @@ function releaseHang(){
 }
 function hangPullUp(p){
   const h=p.hang, bx=h.bx, n=FACE_N[h.side];
-  const to=new THREE.Vector3(
-    clamp(p.pos.x-n[0]*1,bx.minX+0.45,bx.maxX-0.45),bx.y1,
-    clamp(p.pos.z-n[1]*1,bx.minZ+0.45,bx.maxZ-0.45));
+  // un bandeau d'étage : on ne s'y tient pas debout, on continue de grimper
+  if(h.y<bx.y1-0.3){
+    p.hang=null;
+    p.wall={bx,side:h.side,u:h.u,y:h.y-HANG_DROP,cyc:0,elan:0,side_v:0,auto:true,leap:0.2};
+    sfx("stone"); return;
+  }
+  const tx=clamp(p.pos.x-n[0]*1,bx.minX+0.45,bx.maxX-0.45), tz=clamp(p.pos.z-n[1]*1,bx.minZ+0.45,bx.maxZ-0.45);
+  const to=new THREE.Vector3(tx,Math.max(bx.y1,standAt(tx,tz,bx.y1)),tz);
   p.hang=null; p.climbing={t:0,dur:0.42,from:p.pos.clone(),to,tree:true,wall:true};
   p.vy=0; sfx("stone");
 }
@@ -3432,38 +3861,56 @@ function hangShimmy(h,du){
   if(u>sp[1]+0.02||u<sp[0]-0.02){
     const c=CORNER[h.side], ns=u>sp[1]?c.hi:c.lo;
     const nsp=hangSpan(h.bx,ns), nu=c.u(h.bx);
-    if(nu>=nsp[0]-0.02&&nu<=nsp[1]+0.02){ h.side=ns; h.u=clamp(nu,nsp[0],nsp[1]); sfx("tick"); return; }
+    // l'angle n'existe que s'il est libre : pas contre le mur d'un voisin
+    const t={bx:h.bx,side:ns,u:nu,y:h.y}, q=h.y!==undefined?hangPos(t):null, n=FACE_N[ns];
+    const libre=!q||!G.boxes.some(o=>o!==h.bx&&o.y1>q.y+1&&o.y0<q.y+1.9&&insideBox(q.x+n[0]*0.05,q.z+n[1]*0.05,o,0.1));
+    if(libre&&nu>=nsp[0]-0.02&&nu<=nsp[1]+0.02){ h.side=ns; h.u=clamp(nu,nsp[0],nsp[1]); sfx("tick"); return; }
   }
   h.u=clamp(u,sp[0],sp[1]);
 }
-/* Sauter d'un rebord à l'autre : suspendu, Q ou D pousse vers le côté, et si
-   une corniche attend à portée sur un AUTRE bâtiment, on s'y jette.
-   Sans direction, Espace se contente de rétablir sur le toit.              */
-function ledgeJump(p,dir){
-  const h=p.hang, yaw=hangYaw(h.side);
-  const rx=Math.cos(yaw), rz=-Math.sin(yaw);          // « à droite » du grimpeur
-  const dx=rx*dir, dz=rz*dir;
+// les prises que l'on peut atteindre d'un bond depuis la position (x,y des pieds,z), dans la direction (dx,dz)
+function prisesVers(x,y,z,dx,dz,auMoins,auPlus,saufBx,lat){
   let best=null,bd=1e9;
   for(const bx of G.boxes){
-    if(bx===h.bx||!hangable(bx)) continue;
-    if(Math.abs(bx.y1-h.bx.y1)>2.6) continue;         // pas plus d'un étage d'écart
+    if(bx===saufBx||!hangable(bx)) continue;
+    if(bx.y1<y+HANG_DROP-2.6||bx.y0>y+HANG_DROP+2.6) continue;
     for(const side in FACE_N){
       const n=FACE_N[side];
       if(n[0]*dx+n[1]*dz>-0.3) continue;              // la face doit nous regarder
-      const cible={bx,side,u:n[0]?p.pos.z:p.pos.x};
-      const q=hangPos(cible);
-      const ecart=(q.x-p.pos.x)*dx+(q.z-p.pos.z)*dz;  // devant nous, du bon côté
-      if(ecart<0.6||ecart>4.4) continue;
-      const lat=Math.abs((q.x-p.pos.x)*dz-(q.z-p.pos.z)*dx);
-      if(lat>1.6) continue;
-      const d=Math.hypot(q.x-p.pos.x,q.z-p.pos.z);
-      if(d<bd){ bd=d; best={cible,q}; }
+      for(const ly of corniches(bx)){
+        if(Math.abs(ly-(y+HANG_DROP))>2.6) continue;
+        const cible={bx,side,u:n[0]?z:x,y:ly};
+        const q=hangPos(cible);
+        const ecart=(q.x-x)*dx+(q.z-z)*dz;
+        if(ecart<auMoins||ecart>auPlus) continue;
+        if(Math.abs((q.x-x)*dz-(q.z-z)*dx)>(lat||1.6)) continue;
+        const d=Math.hypot(q.x-x,q.z-z)+Math.abs(q.y-y)*0.6;
+        if(d<bd){ bd=d; best={cible,q}; }
+      }
     }
   }
+  return best;
+}
+/* Sauter d'un rebord à l'autre : suspendu, Q ou D pousse vers le côté, et si
+   une corniche attend à portée — sur un autre bâtiment, à moins d'un étage
+   d'écart —, on s'y jette. Sans direction, Espace se rétablit ou grimpe.   */
+function ledgeJump(p,dir){
+  const h=p.hang, yaw=hangYaw(h.side);
+  const dx=Math.cos(yaw)*dir, dz=-Math.sin(yaw)*dir;    // « à droite » du grimpeur, ou à gauche
+  const best=prisesVers(p.pos.x,p.pos.y,p.pos.z,dx,dz,0.6,4.4,h.bx);
   if(!best) return false;
   p.hang=null;
-  p.saut={t:0,dur:0.1+bd*0.075,from:p.pos.clone(),to:best.q,cible:best.cible};
+  p.saut={t:0,dur:0.12+Math.hypot(best.q.x-p.pos.x,best.q.z-p.pos.z)*0.075,from:p.pos.clone(),to:best.q,cible:best.cible};
   sfx("rope"); return true;
+}
+// se jeter en arrière, dos au mur : vers une corniche en face, ou dans le vide
+function ejectArriere(p,side){
+  const n=FACE_N[side];
+  const best=prisesVers(p.pos.x,p.pos.y,p.pos.z,n[0],n[1],1.2,4.6,null,1.4);
+  p.hang=null; p.wall=null;
+  if(best){ p.saut={t:0,dur:0.16+Math.hypot(best.q.x-p.pos.x,best.q.z-p.pos.z)*0.08,from:p.pos.clone(),to:best.q,cible:best.cible,arriere:true};
+    sfx("rope"); return; }
+  p.vx=n[0]*4.6; p.vz=n[1]*4.6; p.vy=4.4; p.yaw=Math.atan2(n[0],n[1]); p.onGround=false; p.fallFrom=p.pos.y; p.noGrab=0.25; sfx("rope");
 }
 /* ---- Escalade libre : on grimpe un mur prise après prise ------------------
    p.wall = {bx, side, u, y} : collé à la face « side » de la boîte bx, les
@@ -3471,14 +3918,15 @@ function ledgeJump(p,dir){
    longer le mur (les angles se passent comme au rebord). En haut, les mains
    trouvent la corniche : on s'y suspend, et si l'on pousse encore, on se
    rétablit dans la foulée. En courant (Maj), on grimpe deux fois plus vite,
-   et l'élan d'une course fait gagner les premiers mètres presque d'un bond. */
+   et l'élan d'une course fait gagner les premiers mètres presque d'un bond.
+   Une échelle ou un échafaudage se grimpent plus vite encore.             */
 function wallPos(w){
   const bx=w.bx, n=FACE_N[w.side], sp=hangSpan(bx,w.side), u=clamp(w.u,sp[0],sp[1]);
   return n[0]? new THREE.Vector3(bx.x+n[0]*(bx.w/2+0.34),w.y,u)
              : new THREE.Vector3(u,w.y,bx.z+n[1]*(bx.d/2+0.34));
 }
 function startWall(p,bx,elan){
-  const f=faceOutside(bx,p.pos.x,p.pos.z,1.3); if(!f) return false;
+  const f=faceOutside(bx,p.pos.x,p.pos.z,1.7); if(!f) return false;
   const sp=hangSpan(bx,f.side);
   if(sp[1]<sp[0]) return false;                       // face trop étroite pour y poser les mains
   // lancé par Espace ou par l'élan, on grimpe tout seul jusqu'en haut ; tirer vers soi (S) arrête la montée
@@ -3486,46 +3934,142 @@ function startWall(p,bx,elan){
   p.vy=0; p.vx=0; p.vz=0; p.onGround=false; p.crouch=false; p.yaw=hangYaw(f.side);
   p.pos.copy(wallPos(p.wall)); sfx("stone"); return true;
 }
+// une échelle posée contre ce mur, à hauteur des pieds ?
+function echelleIci(x,y,z){
+  for(const e of G.echelles||[]) if(Math.hypot(e.x-x,e.z-z)<0.75&&y>=e.y0-0.3&&y<=e.y1) return e;
+  return null;
+}
 // les mains arrivent en haut : corniche, ou rétablissement direct sur un mur bas ou un toit de chaume
 function wallTopOut(p,up){
   const w=p.wall, bx=w.bx;
   p.wall=null;
-  if(hangable(bx)){ startHang(p,{bx,side:w.side,u:w.u}); p.hang.push=up?0.12:-1; p.hang.auto=w.auto; return; }
+  if(hangable(bx)){ startHang(p,{bx,side:w.side,u:w.u,y:bx.y1}); p.hang.push=up?0.12:-1; p.hang.auto=w.auto; return; }
   const n=FACE_N[w.side], ins=bx.type==="fare"?0.3:0.8;
   const tx=clamp(p.pos.x-n[0]*(0.34+ins),bx.minX+0.3,bx.maxX-0.3), tz=clamp(p.pos.z-n[1]*(0.34+ins),bx.minZ+0.3,bx.maxZ-0.3);
-  const ty=Math.max(bx.y1,groundAt(tx,tz,bx.y1+0.3,G.boxes));
+  const ty=Math.max(bx.y1,standAt(tx,tz,bx.y1));
   p.climbing={t:0,dur:0.45,from:p.pos.clone(),to:new THREE.Vector3(tx,ty,tz),tree:true,wall:true};
   sfx("stone");
 }
 function wallLetGo(p,eject){
   const w=p.wall; if(!w) return;
   const n=FACE_N[w.side];
-  p.wall=null; p.onGround=false; p.fallFrom=p.pos.y; p.noGrab=eject?0.25:0.35;
-  if(eject){ p.vx=n[0]*4.6; p.vz=n[1]*4.6; p.vy=4.4; p.yaw=Math.atan2(n[0],n[1]); sfx("rope"); }
-  else{ p.pos.x+=n[0]*0.15; p.pos.z+=n[1]*0.15; p.vy=-1; p.vx=0; p.vz=0; }
+  if(eject){ ejectArriere(p,w.side); return; }
+  p.wall=null; p.onGround=false; p.fallFrom=p.pos.y; p.noGrab=0.35;
+  p.pos.x+=n[0]*0.15; p.pos.z+=n[1]*0.15; p.vy=-1; p.vx=0; p.vz=0;
 }
-function updateWall(p,dt,up,side,run){
+// au mur, Q ou D + Espace : bond de côté — vers la corniche d'un voisin, ou un grand pas sur le même mur
+function sautLateral(p,dir){
+  const w=p.wall, yaw=hangYaw(w.side);
+  const dx=Math.cos(yaw)*dir, dz=-Math.sin(yaw)*dir;
+  const best=prisesVers(p.pos.x,p.pos.y,p.pos.z,dx,dz,0.8,4.4,w.bx,2.2);
+  if(best){ p.wall=null; p.saut={t:0,dur:0.14+Math.hypot(best.q.x-p.pos.x,best.q.z-p.pos.z)*0.075,from:p.pos.clone(),to:best.q,cible:best.cible};
+    sfx("rope"); return true; }
+  w.lat={t:0.26,dir}; sfx("rope"); return true;
+}
+function updateWall(p,dt,up,side,run,desc){
   const w=p.wall, bx=w.bx;
-  if(w.auto&&(up<-0.2||Math.abs(side)>0.3)) w.auto=false;
+  if(w.auto&&(up<-0.2||Math.abs(side)>0.3||desc)) w.auto=false;
   if(w.auto) up=Math.max(up,1);
+  const ech=echelleIci(p.pos.x,w.y,p.pos.z), vite=ech?1.9:(bx.type==="echaf"?1.45:1);
+  w.echelle=!!ech; w.glisse=false;
   let vy=0;
   if(w.leap>0){ w.leap-=dt; vy=5.2; }                  // le saut vers la prise du dessus
-  else if(up>0.2) vy=(run?3.2:2.1)*up*(w.elan>0?1.8:1);
-  else if(up<-0.2) vy=(run?3.2:2.2)*up;
+  else if(desc){ vy=-4.6; w.glisse=true; }             // descente libre : on se laisse glisser
+  else if(up>0.2) vy=(run?3.2:2.1)*up*(w.elan>0?1.8:1)*vite;
+  else if(up<-0.2) vy=(run?3.2:2.2)*up*vite;
   if(w.elan>0&&vy>0) w.elan-=vy*dt;
   w.y+=vy*dt;
   const yaw=hangYaw(w.side), r=hangAxisX(w.side)?Math.cos(yaw):-Math.sin(yaw);
   w.side_v=side;
-  if(side) hangShimmy(w,r*side*(run?1.6:1.15)*dt);
-  w.cyc+=(Math.abs(vy)*2.4+Math.abs(side)*3.2)*dt;
+  if(w.lat){ w.lat.t-=dt; hangShimmy(w,r*w.lat.dir*8.5*dt); if(w.lat.t<=0) w.lat=null; }
+  else if(side) hangShimmy(w,r*side*(run?1.6:1.15)*dt);
+  w.cyc+=(Math.abs(vy)*2.4*(ech?1.5:1)+Math.abs(side)*3.2)*dt;
   p.speedNow=Math.abs(vy)*0.4+Math.abs(side)*0.6;
   p.phase+=dt*2;
-  // en bas : on retrouve le sol
+  // en bas : on retrouve le sol ; en glissade, on lâche dès que le sol est proche
   const q=wallPos(w), gy=groundAt(q.x,q.z,w.y+0.2,G.boxes);
-  if(w.y<=gy+0.02&&vy<=0){ p.wall=null; p.pos.set(q.x,gy,q.z); p.onGround=true; p.vy=0; p.fallFrom=gy; return; }
+  if(w.y<=gy+0.02&&vy<=0){ p.wall=null; p.pos.set(q.x,gy,q.z); p.onGround=true; p.vy=0; p.fallFrom=gy; p.land=0.18; p.landK=0.5; return; }
+  if(desc&&w.y-gy<2.4){ p.pos.copy(q); p.chuteDouce=true; wallLetGo(p,false); return; }
   // en haut : les mains sur le rebord
   if(w.y+HANG_DROP>=bx.y1){ w.y=bx.y1-HANG_DROP; p.pos.copy(wallPos(w)); wallTopOut(p,up>0.2||w.leap>0); return; }
   p.pos.copy(q); p.yaw=yaw; p.fallFrom=p.pos.y;
+}
+
+/* ---- Descente libre (Maj + C) ----------------------------------------------
+   Comme on monte sans rien presser, on descend sans se rompre les os : au
+   bord d'un toit, on saute sur l'appui plus bas (balcon, auvent, toit voisin),
+   ou l'on bascule pour se pendre au rebord ; de là, on se laisse tomber d'une
+   corniche à l'autre, on glisse le long du mur, et l'on touche le sol en
+   souplesse, sans bruit.                                                   */
+function descenteHeld(){ return runHeld()&&!!(K.KeyC||touch.desc||PAD.desc); }
+// un appui plus bas, juste devant, où sauter sans se faire mal
+function landingDown(p,fx,fz){
+  const y=p.pos.y;
+  for(let d=0.7;d<=2.6;d+=0.15){
+    const x=p.pos.x+fx*d, z=p.pos.z+fz*d, gy=groundAt(x,z,y-0.6,G.boxes);
+    if(gy>y-0.9||gy<y-4.6) continue;
+    const x2=p.pos.x+fx*(d+0.45), z2=p.pos.z+fz*(d+0.45);
+    if(Math.abs(groundAt(x2,z2,y-0.6,G.boxes)-gy)>0.4) continue;
+    if(inWater(x,z)&&gy<0.3) continue;
+    return {x:p.pos.x+fx*(d+0.3),z:p.pos.z+fz*(d+0.3),y:gy,d:d+0.3,doux:true};
+  }
+  return null;
+}
+// suspendu, en descente : la corniche d'en dessous, sinon le sol, sinon la glissade
+function descendreDuRebord(p){
+  const h=p.hang, bx=h.bx;
+  const plus_bas=corniches(bx).filter(ly=>ly<h.y-1.4&&ly>=h.y-4.8);
+  if(plus_bas.length){
+    const c={bx,side:h.side,u:h.u,y:Math.max(...plus_bas)};
+    p.hang=null; p.saut={t:0,dur:0.26,from:p.pos.clone(),to:hangPos(c),cible:c,chute:true}; sfx("stone"); return;
+  }
+  const q=hangPos(h), gy=groundAt(q.x,q.z,q.y,G.boxes);
+  if(q.y-gy<=4.8){ p.chuteDouce=true; releaseHang(); return; }
+  p.hang=null; p.wall={bx,side:h.side,u:h.u,y:q.y,cyc:0,elan:0,side_v:0,auto:false};
+}
+
+/* ---- Barres de balancier ---------------------------------------------------
+   Une hampe, une perche tendue entre deux façades, une enseigne : on s'y
+   accroche en sautant, le corps se balance, et l'élan nous jette plus loin
+   — sur un toit, une corniche, une autre barre.                            */
+function barreProche(x,y,z,portee){
+  let best=null,bd=portee;
+  for(const br of G.barres||[]){
+    const hy=y+2.05; if(Math.abs(hy-br.y)>0.6) continue;
+    const ax=br.axis==="x", t=ax?clamp(x,br.x-br.len/2,br.x+br.len/2):br.x, s=ax?br.z:clamp(z,br.z-br.len/2,br.z+br.len/2);
+    const d=Math.hypot(x-t,z-s);
+    if(d<bd){ bd=d; best={br,px:t,pz:s}; }
+  }
+  return best;
+}
+function startSwing(p,br,px,pz,fx,fz){
+  // on se balance perpendiculairement à la barre, dans le sens où l'on allait
+  let dx=br.axis==="x"?0:1, dz=br.axis==="x"?1:0;
+  if(dx*fx+dz*fz<0){ dx=-dx; dz=-dz; }
+  p.swing={br,px,pz,dx,dz,t:0,amp:0.95,lache:false};
+  p.hang=null; p.wall=null; p.bond=null; p.saut=null; p.vy=0; p.vx=0; p.vz=0; p.onGround=false;
+  p.yaw=Math.atan2(dx,dz); sfx("rope");
+}
+function updateSwing(p,dt,inp,run){
+  const s=p.swing; s.t+=dt;
+  const om=TAU/1.15;                                  // un aller-retour en 1,15 s
+  const avance=inp.iz>0.3||run;
+  if(!avance) s.amp=Math.max(0.12,s.amp-dt*0.5); else s.amp=Math.min(1.05,s.amp+dt*0.8);
+  const th=s.amp*Math.sin(om*s.t);
+  s.th=th;
+  p.pos.set(s.px+s.dx*Math.sin(th)*2.05,s.br.y-Math.cos(th)*2.05,s.pz+s.dz*Math.sin(th)*2.05);
+  p.speedNow=0; p.phase+=dt;
+  // au plus haut de l'élan vers l'avant : on lâche, si l'on veut aller plus loin
+  const sommet=Math.cos(om*s.t)<0.15&&Math.sin(om*s.t)>0.8;
+  if(avance&&s.t>0.25&&sommet&&s.amp>0.6) lacherBarre(p);
+}
+function lacherBarre(p){
+  const s=p.swing; p.swing=null;
+  p.yaw=Math.atan2(s.dx,s.dz);
+  // de la barre, un appui à portée : toit, palier, corniche, autre barre
+  const L=landingFrom(p.pos.x,p.pos.y,p.pos.z,s.dx,s.dz,6.2,s.br);
+  if(L){ startBond(p,L); return; }
+  p.vx=s.dx*6.2; p.vz=s.dz*6.2; p.vy=3.4; p.onGround=false; p.fallFrom=p.pos.y; p.noGrab=0.2; sfx("rope");
 }
 
 /* ---- Course libre : l'élan décide -----------------------------------------
@@ -3538,7 +4082,7 @@ function mantleTarget(p,fx,fz,lo,hi){
   let best=null,bd=1e9;
   const px=p.pos.x+fx*0.8, pz=p.pos.z+fz*0.8;
   for(const bx of G.boxes){
-    if(bx.type==="void"||POLE[bx.type]||bx.y1<=p.pos.y+lo||bx.y1>p.pos.y+hi) continue;
+    if(bx.type==="void"||POLE[bx.type]||bx.ridge||bx.y1<=p.pos.y+lo||bx.y1>p.pos.y+hi) continue;
     if(bx.y0>p.pos.y+1.2) continue;
     const cx=clamp(px,bx.minX,bx.maxX), cz=clamp(pz,bx.minZ,bx.maxZ), d=Math.hypot(px-cx,pz-cz);
     if(d<0.75&&d<bd){ bd=d; best=bx; }
@@ -3548,38 +4092,43 @@ function mantleTarget(p,fx,fz,lo,hi){
 function startMantle(p,bx,fx,fz){
   const tx=clamp(p.pos.x+fx*1.5,bx.minX+0.45,bx.maxX-0.45);
   const tz=clamp(p.pos.z+fz*1.5,bx.minZ+0.45,bx.maxZ-0.45);
-  const ty=Math.max(bx.y1,groundAt(tx,tz,bx.y1+0.3,G.boxes));
+  const ty=Math.max(bx.y1,standAt(tx,tz,bx.y1));
   p.climbing={t:0,dur:0.32+0.1*(ty-p.pos.y),from:p.pos.clone(),to:new THREE.Vector3(tx,ty,tz)};
   p.vy=0; sfx("stone");
 }
-// un appui en face, par-delà le vide : la surface où retomber, ou une corniche à saisir
-function landingAhead(p,fx,fz){
-  const y=p.pos.y, bas=groundAt(p.pos.x+fx*0.6,p.pos.z+fz*0.6,y+0.3,G.boxes);
-  if(bas>y-0.9) return null;                           // pas de vide devant
-  for(let d=1.1;d<=4.9;d+=0.2){
-    const x=p.pos.x+fx*d, z=p.pos.z+fz*d, gy=groundAt(x,z,y+0.7,G.boxes);
-    if(gy<bas+0.6||gy>y+0.6||gy<y-3.4) continue;
-    const x2=p.pos.x+fx*(d+0.55), z2=p.pos.z+fz*(d+0.55);
+/* Par-delà le vide, depuis (x,y,z) dans la direction (fx,fz) : la surface où
+   retomber, une barre à saisir, ou une corniche. portee : jusqu'où l'élan porte. */
+function landingFrom(x,y,z,fx,fz,portee,saufBarre){
+  const bas=groundAt(x+fx*0.6,z+fz*0.6,y+0.3,G.boxes);
+  if(bas>y-0.9&&!saufBarre) return null;                // pas de vide devant
+  for(let d=1.1;d<=portee;d+=0.2){
+    const px=x+fx*d, pz=z+fz*d, gy=groundAt(px,pz,y+0.7,G.boxes);
+    if(gy<bas+0.6||gy>y+0.6||gy<y-3.6) continue;
+    const x2=x+fx*(d+0.55), z2=z+fz*(d+0.55);
     if(Math.abs(groundAt(x2,z2,y+0.7,G.boxes)-gy)>0.45) continue;   // il faut un vrai palier, pas une arête
     // rien ne doit barrer la trajectoire
     const haut=Math.max(y,gy)+0.9; let barre=false;
     for(const bx of G.boxes){
-      if(bx.y1>haut-0.2&&bx.y0<haut&&segBox(p.pos.x,p.pos.z,x,z,bx)){ barre=true; break; } }
+      if(bx.y1>haut-0.2&&bx.y0<haut&&segBox(x,z,px,pz,bx)){ barre=true; break; } }
     if(barre) break;
-    return {x:p.pos.x+fx*(d+0.45),z:p.pos.z+fz*(d+0.45),y:gy,d:d+0.45};
+    return {x:x+fx*(d+0.45),z:z+fz*(d+0.45),y:gy,d:d+0.45};
   }
-  // sinon une corniche : un mur en face dont le haut est à portée de mains
-  for(const bx of G.boxes){
-    if(!hangable(bx)||bx.y1<y+0.3||bx.y1>y+2.6) continue;
-    const f=faceOutside(bx,p.pos.x+fx*3,p.pos.z+fz*3,3.2);
-    if(!f) continue;
-    const n=FACE_N[f.side]; if(n[0]*fx+n[1]*fz>-0.6) continue;
-    const h={bx,side:f.side,u:f.u}, q=hangPos(h), d=Math.hypot(q.x-p.pos.x,q.z-p.pos.z);
-    if(d<1.2||d>4.6) continue;
-    return {hang:h,x:q.x,z:q.z,y:q.y,d};
+  // une barre en travers du chemin, à hauteur de mains
+  for(const br of G.barres||[]){
+    if(br===saufBarre) continue;
+    const ax=br.axis==="x"; if(Math.abs(ax?fz:fx)<0.6) continue;     // il faut la croiser, pas la longer
+    const d=ax?(br.z-z)/fz:(br.x-x)/fx; if(d<1||d>portee) continue;
+    const px=x+fx*d, pz=z+fz*d;
+    if(ax?Math.abs(px-br.x)>br.len/2-0.3:Math.abs(pz-br.z)>br.len/2-0.3) continue;
+    const pied=br.y-2.05; if(pied<y-2.6||pied>y+1.2) continue;
+    return {barre:br,x:ax?px:br.x,z:ax?br.z:pz,y:pied,d};
   }
+  // une corniche : un mur en face dont un bandeau est à portée de mains
+  const best=prisesVers(x,y,z,fx,fz,1.2,Math.min(portee,4.8),null,1.2);
+  if(best) return {hang:best.cible,x:best.q.x,z:best.q.z,y:best.q.y,d:Math.hypot(best.q.x-x,best.q.z-z)};
   return null;
 }
+function landingAhead(p,fx,fz){ return landingFrom(p.pos.x,p.pos.y,p.pos.z,fx,fz,4.9,null); }
 // le segment (ax,az)→(bx,bz) traverse-t-il la boîte, vue de dessus ?
 function segBox(ax,az,bx_,bz,q){
   for(let t=0.15;t<=0.95;t+=0.1){ const x=lerp(ax,bx_,t), z=lerp(az,bz,t);
@@ -3588,8 +4137,10 @@ function segBox(ax,az,bx_,bz,q){
 }
 function startBond(p,L){
   const to=new THREE.Vector3(L.x,L.y,L.z);
-  p.bond={t:0,dur:0.26+L.d*0.075,from:p.pos.clone(),to,haut:Math.max(p.pos.y,L.y)+0.45+L.d*0.09,hang:L.hang||null};
-  p.onGround=false; p.noGrab=0.2; sfx("rope");
+  const monte=Math.max(0,L.y-p.pos.y);
+  p.bond={t:0,dur:0.26+L.d*0.075+monte*0.05,from:p.pos.clone(),to,
+    haut:Math.max(p.pos.y,L.y)+(L.doux?0.25:0.45+L.d*0.09),hang:L.hang||null,barre:L.barre||null,doux:!!L.doux};
+  p.onGround=false; p.noGrab=0.2; p.swing=null; sfx("rope");
 }
 function freerun(p,fx,fz){
   // un tronc devant : on l'attrape
@@ -3604,6 +4155,41 @@ function freerun(p,fx,fz){
   if(w){ const f=faceOutside(w,p.pos.x,p.pos.z,1.3);
     if(f){ const n=FACE_N[f.side]; if(n[0]*fx+n[1]*fz<-0.55) return startWall(p,w,true); } }
   return false;
+}
+
+/* ---- Le saut de la foi ---------------------------------------------------------
+   Du haut d'une tour, d'une vergue, d'un piton : si une charrette de foin, un
+   tas de nīʻau ou l'eau attend en contrebas, Espace au bord y plonge droit,
+   bras en croix, et l'on disparaît dans le foin sans un bruit.            */
+function cibleFoi(p,fx,fz){
+  const y=p.pos.y;
+  if(groundAt(p.pos.x+fx*0.8,p.pos.z+fz*0.8,y+0.3,G.boxes)>y-3) return null;     // pas au bord du vide
+  let best=null,bd=1e9;
+  for(const h of G.hides){ if(!SOFT_HIDE[h.kind]) continue;
+    const dx=h.x-p.pos.x, dz=h.z-p.pos.z, d=Math.hypot(dx,dz);
+    if(d>9) continue; if(d>1.6&&(dx*fx+dz*fz)/d<0.45) continue;
+    const gy=groundAt(h.x,h.z,y-1,G.boxes); if(y-gy<6) continue;
+    if(d<bd){ bd=d; best={x:h.x,z:h.z,y:gy,hide:h}; } }
+  if(!best) for(let d=2;d<=9;d+=0.5){ const x=p.pos.x+fx*d, z=p.pos.z+fz*d, gy=groundAt(x,z,y-1,G.boxes);
+    if(inWater(x,z)&&gy<0.3&&y-gy>6){ best={x,z,y:gy,eau:true}; break; } }
+  return best;
+}
+function startFoi(p,F){
+  const drop=p.pos.y-F.y;
+  p.bond={t:0,dur:0.45+Math.sqrt(2*drop/19)*0.9,from:p.pos.clone(),to:new THREE.Vector3(F.x,F.y,F.z),
+    haut:p.pos.y+0.9,foi:true,hide:F.hide||null,eau:!!F.eau};
+  p.yaw=Math.atan2(F.x-p.pos.x,F.z-p.pos.z); p.onGround=false; p.noGrab=0.5; sfx("rope");
+}
+/* ---- Monte-charges -----------------------------------------------------------
+   Une corde, une poulie au bord du toit, un tonneau en contrepoids : on
+   tranche l'amarre et le contrepoids nous hisse d'un coup jusqu'en haut.   */
+function monteChargeProche(p){
+  for(const m of G.lifts||[]) if(!p.lift&&Math.hypot(p.pos.x-m.x,p.pos.z-m.z)<1.4&&Math.abs(p.pos.y-m.y0)<0.6) return m;
+  return null;
+}
+function startLift(p,m){
+  p.lift={m,t:0,dur:0.4+(m.y1-m.y0)*0.075,from:p.pos.clone()};
+  p.vx=p.vz=0; p.yaw=Math.atan2(m.tx-m.x,m.tz-m.z); sfx("rope"); makeNoise(m.x,m.z,5,0.1);
 }
 function mastVisual(bx){
   const h=bx.y1-bx.y0+3;
@@ -3786,10 +4372,251 @@ function setQuality(q,silent){
 }
 
 /* ---- construction d'un niveau ---- */
+/* ---- La ville, telle qu'on la voit -------------------------------------------
+   Des centaines de façades, de toits, de bandeaux et de fenêtres : tout ce qui
+   partage une matière est fondu en UN objet (fondre), et tout ce qui se répète
+   — fenêtres, volets, lucarnes, barreaux — passe par batch(). Sur téléphone,
+   la ville coûte ainsi quelques dizaines d'objets, pas des milliers.        */
+const VILLE_TYPES={immeuble:1,mansarde:1,toit:1,cheminee:1,toile:1,echaf:1,pile:1,reverbere:1,cathedrale:1,quai:1,planche:1};
+// une boîte en coordonnées du monde, le motif répété tous les s mètres
+function geoBoite(q,s){
+  const h=q.y1-q.y0, g=new THREE.BoxGeometry(q.w,h,q.d); worldUV(g,q.w,h,q.d,s);
+  g.translate(q.x,q.y0+h/2,q.z); return g;
+}
+// fondre des géométries (positions, normales, uv) en une seule
+function fondre(list){
+  const pos=[],nor=[],uv=[];
+  for(let g of list){ if(g.index) g=g.toNonIndexed();
+    const P=g.attributes.position, N=g.attributes.normal, U=g.attributes.uv;
+    for(let i=0;i<P.count;i++){ pos.push(P.getX(i),P.getY(i),P.getZ(i)); nor.push(N.getX(i),N.getY(i),N.getZ(i)); uv.push(U?U.getX(i):0,U?U.getY(i):0); }
+    g.dispose(); }
+  const o=new THREE.BufferGeometry();
+  o.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+  o.setAttribute("normal",new THREE.Float32BufferAttribute(nor,3));
+  o.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2)); return o;
+}
+// des triangles posés à la main : chaque face regarde vers le haut ou vers le dehors
+function geoTriangles(tris,cx,cz,s){
+  const pos=[],uv=[];
+  for(const t of tris){
+    let [a,b2,c]=t;
+    const ux=b2[0]-a[0],uy=b2[1]-a[1],uz=b2[2]-a[2], vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+    const nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    const mx=(a[0]+b2[0]+c[0])/3-cx, mz=(a[2]+b2[2]+c[2])/3-cz;
+    if(ny<-1e-6||(Math.abs(ny)<1e-6&&nx*mx+nz*mz<0)){ const tmp=b2; b2=c; c=tmp; }
+    for(const p of [a,b2,c]){ pos.push(p[0],p[1],p[2]);
+      // le motif suit la pente : u le long de l'égout, v en montant
+      const flat=Math.abs(nx)>Math.abs(nz);
+      uv.push((flat?p[2]:p[0])/s,(p[1]*1.6+(flat?p[0]:p[2])*0.2)/s); }
+  }
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2)); g.computeVertexNormals(); return g;
+}
+// un toit à quatre pans : deux trapèzes et deux triangles, le faîtage au milieu
+function geoToit(q){
+  const x0=q.minX,x1=q.maxX,z0=q.minZ,z1=q.maxZ,y0=q.y0,y1=q.y1;
+  const A=[x0,y0,z0],B=[x1,y0,z0],C=[x1,y0,z1],D=[x0,y0,z1];
+  let r0,r1,tris;
+  if(q.ridge==="x"){ const h=q.d/2; r0=[x0+h,y1,q.z]; r1=[x1-h,y1,q.z];
+    tris=[[A,B,r1],[A,r1,r0],[C,D,r0],[C,r0,r1],[D,A,r0],[B,C,r1]]; }
+  else{ const h=q.w/2; r0=[q.x,y1,z0+h]; r1=[q.x,y1,z1-h];
+    tris=[[A,D,r1],[A,r1,r0],[C,B,r0],[C,r0,r1],[B,A,r0],[D,C,r1]]; }
+  return geoTriangles(tris,q.x,q.z,2.2);
+}
+// la mansarde : quatre pans raides d'ardoise et un terrasson de zinc
+function geoMansarde(q){
+  const i=0.22, x0=q.minX,x1=q.maxX,z0=q.minZ,z1=q.maxZ,y0=q.y0,y1=q.y1-0.02;
+  const a=[x0,y0,z0],b2=[x1,y0,z0],c=[x1,y0,z1],d=[x0,y0,z1];
+  const A=[x0+i,y1,z0+i],B=[x1-i,y1,z0+i],C=[x1-i,y1,z1-i],D=[x0+i,y1,z1-i];
+  return geoTriangles([[a,b2,B],[a,B,A],[b2,c,C],[b2,C,B],[c,d,D],[c,D,C],[d,a,A],[d,A,D]],q.x,q.z,2.2);
+}
+function geoDessus(q,y){ const g=new THREE.PlaneGeometry(q.w-0.44,q.d-0.44); g.rotateX(-Math.PI/2); planeUV(g,q.w,q.d,3);
+  g.translate(q.x,y,q.z); return g; }
+// un point juste devant une façade est-il dégagé (pas collé au mur d'un voisin) ?
+function facadeLibre(B,q,x,y,z){
+  for(const o of B){ if(o===q||!(o.type==="immeuble"||o.type==="cathedrale"||o.type==="stone"||o.type==="wood"||o.type==="mansarde"||o.type==="echaf")) continue;
+    if(y<o.y0||y>o.y1) continue; if(x>o.minX-0.05&&x<o.maxX+0.05&&z>o.minZ-0.05&&z<o.maxZ+0.05) return false; }
+  return true;
+}
+let VILLE_GEO=null;
+function buildVille(lv){
+  const B=lv.boxes, lots=new Map(), R=alea(4242);
+  const ajoute=(mat,g)=>{ if(!lots.has(mat)) lots.set(mat,[]); lots.get(mat).push(g); };
+  const fen=[],fenL=[],vol=[],app=[],corn=[],dev=[],vit=[],vitL=[],portes=[],pots=[],luc=[],lucC=[],lucF=[],lucFL=[];
+  const fer=[],tiges=[],poteaux=[],planches=[],croix=[],statues=[],sombre=[],pinacles=[],vitraux=[];
+  const toiles={R:[],V:[],B:[]};
+  const FACES=[["x+",1,0],["x-",-1,0],["z+",0,1],["z-",0,-1]];
+  // le long d'une face : f(u, x, z, longueur) pour chaque point régulier
+  const longFace=(q,side,pas,fn)=>{ const n=FN2[side], len=n[0]?q.d:q.w, k=Math.max(1,Math.floor((len-1.2)/pas));
+    for(let i=0;i<k;i++){ const u=-len/2+len*(i+0.5)/k;
+      const x=n[0]?q.x+n[0]*q.w/2:q.x+u, z=n[0]?q.z+u:q.z+n[1]*q.d/2; fn(u,x,z,n,len); } };
+  const bandeaux=(q,haut)=>{ const hs=(q.ledges||[]).concat([q.y1]);
+    for(const y of hs){ if(y>haut) continue;
+      corn.push({x:q.x,y:y-0.1,z:q.minZ-0.11,sx:q.w+0.44,sy:0.2,sz:0.22},{x:q.x,y:y-0.1,z:q.maxZ+0.11,sx:q.w+0.44,sy:0.2,sz:0.22},
+                {x:q.minX-0.11,y:y-0.1,z:q.z,sx:0.22,sy:0.2,sz:q.d},{x:q.maxX+0.11,y:y-0.1,z:q.z,sx:0.22,sy:0.2,sz:q.d}); } };
+  for(const q of B){
+    const t=q.type;
+    if(t==="immeuble"){
+      ajoute(FACADES[q.teinte%FACADES.length],geoBoite(q,4)); bandeaux(q,q.y1);
+      if(q.terrasse) ajoute(MAT.zinc,geoDessus(q,q.y1+0.01));
+      for(const [side] of FACES){
+        // les étages : de hautes fenêtres, volets ouverts, appuis de pierre
+        for(let k=1;k<q.etages;k++){ const y=REZ+(k-1)*ETAGE+1.45;
+          longFace(q,side,2.15,(u,x,z,n)=>{
+            if(!facadeLibre(B,q,x+n[0]*0.3,y,z+n[1]*0.3)) return;
+            const lit=R()<0.2, rot=n[0]?Math.PI/2:0, ox=x+n[0]*0.04, oz=z+n[1]*0.04;
+            (lit?fenL:fen).push({x:ox,y,z:oz,ry:rot,sx:0.95,sy:1.9,sz:0.1});
+            app.push({x:x+n[0]*0.1,y:y-1.02,z:z+n[1]*0.1,ry:rot,sx:1.2,sy:0.12,sz:0.24});
+            app.push({x:x+n[0]*0.06,y:y+1.05,z:z+n[1]*0.06,ry:rot,sx:1.15,sy:0.2,sz:0.14});
+            if(!lit&&R()<0.7){ const tx=n[0]?0:1, tz=n[0]?1:0;
+              [-1,1].forEach(s=>vol.push({x:x+tx*0.74*s+n[0]*0.1,y,z:z+tz*0.74*s+n[1]*0.1,ry:rot,sx:0.5,sy:1.9,sz:0.05})); }
+          }); }
+        // le rez-de-chaussée : devantures de boutiques, vitrines, portes
+        longFace(q,side,3.2,(u,x,z,n)=>{
+          if(!facadeLibre(B,q,x+n[0]*0.3,1.5,z+n[1]*0.3)) return;
+          const rot=n[0]?Math.PI/2:0;
+          dev.push({x:x+n[0]*0.07,y:1.65,z:z+n[1]*0.07,ry:rot,sx:2.9,sy:3.1,sz:0.14});
+          if(R()<0.6) (R()<0.45?vitL:vit).push({x:x+n[0]*0.15,y:1.55,z:z+n[1]*0.15,ry:rot,sx:1.7,sy:1.6,sz:0.04});
+          else portes.push({x:x+n[0]*0.15,y:1.2,z:z+n[1]*0.15,ry:rot,sx:1.2,sy:2.3,sz:0.06});
+        });
+      }
+    }else if(t==="mansarde"){
+      ajoute(MAT.ardoise,geoMansarde(q)); ajoute(MAT.zinc,geoDessus(q,q.y1));
+      for(const [side] of FACES) longFace(q,side,2.6,(u,x,z,n)=>{
+        if(!facadeLibre(B,q,x+n[0]*0.6,q.y0+1.2,z+n[1]*0.6)) return;
+        const rot=n[0]?Math.PI/2:0, cx=x+n[0]*0.2, cz=z+n[1]*0.2;
+        luc.push({x:cx,y:q.y0+1.15,z:cz,ry:rot,sx:1.0,sy:1.5,sz:0.7});
+        lucC.push({x:cx,y:q.y0+2.05,z:cz,ry:rot+Math.PI/4,sx:0.78,sy:0.5,sz:0.78});
+        (R()<0.22?lucFL:lucF).push({x:cx+n[0]*0.36,y:q.y0+1.1,z:cz+n[1]*0.36,ry:rot,sx:0.62,sy:1.0,sz:0.04});
+      });
+    }else if(t==="toit") ajoute(MAT.ardoise,geoToit(q));
+    else if(t==="cheminee"){ ajoute(MAT.brique,geoBoite(q,1.2));
+      corn.push({x:q.x,y:q.y1-0.06,z:q.z,sx:q.w+0.14,sy:0.12,sz:q.d+0.14});
+      const ax=q.w>q.d; for(let k=-1;k<=1;k++) if(R()<0.8) pots.push({x:q.x+(ax?k*0.32:0),y:q.y1+0.18,z:q.z+(ax?0:k*0.32),sx:0.1,sy:0.36,sz:0.1}); }
+    else if(t==="cathedrale"){ ajoute(MAT.pierre,geoBoite(q,5)); bandeaux(q,q.y1);
+      if(q.y1-q.y0>14&&q.w>2&&q.d>2) for(const [side] of FACES){ // de hautes verrières sombres, quelques-unes éclairées par un cierge
+        for(const y0 of [3.2,q.y1>18?11:0]) if(y0) longFace(q,side,3.4,(u,x,z,n)=>{
+          if(!facadeLibre(B,q,x+n[0]*0.4,y0+2.5,z+n[1]*0.4)) return;
+          const rot=n[0]?Math.PI/2:0;
+          (R()<0.25?vitraux:sombre).push({x:x+n[0]*0.05,y:y0+2.4,z:z+n[1]*0.05,ry:rot,sx:1.1,sy:4.2,sz:0.1}); }); }
+      if(q.w<2&&q.d<3) pinacles.push({x:q.x,y:q.y1+1.1,z:q.z,sx:0.55,sy:2.2,sz:0.55}); }
+    else if(t==="pile"||t==="quai") ajoute(MAT.pierreGrise,geoBoite(q,3));
+    else if(t==="planche") ajoute(MAT.planks,geoBoite(q,1.5));
+    else if(t==="toile"){
+      // la toile penche de la façade vers la rue ; une frange festonnée pend à l'avant
+      const n=FN2[q.side], along=n[0]===0, len=along?q.w:q.d;
+      const g=new THREE.PlaneGeometry(len,1.75); planeUV(g,len,1.75,0.8);
+      g.rotateX(-Math.PI/2+0.32); if(!along) g.rotateY(Math.PI/2);
+      if(n[0]<0||n[1]<0) g.rotateY(Math.PI);
+      g.translate(q.x,q.y1+0.03,q.z); toiles[q.couleur].push(g);
+      const f=new THREE.PlaneGeometry(len,0.28); planeUV(f,len,0.28,0.8); if(!along) f.rotateY(Math.PI/2);
+      f.translate(q.x+n[0]*0.82,q.y1-0.38,q.z+n[1]*0.82); toiles[q.couleur].push(f);
+      [-1,1].forEach(s=>tiges.push({x:q.x+(along?s*len/2:n[0]*0.4),y:q.y1-0.1,z:q.z+(along?n[1]*0.4:s*len/2),
+        ry:along?Math.PI/2:0,sx:0.04,sy:0.04,sz:1.6})); }
+    else if(t==="echaf"){
+      // un échafaudage de bois : des perches tous les deux mètres, un plancher à chaque niveau, des croix de Saint-André
+      const ax=q.w>=q.d, len=ax?q.w:q.d, n=Math.max(2,Math.round(len/2));
+      for(let i=0;i<=n;i++){ const u=-len/2+len*i/n;
+        [-1,1].forEach(s=>poteaux.push({x:q.x+(ax?u:s*q.w/2*0.9),y:q.y1/2+0.4,z:q.z+(ax?s*q.d/2*0.9:u),sx:0.07,sy:q.y1+0.8,sz:0.07})); }
+      for(const y of (q.ledges||[]).concat([q.y1]))
+        planches.push({x:q.x,y:y-0.05,z:q.z,sx:q.w+0.1,sy:0.06,sz:q.d+0.1});
+      for(const y of (q.ledges||[]).concat([q.y1])) for(let i=0;i<n;i++){ const u=-len/2+len*(i+0.5)/n;
+        const side=ax?[0,1]:[1,0], ox=q.x+(ax?u:side[0]*q.w/2), oz=q.z+(ax?side[1]*q.d/2:u);
+        croix.push({x:ox,y:y-1.2,z:oz,ry:ax?0:Math.PI/2,rz:0.85,sx:2.9,sy:0.06,sz:0.06});
+        croix.push({x:ox,y:y-1.2,z:oz,ry:ax?0:Math.PI/2,rz:-0.85,sx:2.9,sy:0.06,sz:0.06}); }
+    }
+    else if(t==="balcon"&&q.fer){
+      // un balcon de fer forgé : la dalle de pierre et ses barreaux
+      corn.push({x:q.x,y:q.y1-0.11,z:q.z,sx:q.w,sy:0.22,sz:q.d});
+      const along=q.w>q.d, len=along?q.w:q.d, nb=Math.round(len/0.16), out=1;
+      // le côté vide : celui qui n'est pas contre la façade
+      let sx=0,sz=0; for(const [side,nx,nz] of FACES){ const px=q.x+nx*(q.w/2+0.2), pz=q.z+nz*(q.d/2+0.2);
+        if(!facadeLibre(B,q,px,q.y1+0.5,pz)) { sx=-nx; sz=-nz; } }
+      const ex=q.x+sx*(q.w/2-0.04), ez=q.z+sz*(q.d/2-0.04);
+      for(let i=0;i<=nb;i++){ const u=-len/2+len*i/nb;
+        fer.push({x:along?q.x+u:ex,y:q.y1+0.47,z:along?ez:q.z+u,sx:0.025,sy:0.9,sz:0.025}); }
+      fer.push({x:along?q.x:ex,y:q.y1+0.92,z:along?ez:q.z,sx:along?len:0.05,sy:0.05,sz:along?0.05:len});
+      fer.push({x:along?q.x:ex,y:q.y1+0.12,z:along?ez:q.z,sx:along?len:0.04,sy:0.04,sz:along?0.04:len});
+    }
+  }
+  // les chimères aux angles des tours, les rois de la galerie, les rosaces, les portails
+  for(const q of B) if(q.type==="beam"&&q.y1>30) statues.push({x:q.minX+0.2,y:q.y1+0.35,z:q.z,sx:0.45,sy:0.7,sz:0.35});
+  const F=B.find(q=>q.type==="cathedrale"&&q.y1===24);
+  if(F){
+    for(let z=F.minZ+0.8;z<F.maxZ-0.6;z+=0.78) statues.push({x:F.minX-0.15,y:11.55,z,sx:0.3,sy:1.1,sz:0.4});
+    [-6.6,0,6.6].forEach(z=>{ sombre.push({x:F.minX-0.02,y:3.2,z,ry:Math.PI/2,sx:3.6,sy:6,sz:0.1}); });
+    const rose=new THREE.Mesh(new THREE.CircleGeometry(3.4,24),new THREE.MeshBasicMaterial({color:0x35203a,toneMapped:false}));
+    rose.position.set(F.minX-0.06,17.3,0); rose.rotation.y=-Math.PI/2; G.root.add(rose);
+    const anneau=new THREE.Mesh(new THREE.TorusGeometry(3.4,0.28,6,28),MAT.pierre); anneau.position.copy(rose.position); anneau.rotation.y=Math.PI/2; G.root.add(anneau);
+  }
+  for(const [mat,list] of lots){ const m=new THREE.Mesh(fondre(list),mat); m.castShadow=true; m.receiveShadow=true; G.root.add(m); }
+  for(const k in toiles) if(toiles[k].length){ const m=new THREE.Mesh(fondre(toiles[k]),MAT["toile"+k]); m.castShadow=true; G.root.add(m); }
+  const cube=new THREE.BoxGeometry(1,1,1); cube.userData.shared=true;
+  batch(cube,MAT.vitre,fen); batch(cube,MAT.winLit,fenL); batch(cube,MAT.shutter,vol,true);
+  batch(cube,MAT.corniche,app,true); batch(cube,MAT.corniche,corn,true);
+  batch(cube,MAT.devanture,dev,true); batch(cube,MAT.vitre,vit); batch(cube,MAT.winLit,vitL); batch(cube,MAT.door,portes);
+  batch(CYL6,MAT.terre_cuite,pots,true);
+  batch(cube,MAT.lime,luc,true); batch(new THREE.ConeGeometry(0.7,1,4),MAT.ardoise,lucC,true);
+  batch(cube,MAT.vitre,lucF); batch(cube,MAT.winLit,lucFL);
+  batch(cube,MAT.fer,fer); batch(cube,MAT.fer,tiges);
+  batch(CYL6,MAT.wood,poteaux,true); batch(cube,MAT.planks,planches,true); batch(cube,MAT.wood,croix);
+  batch(cube,MAT.pierre,statues,true); batch(cube,MAT.winDark,sombre); batch(cube,MAT.vitrail,vitraux);
+  batch(new THREE.ConeGeometry(0.5,1,6),MAT.pierre,pinacles,true);
+}
+// les barres de balancier, les échelles, les monte-charges : ce qui sert au parcours, en évidence
+function buildAgres(lv){
+  const barres=[],brides=[];
+  for(const br of lv.barres||[]){ const ax=br.axis==="x";
+    barres.push({x:br.x,y:br.y,z:br.z,rz:ax?Math.PI/2:0,rx:ax?0:Math.PI/2,sx:0.06,sy:br.len,sz:0.06});
+    [-1,1].forEach(s=>brides.push({x:br.x+(ax?s*br.len/2:0),y:br.y-0.3,z:br.z+(ax?0:s*br.len/2),sx:0.08,sy:0.6,sz:0.08})); }
+  batch(CYL6,MAT.fer,barres,true); batch(CYL6,MAT.fer,brides);
+  const montants=[],barreaux=[];
+  for(const e of lv.echelles||[]){ const h=e.y1-e.y0;
+    // l'échelle suit le mur derrière elle : le long de x ou de z
+    const lv2=lv.boxes.find(q=>(q.type==="immeuble"||q.type==="stone"||q.type==="cathedrale")&&insideBox(e.x,e.z,q,0.5));
+    const surX=lv2?Math.min(Math.abs(e.z-lv2.minZ),Math.abs(e.z-lv2.maxZ))<Math.min(Math.abs(e.x-lv2.minX),Math.abs(e.x-lv2.maxX)):true;
+    [-0.25,0.25].forEach(o=>montants.push({x:e.x+(surX?o:0),y:e.y0+h/2,z:e.z+(surX?0:o),sx:0.07,sy:h,sz:0.07}));
+    for(let y=e.y0+0.3;y<e.y1;y+=0.36) barreaux.push({x:e.x,y,z:e.z,sx:surX?0.5:0.05,sy:0.05,sz:surX?0.05:0.5}); }
+  const cube=new THREE.BoxGeometry(1,1,1); cube.userData.shared=true;
+  batch(cube,MAT.wood,montants,true); batch(cube,MAT.wood,barreaux);
+  for(const m of lv.lifts||[]){
+    // la poutre qui dépasse du toit, la poulie, la corde, le tonneau de contrepoids
+    const dx=m.x-m.tx, dz=m.z-m.tz, l=Math.hypot(dx,dz)||1;
+    const g=new THREE.Group();
+    const poutre=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.16,2.2),MAT.wood);
+    poutre.position.set((m.x+m.tx)/2,m.y1+1.1,(m.z+m.tz)/2); poutre.rotation.y=Math.atan2(dx,dz); g.add(poutre);
+    const roue=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.05,6,12),MAT.fer); roue.position.set(m.x,m.y1+0.9,m.z); roue.rotation.y=Math.atan2(dx,dz)+Math.PI/2; g.add(roue);
+    const corde=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,m.y1+0.9-m.y0,4),MAT.rope); corde.position.set(m.x,(m.y1+0.9+m.y0)/2,m.z); g.add(corde);
+    const tonneau=new THREE.Mesh(BARREL,MAT.wood); tonneau.scale.setScalar(0.7); tonneau.position.set(m.x+dz/l*0.5,m.y1-0.3,m.z-dx/l*0.5); g.add(tonneau);
+    const sac=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.4,0.5),MAT.sack); sac.position.set(m.x,m.y0+0.2,m.z); g.add(sac);
+    g.traverse(o=>{o.castShadow=true;}); G.root.add(g);
+  }
+}
+/* La rive d'en face : des rangées d'immeubles sombres où brillent quelques
+   fenêtres, et, plus loin, les grandes silhouettes — le dôme du Panthéon, la
+   tour Saint-Jacques, les deux tours de Saint-Sulpice, l'Hôtel de Ville.  */
+function buildVilleFond(lv){
+  const L=[];
+  for(const s of [-1,1]) for(let x=-170;x<=170;x+=8+Math.random()*4){
+    const rang=Math.random()<0.5?0:1, h=11+Math.random()*10, d=10+Math.random()*4;
+    L.push({x,y:h/2,z:s*(68+rang*13+d/2),sx:7.5+Math.random()*3,sy:h,sz:d}); }
+  for(const s of [-1,1]) for(let z=-60;z<=60;z+=9+Math.random()*4){
+    const h=12+Math.random()*9; L.push({x:s*(98+Math.random()*10),y:h/2,z,sx:10,sy:h,sz:8+Math.random()*3}); }
+  const im=batch(new THREE.BoxGeometry(1,1,1),MAT.rive,L); if(im) im.castShadow=false;
+  const toitsR=L.map(o=>({x:o.x,y:o.sy+0.9,z:o.z,sx:o.sx*0.72,sy:1.8,sz:o.sz*0.72,ry:Math.PI/4}));
+  batch(new THREE.ConeGeometry(0.71,1,4),MAT.silhouette,toitsR);
+  const m=MAT.silhouette, add=(geo,x,y,z)=>{ const o=new THREE.Mesh(geo,m); o.position.set(x,y,z); G.root.add(o); };
+  add(new THREE.CylinderGeometry(14,16,26,20),60,13,240);  add(new THREE.SphereGeometry(13,20,10,0,TAU,0,Math.PI/2),60,26,240);   // le Panthéon
+  add(new THREE.CylinderGeometry(1.5,1.5,8,8),60,43,240); add(new THREE.BoxGeometry(40,18,26),60,9,262);
+  add(new THREE.BoxGeometry(9,52,9),-70,26,-190);                                                          // la tour Saint-Jacques
+  add(new THREE.BoxGeometry(10,40,10),-210,20,200); add(new THREE.BoxGeometry(10,40,10),-180,20,200); add(new THREE.BoxGeometry(44,26,50),-195,13,230);   // Saint-Sulpice
+  add(new THREE.BoxGeometry(70,22,30),130,11,-150); add(new THREE.BoxGeometry(8,34,8),130,17,-150);         // l'Hôtel de Ville
+}
 function buildLevel(i){
   const lv=LEVELS[i]();
   G.level=lv; G.levelIndex=i;
   G.boxes=lv.boxes; G.hides=lv.hides; G.inter=lv.inter; G.tapu=lv.tapu||[]; G.hills=lv.hills||[];
+  G.barres=lv.barres||[]; G.echelles=lv.echelles||[]; G.lifts=lv.lifts||[];
   G.time=0; G.alarm=0; G.alarmT=0; G.alarmCount=0; G.kills=0; G.maxSeen=0;
   G.bodiesHidden=0; G.bodiesFound=0; G.bellSabotaged=false;
   G.projectiles=[]; G.smokes=[]; G.ripples=[]; G.anim=[]; G.fx=[]; G.slow=0; G.sync=null;
@@ -3799,12 +4626,16 @@ function buildLevel(i){
   clearScene();
 
   MAT.terrain.color.setHex(lv.ground||0xffffff);
+  // la ville est pavée ; la Seine, plus sombre que le lagon
+  MAT.terrain.map=MAT.terrain.bumpMap=lv.urbain?TEX.paves:TEX.sand;
+  MAT.water.color.setHex(lv.eau||0x1b5566);
   const FOND=buildGround(lv);
 
   const wins=[],doors=[],merl=[];
-  const spikes=[];
+  const spikes=[], bandeaux=[];
   lv.boxes.forEach(bx=>{
     if(bx.type==="void"||bx.type==="chaume") return;
+    if(VILLE_TYPES[bx.type]||(bx.type==="balcon"&&bx.fer)) return;           // dessinés par buildVille
     if(bx.type==="uru"){ arbreVisual(bx); return; }
     if(bx.type==="balcon"){ balconVisual(bx,lv.boxes); return; }
     if(bx.type==="auvent"){ auventVisual(bx); return; }
@@ -3826,6 +4657,10 @@ function buildLevel(i){
       base.position.set(bx.x,0.25,bx.z); base.receiveShadow=true; G.root.add(base);
     }
     if(bx.type==="fare") fareRoof(bx);
+    // les prises d'étage se voient : un bandeau de pierre ou une lisse de bois
+    if((bx.type==="stone"||bx.type==="wood"||bx.type==="tower")&&!ringW) for(const y of corniches(bx)) if(y<bx.y1-0.5){
+      bandeaux.push({x:bx.x,y:y-0.08,z:bx.minZ-0.08,sx:bx.w+0.3,sy:0.16,sz:0.16},{x:bx.x,y:y-0.08,z:bx.maxZ+0.08,sx:bx.w+0.3,sy:0.16,sz:0.16},
+                    {x:bx.minX-0.08,y:y-0.08,z:bx.z,sx:0.16,sy:0.16,sz:bx.d},{x:bx.maxX+0.08,y:y-0.08,z:bx.z,sx:0.16,sy:0.16,sz:bx.d}); }
     if(bx.type==="cliff") cliffCap(bx);
     if(bx.type==="rock") rockDecor(bx);
     if(bx.type==="jungle") jungleEdge(bx);
@@ -3836,11 +4671,14 @@ function buildLevel(i){
     else if(built&&!ringW) collectWindows(bx,lv.boxes,wins,doors);
   });
   lv.boxes.filter(q=>q.type==="fare").forEach(q=>fareTerraces(q,lv.boxes));
+  { const cube=new THREE.BoxGeometry(1,1,1); cube.userData.shared=true; batch(cube,MAT.roof,bandeaux,true); }
+  if(lv.boxes.some(q=>VILLE_TYPES[q.type])) buildVille(lv);
+  buildAgres(lv);
   buildNav(lv);
   buildInstances(wins,doors,merl);
-  buildSpikes(spikes); buildPaths(lv); buildWater(lv); buildMountains(lv);
+  buildSpikes(spikes); if(!lv.urbain){ buildPaths(lv); buildMountains(lv); } buildWater(lv);
   PALM_ACC={futs:[],palmes:[],cocos:[]};
-  buildForest(lv);
+  if(lv.urbain) buildVilleFond(lv); else buildForest(lv);
   lv.boxes.forEach(bx=>{ if(bx.type==="palm") palmTree(bx.x,bx.z,bx.y1,true,false); });
   batch(CYL6,MAT.stipe,PALM_ACC.futs,true);
   batch(LEAF_GEO,MAT.leaf,PALM_ACC.palmes,true);
@@ -3925,7 +4763,8 @@ function buildLevel(i){
     crouch:false,onGround:true,phase:0,climbing:null,gliding:null,lunge:null,stun:0,bladeT:0,grabT:0,
     hang:null,noGrab:0,vx:0,vz:0,step:0,vault:null,saut:null,roll:0,wasHidden:false,siffleT:0,
     speedNow:0,hidden:false,detect:0,light:0,carrying:null,fallFrom:0,
-    wall:null,bond:null,land:0,landK:1,coyote:0,jumpBuf:0,hp:3,hitT:0,regen:0,edgeHint:false};
+    wall:null,bond:null,land:0,landK:1,coyote:0,jumpBuf:0,hp:3,hitT:0,regen:0,edgeHint:false,
+    swing:null,lift:null,chuteDouce:false,equilibre:false};
   G.camYaw=lv.start.yaw+Math.PI; G.camPitch=0.35; G.camDistEff=G.camDist;
 
   G.guards=lv.guards.map((def,gi)=>{
@@ -3999,11 +4838,12 @@ addEventListener("keydown",e=>{
   if(e.code==="KeyE") tryAction();
   if(e.code==="KeyF") useTool();
   if(e.code==="Space") tryClimb();
-  if(e.code==="KeyC"){ if(G.player.hang||G.player.wall) releaseHang(); else G.player.crouch=!G.player.crouch; }
+  if(e.code==="KeyC"){ if(runHeld()){ /* descente libre : C tenu avec Maj, géré dans la boucle */ }
+    else if(G.player.hang||G.player.wall||G.player.swing) releaseHang(); else G.player.crouch=!G.player.crouch; }
   if(e.code==="KeyV"){G.showCones=!G.showCones;toast(G.showCones?"Cônes de vision affichés":"Cônes masqués");}
   if(e.code==="KeyM"){muted=!muted;toast(muted?"Son coupé":"Son rétabli");}
   if(e.code==="KeyG") setQuality(G.quality==="low"?"high":"low");
-  if(e.code==="KeyX"){ if(G.player.hang||G.player.wall) releaseHang(); else dropBody(); }
+  if(e.code==="KeyX"){ if(G.player.hang||G.player.wall||G.player.swing) releaseHang(); else dropBody(); }
   if(/^Digit[1-6]$/.test(e.code)) selectTool(TOOLS[+e.code.slice(5)-1].k);
   if(e.code==="KeyR") tryKO();
   if(e.code==="KeyT") siffler();
@@ -4031,7 +4871,7 @@ canvas.addEventListener("wheel",e=>{
   e.preventDefault(); G.camDist=clamp(G.camDist+e.deltaY*0.006,3.2,12);
 },{passive:false});
 
-const touch={move:{x:0,y:0},run:false};
+const touch={move:{x:0,y:0},run:false,desc:false};
 const isTouch=matchMedia("(hover:none)").matches||"ontouchstart" in window;
 const tEl=document.getElementById("touch");
 const stick=document.getElementById("stick"),knob=document.getElementById("knob");
@@ -4112,9 +4952,12 @@ function bindBtn(id,fn,toggle){
 }
 bindBtn("tbRun",v=>{touch.run=v;},true);
 bindBtn("tbCrouch",(v,el)=>{
-  if(G.player&&(G.player.hang||G.player.wall)){ releaseHang(); el.classList.remove("on"); return; }  // suspendu : lâcher
+  if(touch.run){ el.classList.remove("on"); touch.desc=true; return; }                          // en courant : descente libre
+  if(G.player&&(G.player.hang||G.player.wall||G.player.swing)){ releaseHang(); el.classList.remove("on"); return; }  // suspendu : lâcher
   if(G.player)G.player.crouch=v;
 },true);
+{ const fin=()=>{ touch.desc=false; }; const el=document.getElementById("tbCrouch");
+  el.addEventListener("touchend",fin); el.addEventListener("touchcancel",fin); el.addEventListener("mouseup",fin); }
 bindBtn("tbTool",()=>cycleTool());
 bindBtn("tbThrow",()=>useTool());
 bindBtn("tbAct",()=>tryAction());
@@ -4127,7 +4970,7 @@ bindBtn("tbWhistle",()=>siffler());
    A grimper/sauter, X agir, Y assommer, B s'accroupir ou lâcher, RT/RB courir,
    LB changer d'outil, LT lancer, croix bas siffler, croix haut lâcher un
    corps, Start pause. Rien à configurer : elle est reconnue dès qu'on y touche. */
-const PAD={on:false,mx:0,my:0,run:false,prev:{}};
+const PAD={on:false,mx:0,my:0,run:false,desc:false,prev:{}};
 function pollGamepad(dt){
   const pads=navigator.getGamepads?navigator.getGamepads():[]; let gp=null;
   for(const q of pads) if(q&&q.connected){gp=q;break;}
@@ -4142,12 +4985,12 @@ function pollGamepad(dt){
   }
   const b=i=>!!(gp.buttons[i]&&(gp.buttons[i].pressed||gp.buttons[i].value>0.5));
   const press=(i,fn)=>{ const now=b(i); if(now&&!PAD.prev[i]) fn(); PAD.prev[i]=now; };
-  PAD.run=b(7)||b(5);
+  PAD.run=b(7)||b(5); PAD.desc=PAD.run&&b(1);
   if(G.phase==="play"){
     press(0,tryClimb); press(2,tryAction); press(3,tryKO);
-    press(1,()=>{ if(G.player.hang||G.player.wall) releaseHang(); else G.player.crouch=!G.player.crouch; });
+    press(1,()=>{ if(PAD.run) return; if(G.player.hang||G.player.wall||G.player.swing) releaseHang(); else G.player.crouch=!G.player.crouch; });
     press(4,cycleTool); press(6,useTool); press(13,siffler);
-    press(12,()=>{ if(G.player.hang||G.player.wall) releaseHang(); else dropBody(); });
+    press(12,()=>{ if(G.player.hang||G.player.wall||G.player.swing) releaseHang(); else dropBody(); });
     press(9,pause);
   }else if(G.phase==="pause"){ press(9,resume); press(1,resume); }
   else{ for(const i of [0,1,2,3,4,5,6,7,9,12,13]) PAD.prev[i]=b(i); }
@@ -4170,6 +5013,11 @@ const HIDE_NOTE={
   filet:"Dans les filets",
   herbe:"Couché dans les hautes herbes"
 };
+// à Paris, les mêmes cachettes ont d'autres noms
+const HIDE_NOTE_VILLE={hay:"Enfoui dans la charrette de foin",stall:"Sous l'étal du marchand",vaa:"Sous la barque retournée",jar:"Derrière les tonneaux",bush:"Dans le massif"};
+const HIDE_STASH_VILLE={hay:"enfouir le corps dans le foin",stall:"glisser le corps sous l'étal",vaa:"glisser le corps sous la barque"};
+const noteCachette=k=>(G.level&&G.level.urbain&&HIDE_NOTE_VILLE[k])||HIDE_NOTE[k];
+const rangerCorps=k=>(G.level&&G.level.urbain&&HIDE_STASH_VILLE[k])||HIDE_STASH[k];
 const HIDE_STASH={
   stall:"glisser le corps sous l'abri",
   hay:"enfouir le corps dans le nīʻau",
@@ -4221,18 +5069,31 @@ function cycleTool(){
   selectTool(TOOLS[(i+1)%TOOLS.length].k);
 }
 function tryClimb(){
-  const p=G.player; if(p.climbing||p.gliding||p.saut||p.vault||p.bond||p.stun>0) return;
+  const p=G.player; if(p.climbing||p.gliding||p.saut||p.vault||p.bond||p.lift||p.stun>0) return;
+  const mi=moveInput();
+  if(p.swing){ lacherBarre(p); return; }
   if(p.wall){
-    // au mur : Espace bondit vers la prise du dessus ; en tirant vers soi, on se jette en arrière
-    if(moveInput().iz<-0.5) wallLetGo(p,true); else if(!(p.wall.leap>0)) p.wall.leap=0.24;
+    // au mur : Espace bondit vers la prise du dessus ; avec Q ou D, de côté ; en tirant vers soi, on se jette en arrière
+    if(mi.iz<-0.5) wallLetGo(p,true);
+    else if(Math.abs(mi.ix)>0.5) sautLateral(p,mi.ix>0?1:-1);
+    else if(!(p.wall.leap>0)) p.wall.leap=0.24;
     return;
   }
   if(p.hang){
-    // suspendu : avec une direction, on se jette vers la corniche voisine ;
-    // sans direction, on se rétablit sur le toit
-    const mi=moveInput(), dir=Math.abs(mi.ix)>0.4?mi.ix:0;
+    // suspendu : avec une direction, on se jette vers la corniche voisine ; en tirant vers soi, en arrière ;
+    // sans direction, on se rétablit sur le toit (ou l'on reprend l'escalade depuis un bandeau)
+    const dir=Math.abs(mi.ix)>0.4?mi.ix:0;
+    if(mi.iz<-0.5){ ejectArriere(p,p.hang.side); return; }
     if(dir&&ledgeJump(p,dir>0?1:-1)) return;
     hangPullUp(p); return;
+  }
+  // un monte-charge : on tranche l'amarre
+  const mc=monteChargeProche(p);
+  if(mc&&!p.carrying){ startLift(p,mc); return; }
+  // une barre juste au-dessus : on saute la saisir
+  if(p.onGround&&!p.carrying&&G.barres&&G.barres.length){
+    for(let k=0;k<6;k++){ const b=barreProche(p.pos.x,p.pos.y+0.25*k,p.pos.z,0.8);
+      if(b&&b.br.y-p.pos.y>1.6&&b.br.y-p.pos.y<3.6){ startBond(p,{barre:b.br,x:b.px,z:b.pz,y:b.br.y-2.05,d:0.6}); return; } }
   }
   // tyrolienne prioritaire
   for(const r of G.ropes){
@@ -4256,6 +5117,8 @@ function tryClimb(){
   const le=ledgeUnder(p);
   if(le){ startHang(p,le); return; }
   if((p.onGround||p.coyote>0)&&!p.swim){
+    const F=p.onGround?cibleFoi(p,fx,fz):null;
+    if(F){ startFoi(p,F); return; }
     // un appui en face, par-delà le vide : le saut va droit dessus
     const L=p.onGround?landingAhead(p,fx,fz):null;
     if(L&&p.speedNow>0.8){ startBond(p,L); return; }
@@ -4611,7 +5474,7 @@ function updatePlayer(dt){
     // vol entre deux corniches : on lâche, on passe, on rattrape
     const c=p.saut; c.t+=dt;
     const t=clamp(c.t/c.dur,0,1);
-    p.pos.lerpVectors(c.from,c.to,t); p.pos.y-=Math.sin(t*Math.PI)*0.45;
+    p.pos.lerpVectors(c.from,c.to,c.chute?t*t:t); if(!c.chute) p.pos.y-=Math.sin(t*Math.PI)*0.45;
     p.speedNow=0;
     if(t>=1){ p.saut=null; startHang(p,c.cible); }
   }else if(p.bond){
@@ -4624,11 +5487,18 @@ function updatePlayer(dt){
     p.speedNow=5.4; p.phase+=dt*6;
     if(t>=1){
       p.bond=null;
-      if(c.hang){ startHang(p,c.hang); }
+      if(c.foi){
+        p.pos.copy(c.to); p.onGround=true; p.vy=0; p.fallFrom=p.pos.y; p.vx=p.vz=0;
+        if(c.eau){ splashFX(p.pos.x,p.pos.z); toast("Saut de la foi — dans l'eau, sans un bruit"); }
+        else{ toast("Saut de la foi — atterrissage silencieux"); sfx("good"); if(c.hide&&!STAND_HIDE[c.hide.kind]) p.crouch=true; }
+      }
+      else if(c.hang){ startHang(p,c.hang); }
+      else if(c.barre){ p.pos.copy(c.to); startSwing(p,c.barre,c.to.x,c.to.z,Math.sin(p.yaw),Math.cos(p.yaw)); }
       else{
         p.pos.copy(c.to); p.onGround=true; p.vy=0;
         const drop=c.from.y-c.to.y;
-        if(drop>2.2){ p.roll=0.5; sfx("stone"); makeNoise(p.pos.x,p.pos.z,5,0.12); }
+        if(c.doux){ p.land=0.24; p.landK=clamp(drop/3,0.4,1); sfx("stone"); }
+        else if(drop>2.2){ p.roll=0.5; sfx("stone"); makeNoise(p.pos.x,p.pos.z,5,0.12); }
         else{ p.land=0.2; p.landK=0.6; sfx("stone"); }
         p.fallFrom=p.pos.y;
         const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw); p.vx=fx*5; p.vz=fz*5;
@@ -4646,8 +5516,18 @@ function updatePlayer(dt){
       const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw);
       p.vx=fx*4.4; p.vz=fz*4.4;                     // on repart dans la foulée
     }
+  }else if(p.lift){
+    // le contrepoids tombe, la corde nous hisse
+    const c=p.lift; c.t+=dt;
+    const k=clamp(c.t/c.dur,0,1), e=k<0.85?Math.pow(k/0.85,1.4):1;
+    p.pos.set(c.m.x,lerp(c.from.y,c.m.y1-1.6,e),c.m.z);
+    p.speedNow=0;
+    if(k>=1){ const ty=standAt(c.m.tx,c.m.tz,c.m.y1);
+      p.lift=null; p.climbing={t:0,dur:0.4,from:p.pos.clone(),to:new THREE.Vector3(c.m.tx,ty,c.m.tz),tree:true,wall:true}; }
+  }else if(p.swing){
+    if(descenteHeld()) releaseHang(); else updateSwing(p,dt,inp,runHeld());
   }else if(p.wall){
-    updateWall(p,dt,inp.iz,inp.ix,runHeld());
+    updateWall(p,dt,inp.iz,inp.ix,runHeld(),descenteHeld());
   }else if(p.hang){
     // suspendu : de côté le long du rebord ; pousser vers le haut rétablit, vers le bas redescend le mur
     const h=p.hang;
@@ -4657,15 +5537,19 @@ function updatePlayer(dt){
     p.pos.copy(hangPos(h)); p.yaw=yaw;
     p.speedNow=Math.abs(ix)>0.1?1.1:0;
     p.phase+=dt*(Math.abs(ix)>0.1?5:1.2);
+    h.t=(h.t||0)+dt;
+    if(descenteHeld()){ if(h.t>0.16) descendreDuRebord(p); }
+    else{
     // on arrive du mur en poussant : on se rétablit sans s'arrêter
     // un garde au-dessus, près du bord : la montée automatique s'arrête ici, prête pour la prise
-    if(h.auto&&G.guards.some(g=>!g.dead&&Math.abs(g.pos.y-h.bx.y1)<0.45&&insideBox(g.pos.x,g.pos.z,h.bx,0.6)
+    if(h.auto&&h.y>=h.bx.y1-0.1&&G.guards.some(g=>!g.dead&&Math.abs(g.pos.y-h.bx.y1)<0.45&&insideBox(g.pos.x,g.pos.z,h.bx,0.6)
        &&Math.hypot(g.pos.x-p.pos.x,g.pos.z-p.pos.z)<4.5)){ h.auto=false; h.push=-1; toast("Un soldat au-dessus — tu restes suspendu"); }
     if(h.push>=0&&(inp.iz>0.3||h.auto)){ h.push-=dt; if(h.push<=0){ hangPullUp(p); } }
     else if(inp.iz>0.5&&h.push<0){ h.hold=(h.hold||0)+dt; if(h.hold>0.12) hangPullUp(p); }
     else if(inp.iz<-0.5){ h.down=(h.down||0)+dt;
-      if(h.down>0.15){ p.hang=null; p.wall={bx:h.bx,side:h.side,u:h.u,y:h.bx.y1-HANG_DROP-0.05,cyc:0,elan:0,side_v:0,auto:false}; } }
+      if(h.down>0.15){ p.hang=null; p.wall={bx:h.bx,side:h.side,u:h.u,y:h.y-HANG_DROP-0.05,cyc:0,elan:0,side_v:0,auto:false}; } }
     else{ h.hold=0; h.down=0; if(inp.iz<=0.3&&!h.auto&&h.push>=0) h.push=-1; }
+    }
   }else if(p.climbing){
     const c=p.climbing; c.t+=dt;
     const k=clamp(c.t/c.dur,0,1), e=k*k*(3-2*k);
@@ -4695,7 +5579,8 @@ function updatePlayer(dt){
       const ml=Math.hypot(mx,mz)||1;
       wx=mx/ml*spd*Math.min(mag,1); wz=mz/ml*spd*Math.min(mag,1);
     }
-    const prise=p.onGround?(mag>0.01?9:13):2.6;      // en l'air, on ne change presque plus de cap
+    // en l'air, on ne change presque plus de cap ; en descente libre, on tombe droit
+    const prise=p.onGround?(mag>0.01?9:13):(p.chuteDouce?0:2.6);
     const k=Math.min(1,dt*prise);
     p.vx=lerp(p.vx,wx,k); p.vz=lerp(p.vz,wz,k);
     if(Math.abs(p.vx)<0.02) p.vx=0;
@@ -4723,8 +5608,20 @@ function updatePlayer(dt){
       }
     }
     const fx=Math.sin(p.yaw), fz=Math.cos(p.yaw);
+    const desc=descenteHeld()&&!p.carrying;
+    // descente libre : un appui plus bas devant → on y saute ; un rebord → on bascule pour s'y pendre
+    if(desc&&p.onGround&&!p.swim&&mag>0.3&&p.stun<=0){
+      const bas=groundAt(p.pos.x+fx*0.55,p.pos.z+fz*0.55,p.pos.y+0.3,G.boxes);
+      if(bas<p.pos.y-0.9){
+        const L=landingDown(p,fx,fz);
+        if(L) startBond(p,L);
+        else{ const le=ledgeUnder(p,fx,fz,true);
+          if(le){ const q=hangPos(le); p.saut={t:0,dur:0.3,from:p.pos.clone(),to:q,cible:le,chute:true}; p.onGround=false; sfx("stone"); }
+          else p.chuteDouce=true; }
+      }
+    }
     // course libre : au bord d'un toit, un appui en face → on bondit ; sinon, au-dessus d'un grand vide, on s'arrête
-    if(running&&p.onGround&&!p.swim&&mag>0.3&&p.stun<=0){
+    if(running&&!desc&&!p.saut&&!p.bond&&p.onGround&&!p.swim&&mag>0.3&&p.stun<=0){
       const L=p.speedNow>3.6?landingAhead(p,fx,fz):null;
       if(L){ startBond(p,L); }
       else{
@@ -4736,7 +5633,7 @@ function updatePlayer(dt){
         }
       }
     }
-    if(!p.bond){
+    if(!p.bond&&!p.saut){
     const avant=groundAt(p.pos.x,p.pos.z,p.pos.y+0.05,G.boxes,true);
     circleVsBoxes(p.pos,0.42,p.pos.y,p.pos.y+playerHeight(),G.boxes);
     // Marche d'escalier : on monte tout seul les ressauts jusqu'à 55 cm, au lieu de buter.
@@ -4745,31 +5642,48 @@ function updatePlayer(dt){
       p.pos.y=avant; p.fallFrom=avant; p.vy=0; p.step=0.18;
     }
     // Course libre : muret franchi, mur gravi, tronc saisi, sans rien presser.
-    if(p.onGround&&!p.swim&&!p.carrying&&p.stun<=0&&running&&p.speedNow>3.8&&mag>0.3){
+    if(p.onGround&&!p.swim&&!p.carrying&&p.stun<=0&&running&&!desc&&p.speedNow>3.8&&mag>0.3){
       const bx=lowObstacle(p,fx,fz);
       if(bx) startVault(p,bx,fx,fz);
       else freerun(p,fx,fz);
     }
     }
-    if(p.bond||p.vault||p.wall||p.climbing){ /* un geste a pris le relais */ }
+    if(p.bond||p.vault||p.wall||p.climbing||p.saut||p.swing){ /* un geste a pris le relais */ }
     else{
     p.vy-=19*dt;
     let ny=p.pos.y+p.vy*dt;
+    // une barre à portée de main, en plein saut : on s'y accroche
+    if(!p.onGround&&!p.carrying&&p.noGrab<=0&&G.barres&&G.barres.length){
+      const b=barreProche(p.pos.x,ny,p.pos.z,0.6);
+      if(b){ startSwing(p,b.br,b.px,b.pz,p.vx||Math.sin(p.yaw),p.vz||Math.cos(p.yaw)); }
+    }
     // la main trouve le rebord au passage : on s'y accroche au lieu de tomber
-    if(p.vy<0&&!p.onGround&&!p.carrying&&p.noGrab<=0){
+    if(!p.swing&&p.vy<0&&!p.onGround&&!p.carrying&&p.noGrab<=0){
       const lg=ledgeGrab(p.pos.x,ny,p.pos.z);
       if(lg){ startHang(p,lg); toast("Accroché au rebord"); }
     }
-    if(p.hang){ /* accroché : plus de chute cette image */ }
+    if(p.hang||p.swing){ /* accroché : plus de chute cette image */ }
     else{
     const gy=groundAt(p.pos.x,p.pos.z,p.pos.y,G.boxes);
     if(ny<=gy){
-      const drop=p.fallFrom-gy;
-      if(!p.onGround&&drop>3.5){
+      const drop=p.fallFrom-gy, sous=surfaceSous(p.pos.x,p.pos.z,gy);
+      if(!p.onGround&&sous&&sous.type==="toile"&&drop>1.5){
+        // une toile tendue : elle cède sous le poids, puis renvoie doucement
+        toast(drop>4?"La toile a amorti la chute":"Sur la toile"); sfx("rope"); p.land=0.25; p.landK=0.7; p.chuteDouce=false;
+        if(drop>3){ p.vy=3.2; p.onGround=false; p.fallFrom=gy; p.pos.y=gy+0.02; ny=gy+0.02; }
+      }else if(!p.onGround&&p.chuteDouce&&drop<6.5&&drop>0.6){
+        // descente libre : jambes fléchies, sans un bruit
+        p.land=0.26; p.landK=clamp(drop/3.5,0.5,1); sfx("stone"); p.chuteDouce=false;
+      }else if(!p.onGround&&drop>3.5){
+        p.chuteDouce=false;
         const h=inHide(p.pos.x,p.pos.z);
         if(inWater(p.pos.x,p.pos.z)){ toast("Plongeon — personne n'a rien entendu"); splashFX(p.pos.x,p.pos.z); }
         else if(h&&SOFT_HIDE[h.kind]){
           toast("Saut de la foi — atterrissage silencieux"); sfx("good");
+        }else if(drop>9){
+          // de trop haut, sans rien pour amortir : on s'y brise
+          sfx("thud"); makeNoise(p.pos.x,p.pos.z,16,0.5); p.stun=0.8; p.land=0.28; p.landK=1;
+          blessureChute(drop>15?2:1);
         }else if(drop<7&&p.speedNow>2.6){
           // roulade : en arrivant lancé, on roule et on repart, presque sans bruit
           p.roll=0.5; sfx("stone"); makeNoise(p.pos.x,p.pos.z,6,0.15);
@@ -4779,8 +5693,8 @@ function updatePlayer(dt){
           p.stun=0.45; p.land=0.28; p.landK=1; toast("Chute lourde : le bruit a porté");
         }
       }else if(!p.onGround&&drop>1.1){ p.land=0.22; p.landK=clamp(drop/3.5,0.35,0.9); }
-      ny=gy; p.vy=0; p.onGround=true; p.fallFrom=gy;
-      if(p.jumpBuf>0){ p.jumpBuf=0; p.pos.y=ny; tryClimb(); }
+      if(ny<=gy){ ny=gy; p.vy=0; p.onGround=true; p.fallFrom=gy; }
+      if(p.jumpBuf>0&&p.onGround){ p.jumpBuf=0; p.pos.y=ny; tryClimb(); }
     }else if(p.onGround&&p.vy<=0&&p.pos.y-gy<0.36){
       ny=gy; p.vy=0; p.fallFrom=gy;          // descente de pente ou de marche : les pieds restent au sol
     }else{ if(p.onGround&&p.vy<=0) p.coyote=0.14; p.onGround=false; if(p.vy>0) p.fallFrom=Math.max(p.fallFrom,ny); }
@@ -4809,15 +5723,19 @@ function updatePlayer(dt){
     &&Math.hypot(p.pos.x-bx.x,p.pos.z-bx.z)<(bx.type==="ora"?2.2:bx.type==="uru"?1.6:0.9))
     ||G.boxes.some(bx=>bx.type==="branch"&&Math.abs(p.pos.y-bx.y1)<0.25&&insideBox(p.pos.x,p.pos.z,bx,0.4));
   { const tp=inTapu(p.pos.x,p.pos.z); if(tp&&!p.inTapu) toast("Marae — lieu tapu. Ici, on ne verse pas le sang."); p.inTapu=tp; }
+  // sur une poutre, une branche, un faîtage : on écarte les bras pour tenir l'équilibre
+  { const s=p.onGround&&!p.swim?surfaceSous(p.pos.x,p.pos.z,p.pos.y):null;
+    p.equilibre=!!s&&s.y1>1.5&&(Math.min(s.w,s.d)<1.0||s.type==="branch"||(s.ridge&&s.y1-p.pos.y<0.12)); }
   p.mesh.position.copy(p.pos);
   p.mesh.rotation.y=p.yaw;
+  p.mesh.rotation.x=p.swing?-p.swing.th:0;
   const dy=heroPose(p,dt);
   if(p.swim) p.mesh.position.y+=dy-0.8+Math.sin(VT*2.4)*0.05;
 
   const h=inHide(p.pos.x,p.pos.z);
   const cache=!!h&&p.pos.y-hAt(p.pos.x,p.pos.z)<1.6&&(STAND_HIDE[h.kind]||p.crouch);
   p.hidden=cache||(p.swim&&p.crouch);
-  if(cache&&!p.wasHidden){ sfx("tick"); toast(HIDE_NOTE[h.kind]||"Tu te fonds dans l'ombre"); }
+  if(cache&&!p.wasHidden){ sfx("tick"); toast(noteCachette(h.kind)||"Tu te fonds dans l'ombre"); }
   p.wasHidden=cache;
   p.light=lightAt(p.pos.x,p.pos.z)*(p.hidden?0.25:(h?0.6:1))*(p.onPalm?0.5:1);
   // les forces reviennent quand plus personne ne te traque
@@ -4825,6 +5743,21 @@ function updatePlayer(dt){
 
   updateProjectiles(dt);
   updateSmokes(dt);
+}
+// la boîte sur laquelle on se tient en (x,z), à la hauteur y
+function surfaceSous(x,z,y){
+  for(const bx of G.boxes){
+    if(x<bx.minX||x>bx.maxX||z<bx.minZ||z>bx.maxZ) continue;
+    if(Math.abs((bx.ridge?topAt(bx,x,z):bx.y1)-y)<0.06) return bx;
+  }
+  return null;
+}
+// une chute de trop haut : une force perdue, ou deux
+function blessureChute(n){
+  const p=G.player; p.hp=Math.max(0,p.hp-n); updateHP(); p.hitT=0.35; p.regen=0;
+  elVig.classList.add("on");
+  if(p.hp<=0) endLevel(false,"Tombé de trop haut.");
+  else toast(n>1?"Chute terrible — tu te relèves à peine":"Chute rude — tu t'es blessé");
 }
 function updateProjectiles(dt){
   for(let i=G.projectiles.length-1;i>=0;i--){
@@ -5496,7 +6429,7 @@ function computePrompt(){
 
   if(p.carrying){
     const h=inHide(p.pos.x,p.pos.z);
-    if(h&&h.kind!=="bush") G.promptAction={kind:"stash",text:HIDE_STASH[h.kind]||"dissimuler le corps"};
+    if(h&&h.kind!=="bush") G.promptAction={kind:"stash",text:rangerCorps(h.kind)||"dissimuler le corps"};
     else G.promptAction={kind:"drop",text:"déposer le corps"};
     return updatePrompt();
   }
@@ -5570,17 +6503,26 @@ function updatePrompt(){
     for(const [from,to] of [[r.a,r.b],[r.b,r.a]])
       if(Math.hypot(p.pos.x-from.x,p.pos.z-from.z)<2&&Math.abs(p.pos.y-(from.y-0.2))<1.6&&ropeOK(p,from,to)){
         promptEl.innerHTML="<kbd>Espace</kbd>tyrolienne"; promptEl.classList.add("on"); return; }
+  if(p.swing){
+    promptEl.innerHTML='<kbd>Z</kbd>prendre de l\'élan · <kbd>Espace</kbd>s\'élancer'+
+      '<span class="alt"><kbd>C</kbd>lâcher</span>';
+    promptEl.classList.add("on"); return; }
   if(p.wall){
     promptEl.innerHTML='<kbd>Z</kbd><kbd>S</kbd>grimper, descendre'+
-      '<span class="alt"><kbd>Espace</kbd>bondir</span>'+
-      '<span class="alt"><kbd>S</kbd>+<kbd>Espace</kbd>se jeter en arrière</span>'+
-      '<span class="alt"><kbd>C</kbd>lâcher</span>';
+      '<span class="alt"><kbd>Espace</kbd>bondir · <kbd>Q</kbd><kbd>D</kbd>+<kbd>Espace</kbd>de côté</span>'+
+      '<span class="alt"><kbd>S</kbd>+<kbd>Espace</kbd>en arrière</span>'+
+      '<span class="alt"><kbd>Maj</kbd>+<kbd>C</kbd>glisser</span>';
     promptEl.classList.add("on"); return; }
   if(p.hang){
-    promptEl.innerHTML='<kbd>Z</kbd>se rétablir'+
-      '<span class="alt"><kbd>Q</kbd><kbd>D</kbd>+<kbd>Espace</kbd>sauter au rebord voisin</span>'+
-      '<span class="alt"><kbd>C</kbd>lâcher</span>';
+    promptEl.innerHTML='<kbd>Z</kbd>'+(p.hang.y<p.hang.bx.y1-0.3?'grimper':'se rétablir')+
+      '<span class="alt"><kbd>Q</kbd><kbd>D</kbd>+<kbd>Espace</kbd>rebord voisin</span>'+
+      '<span class="alt"><kbd>S</kbd>+<kbd>Espace</kbd>en arrière</span>'+
+      '<span class="alt"><kbd>Maj</kbd>+<kbd>C</kbd>descendre</span>';
     promptEl.classList.add("on"); return; }
+  { const mc=monteChargeProche(p);
+    if(mc){ promptEl.innerHTML="<kbd>Espace</kbd>monte-charge : trancher l'amarre"; promptEl.classList.add("on"); return; } }
+  if(p.onGround&&G.barres&&G.barres.length){ const b=barreProche(p.pos.x,p.pos.y+0.6,p.pos.z,0.9);
+    if(b&&b.br.y-p.pos.y<3.6){ promptEl.innerHTML="<kbd>Espace</kbd>saisir la barre"; promptEl.classList.add("on"); return; } }
   const fx=Math.sin(p.yaw),fz=Math.cos(p.yaw);
   for(const bx of G.boxes){
     if(bx.type==="void"||bx.y1<=p.pos.y+0.35||bx.y1>p.pos.y+2.35) continue;
@@ -5751,7 +6693,7 @@ function showMenu(){
   let html='<h1><span class="sub">Jeu d\'infiltration · Tahiti, 1844</span>L\'Ombre du Fenua</h1>'+
     '<p class="lede">1842 : un contre-amiral français impose le protectorat à la reine Pōmare IV. Deux ans plus tard, la guerre éclate. '+
     'Jusqu\'en 1847, les Tahitiens tiennent les vallées et les hauteurs, de Mahaena à Fautaua. '+
-    'Tu es une ombre de cette résistance : cinq missions, aucun mot échangé.</p>'+
+    'Tu es une ombre de cette résistance : cinq missions au fenua, une à Paris, aucun mot échangé.</p>'+
     '<p class="lede" style="font-size:12px;margin-top:-10px">Les lieux et la guerre sont réels ; les personnages et les missions sont inventés.</p><div class="levels">';
   LEVELS.forEach((_,i)=>{
     const lv=LEVELS[i](), bt=store(bestKey(i));
@@ -5767,6 +6709,10 @@ function showMenu(){
     '<div><span>Escalader, grimper, sauter, corde</span><b>Espace</b></div>'+
     '<div><span>Au mur : monter, descendre, longer</span><b>Z · S · Q D</b></div>'+
     '<div><span>Course libre : grimper, sauter les vides</span><b>Maj + direction</b></div>'+
+    '<div><span>Descente libre : d\'un rebord à l\'autre jusqu\'au sol</span><b>Maj + C</b></div>'+
+    '<div><span>Saut de la foi (foin, eau en contrebas)</span><b>Espace au bord</b></div>'+
+    '<div><span>Barre : s\'y accrocher, s\'élancer</span><b>en sautant · Espace</b></div>'+
+    '<div><span>Au mur : bond de côté, en arrière</span><b>Q D + Espace · S + Espace</b></div>'+
     '<div><span>Contrer un coup</span><b>E, quand il arme</b></div>'+
     '<div><span>Se suspendre au rebord · se rétablir</span><b>Espace</b></div>'+
     '<div><span>Lâcher le mur ou le rebord</span><b>C ou X</b></div>'+
@@ -5789,7 +6735,11 @@ function showMenu(){
     '</div>'+
     '<div class="codex"><h4>Le chemin passe par le haut</h4>'+
     '<b>Escalade</b> — les murs, les rochers, les tours de guet et la coque des navires se grimpent prise par prise : Espace t\'y accroche et tu montes jusqu\'en haut ; Z et S règlent la montée, Q et D te font longer le mur, Espace bondit vers la prise du dessus, S + Espace te jette en arrière. '+
-    '<b>Course libre</b> — cours droit sur un obstacle et ton corps choisit le geste : il franchit, se rétablit, escalade, saute d\'un toit à l\'autre quand un appui l\'attend en face, et s\'arrête net au bord d\'un grand vide. '+
+    '<b>Course libre</b> — cours droit sur un obstacle et ton corps choisit le geste : il franchit (d\'un appui de main, ou d\'un saut de chat si l\'obstacle est profond), se rétablit, escalade, saute d\'un toit à l\'autre ou vers une barre quand un appui l\'attend en face, et s\'arrête net au bord d\'un grand vide. '+
+    '<b>Descente libre</b> — Maj + C en courant vers le bord : tu sautes sur le balcon ou l\'auvent d\'en dessous, ou tu bascules pour te pendre au rebord, puis tu te laisses tomber de bandeau en bandeau jusqu\'au pavé, sans un bruit. '+
+    '<b>Étages</b> — les immeubles, les tours et les échafaudages ont une prise à chaque étage : on s\'y suspend, on y passe d\'une façade à l\'autre. Échelles et échafaudages se grimpent deux fois plus vite. '+
+    '<b>Barres, toiles, monte-charges</b> — une perche tendue en travers d\'une rue se saisit au vol et te relance plus loin ; une toile de boutique amortit une chute ; un monte-charge te hisse d\'un coup sur le toit. '+
+    '<b>Toits</b> — les toits d\'ardoise se parcourent, faîtage et noues compris ; les mansardes ont leur gouttière. Mais une chute de plus de neuf mètres sans rien pour l\'amortir coûte une force, deux au-delà de quinze. '+
     '<b>Rebords</b> — tout ce qui s\'escalade a une corniche. Arrête-toi au bord d\'un toit, regarde le vide et appuie sur Espace : '+
     'tu te suspends par les mains. Q et D te déplacent le long du rebord et te font passer les angles ; Espace te rétablit, C te fait lâcher. '+
     'Si tu tombes le long d\'un mur, ta main trouve le rebord toute seule. Suspendu, le toit te cache de celui qui marche dessus. '+
