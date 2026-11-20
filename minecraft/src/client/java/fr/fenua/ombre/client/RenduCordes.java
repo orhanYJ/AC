@@ -20,6 +20,12 @@ import org.joml.Matrix4f;
 public final class RenduCordes {
     private RenduCordes() {}
 
+    /** Un câble de tyrolienne vu récemment : ses deux bouts (points d'accroche) et leurs poteaux. */
+    public record Cable(Vec3d a, Vec3d b, BlockPos poteauA, BlockPos poteauB, long vu) {}
+
+    /** Les câbles dessinés ces dernières secondes (on peut les attraper au vol). */
+    public static final java.util.Map<BlockPos, Cable> CABLES = new java.util.concurrent.ConcurrentHashMap<>();
+
     public static class Poteau implements BlockEntityRenderer<PoteauTyrolienne.Entite> {
         @Override
         public void render(PoteauTyrolienne.Entite e, float dt, MatrixStack m, VertexConsumerProvider vcp, int lum, int ov) {
@@ -28,6 +34,8 @@ public final class RenduCordes {
             Vec3d a = new Vec3d(0.5, CoteClient.ACCROCHE, 0.5);
             Vec3d b = new Vec3d(d.getX() + 0.5, d.getY() + CoteClient.ACCROCHE, d.getZ() + 0.5);
             dessiner(m, vcp, e.getWorld(), e.getPos(), a, b, true);
+            Vec3d o = Vec3d.of(e.getPos());
+            CABLES.put(e.getPos().toImmutable(), new Cable(o.add(a), o.add(b), e.getPos().toImmutable(), e.cible, System.currentTimeMillis()));
         }
         @Override public boolean rendersOutsideBoundingBox(PoteauTyrolienne.Entite e) { return true; }
         @Override public int getRenderDistance() { return 160; }

@@ -35,7 +35,9 @@ import net.minecraft.world.World;
  *  HISSE      : le rétablissement par-dessus un bord.
  *  MUR_COURU  : course sur un mur, en sprint. Espace rebondit vers le mur d'en face.
  *  TYRO       : glisse le long d'une tyrolienne. Espace saute, Maj lâche.
- *  LIFT       : monte-charge, on monte jusqu'au toit.
+ *  LIFT       : monte-charge (Espace dessus, ou clic droit) : on monte jusqu'au toit.
+ *  Course libre (sprint + Z) : mur bas = rétablissement, mur haut = escalade, bord de toit = saut
+ *               vers l'appui d'en face, ou arrêt net au-dessus d'un grand vide.
  *  PERCHE     : balancé sous une perche ou une enseigne ; Z donne de l'élan et projette, Espace saute, Maj lâche.
  */
 public final class Parcours {
@@ -60,6 +62,10 @@ public final class Parcours {
     private static Vec3d cableA, cableB;
     private static double cableT, cableL, cableV;
     private static BlockPos cableFin;
+    // Monte-charge
+    private static double liftX, liftZ;
+    // Course libre : s'arrêter net au bord d'un grand vide (lu par mixin/BordMixin)
+    static boolean bordProtege;
     // Perche
     private static Vec3d pivot;
     private static double balX, balZ, theta, omega;
@@ -85,6 +91,8 @@ public final class Parcours {
 
     static double balancement() { return theta; }
 
+    public static boolean bordProtege() { return bordProtege; }
+
     /** Orientation du corps (en degrés) quand il fait face au mur, ou NaN. */
     static float corpsVersMur() {
         return switch (etat) {
@@ -108,6 +116,7 @@ public final class Parcours {
                 etat = Etat.LIBRE;
                 return;
             }
+            if (!(etat == Etat.LIBRE && p.isOnGround() && client.options.sprintKey.isPressed())) bordProtege = false;
             if (sansPrise > 0) sansPrise--;
             if (chercheMur > 0) chercheMur--;
             if (poseBond > 0) poseBond--;
@@ -149,6 +158,16 @@ public final class Parcours {
             return;
         }
 
+        // Espace sur un monte-charge ou à côté d'un poteau de tyrolienne : on part, sans clic droit
+        if (sol && nouveauSaut && partirSansClic(p)) return;
+
+        // Course libre : sprint + Z, le corps choisit le geste tout seul
+        if (sol && client.options.sprintKey.isPressed() && in.movementForward > 0 && !in.sneaking && !in.jumping) {
+            if (courseLibre(p, f)) return;
+        } else {
+            bordProtege = false;
+        }
+
         // Depuis le sol : Espace en poussant contre un mur haut = on s'y accroche
         if (sol && nouveauSaut) {
             double[] d = murAutour(p, norme(e) > 0.1 ? e : f);
@@ -161,8 +180,9 @@ public final class Parcours {
         }
         if (sol) return;
 
-        // Une perche ou une enseigne à portée de main
+        // Une perche ou une enseigne à portée de main, ou un câble de tyrolienne
         if (sansPrise == 0 && attraperPerche(p)) return;
+        if (sansPrise == 0 && v.y < 0.25 && attraperCable(p)) return;
 
         if (sansPrise > 0 && chercheMur == 0) return;
         double vh = Math.sqrt(v.x * v.x + v.z * v.z);
@@ -171,7 +191,7 @@ public final class Parcours {
         // En tombant le long d'un mur dont le haut passe aux mains : on s'accroche au rebord
         if (v.y < -0.05 && !in.sneaking) {
             double[] d = murAutour(p, pref);
-            if (d != null && !Double.isNaN(hauteurRebord(p, p.getX() + d[0] * 0.6, p.getZ() + d[1] * 0.6, 1.1, 2.1))) {
+            if (d != null && !Double.isNaN(hauteurRebord(p, p.getX() + d[0] * 0.6, p.getZ() + d[1] * 0.6, 1.0, 2.3))) {
                 murX = d[0]; murZ = d[1];
                 changer(Etat.REBORD);
                 p.setVelocity(0, 0, 0);
@@ -383,16 +403,19 @@ public final class Parcours {
             Vec3d pieds = CoteClient.pointCable(a, b, t).subtract(0, MAINS, 0);
             Box boite = p.getBoundingBox().offset(pieds.subtract(p.getPos()));
             if (p.getWorld().isSpaceEmpty(p, boite)) {
-                cableA = a; cableB = b; cableL = l; cableT = t; cableV = 0.25; cableFin = vers;
-                p.setPosition(pieds);
-                p.setVelocity(Vec3d.ZERO);
-                changer(Etat.TYRO);
-                p.playSound(SoundEvents.ENTITY_LEASH_KNOT_PLACE, 0.8f, 0.7f);
-                rattrape();
+                lancerCable(p, a, b, vers, t);
                 return;
             }
         }
         p.sendMessage(Text.literal("§7Pas la place de s'accrocher au câble ici."), true);
+    }
+
+    private static void lancerCable(ClientPlayerEntity p, Vec3d a, Vec3d b, BlockPos vers, double t) {
+        cableA = a; cableB = b; cableL = a.distanceTo(b); cableT = t; cableV = 0.25; cableFin = vers;
+        p.setVelocity(CoteClient.pointCable(a, b, t).subtract(0, MAINS, 0).subtract(p.getPos()));
+        changer(Etat.TYRO);
+        p.playSound(SoundEvents.ENTITY_LEASH_KNOT_PLACE, 0.8f, 0.7f);
+        rattrape();
     }
 
     private static void tyro(ClientPlayerEntity p, Input in, boolean nouveauSaut) {
@@ -428,8 +451,8 @@ public final class Parcours {
 
     public static void demarrerMonteCharge(BlockPos pos, Direction mur, int sommet) {
         ClientPlayerEntity p = MinecraftClient.getInstance().player;
-        if (p == null) return;
-        p.setPosition(pos.getX() + 0.5, pos.getY() + 0.13, pos.getZ() + 0.5);
+        if (p == null || etat == Etat.LIFT) return;
+        liftX = pos.getX() + 0.5; liftZ = pos.getZ() + 0.5;
         murX = mur.getOffsetX(); murZ = mur.getOffsetZ();
         cible = sommet;
         changer(Etat.LIFT);
@@ -438,9 +461,11 @@ public final class Parcours {
 
     private static void lift(ClientPlayerEntity p) {
         if (p.getY() >= cible - 1.0) { hisser(p, murX, murZ, cible); return; }
-        if (duree > 6 && p.verticalCollision && p.getVelocity().y <= 0.01) { lacher(5); return; }  // bloqué en chemin
-        p.setVelocity(murX * 0.01, 0.75, murZ * 0.01);
-        if (duree % 4 == 0) p.playSound(SoundEvents.BLOCK_WOOD_STEP, 0.3f, 1.4f);
+        if (duree > 8 && p.verticalCollision && p.getVelocity().y <= 0.01) { lacher(5); return; }  // bloqué en chemin
+        // Le contrepoids tombe : on démarre doucement, puis on file vers le haut, en se recentrant sur la corde
+        double vy = duree < 4 ? 0.05 : Math.min(0.6, 0.1 + (duree - 4) * 0.035);
+        p.setVelocity((liftX - p.getX()) * 0.4, vy, (liftZ - p.getZ()) * 0.4);
+        if (duree % 3 == 0) p.playSound(SoundEvents.BLOCK_CHAIN_STEP, 0.35f, 0.7f + (float) vy);
         if (duree % 10 == 0) rattrape();
         if (duree > 120) changer(Etat.LIBRE);
     }
@@ -499,6 +524,95 @@ public final class Parcours {
         p.setVelocity(pieds.subtract(p.getPos()));
         if (duree % 10 == 0) rattrape();
         if (duree > 200) lacher(10);
+    }
+
+    // ───────────────────────── sans clic droit ─────────────────────────
+
+    /** Espace debout sur un monte-charge, ou tout près d'un poteau de tyrolienne qui descend : on part. */
+    private static boolean partirSansClic(ClientPlayerEntity p) {
+        World w = p.getWorld();
+        BlockPos pieds = p.getBlockPos();
+        BlockState s = w.getBlockState(pieds);
+        if (s.isOf(OmbreBlocs.MONTE_CHARGE)) {
+            Direction mur = fr.fenua.ombre.bloc.MonteCharge.murReel(w, pieds, s.get(Properties.HORIZONTAL_FACING));
+            if (mur != null) {
+                demarrerMonteCharge(pieds, mur, fr.fenua.ombre.bloc.MonteCharge.sommet(w, pieds, mur));
+                return true;
+            }
+        }
+        for (BlockPos b : BlockPos.iterate(pieds.add(-1, 0, -1), pieds.add(1, 1, 1))) {
+            if (w.getBlockState(b).isOf(OmbreBlocs.POTEAU)
+                    && w.getBlockEntity(b) instanceof fr.fenua.ombre.bloc.PoteauTyrolienne.Entite e
+                    && e.cible != null && e.cible.getY() <= b.getY() + 1) {
+                demarrerTyrolienne(b.toImmutable(), e.cible);
+                return etat == Etat.TYRO;
+            }
+        }
+        return false;
+    }
+
+    /** En l'air, les mains passent près d'un câble : on s'y accroche et on glisse vers le bas. */
+    private static boolean attraperCable(ClientPlayerEntity p) {
+        long maintenant = System.currentTimeMillis();
+        Vec3d mains = p.getPos().add(0, MAINS, 0);
+        for (RenduCordes.Cable c : RenduCordes.CABLES.values()) {
+            if (maintenant - c.vu() > 2000) continue;
+            boolean versB = c.b().y <= c.a().y;                      // on glisse vers le bas
+            Vec3d haut = versB ? c.a() : c.b(), bas = versB ? c.b() : c.a();
+            BlockPos fin = versB ? c.poteauB() : c.poteauA();
+            Vec3d d = bas.subtract(haut);
+            double t = MathHelper.clamp(mains.subtract(haut).dotProduct(d) / d.lengthSquared(), 0, 1);
+            if (t < 0.05 || t > 0.9) continue;
+            if (CoteClient.pointCable(haut, bas, t).distanceTo(mains) > 0.9) continue;
+            lancerCable(p, haut, bas, fin, t);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Course libre (sprint + Z) : face à un mur bas, on s'y rétablit ; face à un mur haut, on l'escalade ;
+     * au bord d'un toit, on saute vers l'appui d'en face, ou on s'arrête net au-dessus d'un grand vide.
+     */
+    private static boolean courseLibre(ClientPlayerEntity p, double[] f) {
+        bordProtege = false;
+        if (bloqueBuste(p, f[0] * 0.3, f[1] * 0.3, 1.0)) {
+            double h = hauteurRebord(p, p.getX() + f[0] * 0.6, p.getZ() + f[1] * 0.6, 0.9, 2.4);
+            if (!Double.isNaN(h)) { hisser(p, f[0], f[1], h); return true; }
+            double[] d = murAutour(p, f);
+            if (d != null) {
+                accrocher(p, d);
+                bondMur = 5;
+                p.setVelocity(d[0] * 0.04, 0.42, d[1] * 0.04);
+                return true;
+            }
+        }
+        // Au bord : plus de sol à 45 cm devant, sur 2 blocs de profondeur
+        World w = p.getWorld();
+        double ax = p.getX() + f[0] * 0.45, az = p.getZ() + f[1] * 0.45;
+        BlockPos sous1 = BlockPos.ofFloored(ax, p.getY() - 0.5, az), sous2 = sous1.down();
+        if (!w.getBlockState(sous1).getCollisionShape(w, sous1).isEmpty() || !w.getBlockState(sous2).getCollisionShape(w, sous2).isEmpty())
+            return false;
+        for (double dist = 1.5; dist <= 5.0; dist += 0.5) {
+            double h = hauteurRebord(p, p.getX() + f[0] * dist, p.getZ() + f[1] * dist, -4, 1.2);
+            if (!Double.isNaN(h)) {
+                Vec3d v = p.getVelocity();
+                double vit = Math.max(0.42, Math.min(0.55, 0.3 + dist * 0.05));
+                p.setVelocity(f[0] * vit, h > p.getY() + 0.3 ? 0.52 : 0.45, f[1] * vit);
+                poseBond = 10;
+                p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.4f);
+                return true;
+            }
+        }
+        // Rien en face : au-dessus d'un vide de plus de 4 blocs, on s'arrête au bord (Espace pour sauter quand même)
+        int vide = 0;
+        for (int i = 1; i <= 5; i++) {
+            BlockPos b = BlockPos.ofFloored(ax, p.getY() - 0.5 - i + 1, az);
+            if (!w.getBlockState(b).getCollisionShape(w, b).isEmpty()) break;
+            vide++;
+        }
+        bordProtege = vide >= 5;
+        return false;
     }
 
     // ───────────────────────── gestes communs ─────────────────────────

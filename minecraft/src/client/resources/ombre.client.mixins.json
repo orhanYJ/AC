@@ -6,7 +6,8 @@
   "client": [
     "PosesMixin",
     "ContourMixin",
-    "CouleurContourMixin"
+    "CouleurContourMixin",
+    "BordMixin"
   ],
   "injectors": {
     "defaultRequire": 1

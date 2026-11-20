@@ -55,6 +55,17 @@ Dans le jeu : Options › Graphismes › Shader Packs. Une ville la nuit, avec l
 | Lâcher | **Maj** |
 | En haut du mur | On se rétablit tout seul par-dessus le bord |
 
+### Course libre : Ctrl + Z (comme dans Assassin's Creed)
+
+En sprint, le corps choisit le geste tout seul :
+
+| Devant toi | Ce qui se passe |
+|---|---|
+| Un mur bas (jusqu'à 2,4 blocs) | Tu t'y rétablis d'un geste |
+| Un mur plus haut | Tu l'escalades tout seul, sans Espace (Ctrl + Z tenus : on monte vite) |
+| Le bord d'un toit, avec un appui en face (5 blocs max) | Tu sautes tout seul dessus |
+| Le bord d'un grand vide, sans rien en face | Tu t'arrêtes net au bord ; **Espace** pour sauter quand même |
+
 ### Rebords, course et chutes
 
 | Geste | Touches |
@@ -70,8 +81,8 @@ Dans le jeu : Options › Graphismes › Shader Packs. Une ville la nuit, avec l
 
 | Objet | Comment s'en servir |
 |---|---|
-| **Poteau de tyrolienne** + **corde** | Corde en main, clic droit sur un poteau puis sur un autre (64 blocs max). Mains vides, clic droit sur le poteau le plus haut : on glisse. Espace saute (assassinat aérien possible), Maj lâche |
-| **Monte-charge** | À poser au pied d'un mur en le regardant. Clic droit : on monte jusqu'au toit |
+| **Poteau de tyrolienne** + **corde** | Corde en main, clic droit sur un poteau puis sur un autre (64 blocs max). Pour partir : **Espace** à côté du poteau du haut (ou clic droit dessus), ou **saute sur le câble** au vol. Pendant la glisse : Espace saute (assassinat aérien possible), Maj lâche |
+| **Monte-charge** | À poser au pied d'un mur. **Monte dessus et appuie sur Espace** (ou clic droit) : le contrepoids tombe, tu montes le long de la corde jusqu'au toit et tu t'y rétablis |
 | **Perche** | Barre à saisir au vol : on se balance, **Z** donne de l'élan et projette, Espace saute, Maj lâche |
 | **Enseigne de boutique** | Elle sort du mur : sa potence se saisit comme une perche |
 | **Poutre** | Pièce de bois étroite pour relier deux toits |
