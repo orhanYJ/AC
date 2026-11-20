@@ -1,185 +1,132 @@
-# L'Ombre — Infiltration (mod Minecraft)
+# L'Ombre — Prague 1600 (mod Minecraft)
 
-Un mod **Fabric** pour **Minecraft Java 1.21.1** : jouer en assassin discret, avec du parkour et un fortin à infiltrer.
+Un mod **Fabric** pour **Minecraft Java 1.21.1** : un jeu d'assassin dans la Prague de l'an 1600, à la cour de l'empereur Rodolphe II. Parkour en hauteur sur les toits de tuiles rouges, la foule où se fondre, les gardes de la ville, des personnages réels (Tycho Brahe, Kepler, Rodolphe II, le rabbin Loew et son Golem), et une confrérie secrète à démanteler.
 
-![Le fortin construit par /ombre arene, au coucher du soleil : gardes en rouge, cible en or, colonne de lumière du point de vue](apercu.jpg)
-
-La carte d'entraînement (`/ombre parcours`) : la ville et ses toits, la tour avec sa tyrolienne, une rue avec corniches, enseignes et auvents.
-
-![La ville vue d'en haut](apercu-ville.jpg)
-![La tour, sa tyrolienne et la ville](apercu-tour.jpg)
-![Une rue : corniches, enseignes, auvents](apercu-rue.jpg)
-
-Fichier à installer : [`telecharger/ombre-infiltration-0.1.0.jar`](telecharger/ombre-infiltration-0.1.0.jar)
+**Fichier à installer** : [`telecharger/ombre-infiltration-0.1.0.jar`](telecharger/ombre-infiltration-0.1.0.jar)
+Lien direct : <https://github.com/orhanYJ/AC/raw/claude/elegant-feynman-qh6m7g/minecraft/telecharger/ombre-infiltration-0.1.0.jar>
 
 ## Installation (une seule fois)
 
-1. **Fabric** : télécharge l'installateur sur <https://fabricmc.net/use/installer/> (le `.exe` sous Windows) et lance-le.
-   Onglet « Client », version Minecraft **1.21.1**, dernière version du Loader, puis « Installer ».
-2. **Fabric API** : sur <https://modrinth.com/mod/fabric-api/versions>, filtre sur **1.21.1** et télécharge la version la plus récente (`fabric-api-0.116.…+1.21.1.jar`).
-3. **Le dossier `mods`** : sous Windows, `Windows + R`, tape `%appdata%\.minecraft` puis Entrée. S'il n'y a pas de dossier `mods`, crée-le.
-   Mets-y les **deux** fichiers `.jar` : Fabric API et `ombre-infiltration-0.1.0.jar`.
-4. Ouvre le lanceur Minecraft, choisis le profil **fabric-loader-1.21.1**, puis « Jouer ».
+1. **Fabric** : <https://fabricmc.net/use/installer/>, onglet « Client », version **1.21.1**, « Installer ».
+2. **Fabric API** : <https://modrinth.com/mod/fabric-api/versions>, version pour **1.21.1**.
+3. `Windows + R`, `%appdata%\.minecraft`, dossier `mods` (le créer s'il n'existe pas) : y mettre **Fabric API** et **ombre-infiltration-0.1.0.jar**.
+4. Lanceur Minecraft : profil **fabric-loader-1.21.1**, « Jouer ».
 
-### En bonus pour une grosse carte graphique : les shaders
+Pour une grosse carte graphique : ajouter **Sodium** et **Iris** (version 1.21.1) dans `mods`, et un pack de shaders (*Complementary Reimagined*, *BSL*) dans `.minecraft\shaderpacks`. Les toits de Prague au coucher du soleil…
 
-Ajoute dans `mods` les mods **Sodium** (<https://modrinth.com/mod/sodium>) et **Iris** (<https://modrinth.com/mod/iris>), en version 1.21.1.
-Mets ensuite un pack de shaders, par exemple *Complementary Reimagined* ou *BSL*, dans `.minecraft\shaderpacks`.
-Dans le jeu : Options › Graphismes › Shader Packs. Une ville la nuit, avec les lanternes et les ombres, change tout pour un jeu d'infiltration.
+## Jouer
 
-## Premier essai
+1. Crée un monde **Plat**, avec **« Autoriser les commandes : OUI »**, difficulté **Normale**.
+2. Tape `/ombre prague` : la Vieille-Ville se construit au nord-est, tu es placé à son coin sud-ouest, et tu reçois l'équipement.
+3. Va sur la grande place, au pied de l'**horloge astronomique** : fais un **clic droit** sur **Tycho Brahe** et **Johannes Kepler**. Ils t'expliquent la mission.
+4. Les deux cibles (en or avec l'Instinct, touche **V**) :
+   - **Ottokar von Rabenstein**, grand maître de la Confrérie du Corbeau, au sommet de la tour du pont Charles ;
+   - **Melchior Kragl**, son alchimiste, dans son laboratoire en haut de la tour nord de l'église de Týn.
 
-1. Crée un monde **Plat** (Plus d'options du monde › Type de monde : Plat), avec **« Autoriser les commandes : OUI »**.
-   Difficulté **Normale** : en Paisible, les gardes disparaissent.
-2. Dans le chat (touche `T`) :
-   - `/give @s ombre:lame_de_nacre` puis `/give @s ombre:bombe_fumee 16`
-   - `/ombre arene` : le fortin se construit à 30 blocs **devant toi**
-   - `/time set night` pour l'ambiance
-   - `/ombre aide` rappelle toutes les commandes
-3. Ta cible, le **capitaine Morvan**, est sur le toit de la maison du nord. Avec l'Instinct (`V`), il brille en or et les gardes en rouge.
+**Touche H en jeu : l'écran qui récapitule toutes les commandes.**
+
+### La carte `/ombre prague`
+
+- **La Vieille-Ville** : douze îlots de maisons bourgeoises, façades pastel ou en sgraffite, pignons sur rue, toits de tuiles rouges, lanternes à potence, enseignes, auvents, balcons, gouttières pour grimper, poutres d'un toit à l'autre, cours avec puits et linge.
+- **La place de la Vieille-Ville** : le marché, la fontaine, la foule, et la **tour de l'horloge astronomique** (cadran, galerie, flèche, gargouilles = points de vue).
+- **L'église de Týn** : sa nef et ses **deux tours à flèches** (près de 50 blocs), des gargouilles, des perchoirs aux pointes, et le laboratoire de l'alchimiste.
+- **La Vltava** et le **pont Charles** avec ses statues, entre la **tour du pont** et la petite tour de l'autre rive, où attend **l'empereur Rodolphe II**.
+- Au nord, dans la rue du quartier juif, **le rabbin Loew** et **le Golem**, qui s'en prend aux gardes.
+- Des **tyroliennes** : de la galerie de l'horloge vers Týn, du sommet de la tour du pont vers l'autre rive.
+
+### Les personnages réels
+
+Ils sont intouchables : on les croise et on leur parle (**clic droit**, plusieurs fois pour la suite). Leurs répliques sont fidèles à l'histoire, et ils donnent des indices.
+
+| Personnage | Qui c'était |
+|---|---|
+| **Tycho Brahe** (1546–1601) | Astronome de l'empereur, au nez de métal (perdu en duel quand il était étudiant). Ses mesures du ciel, sans lunette, étaient les plus précises de son temps |
+| **Johannes Kepler** (1571–1630) | Arrivé à Prague en 1600 pour travailler avec Tycho. Il découvrira plus tard que les planètes tournent en ellipse |
+| **Rodolphe II** (1552–1612) | Empereur, installé à Prague, passionné d'arts, de sciences et d'alchimie ; son cabinet de curiosités était célèbre |
+| **Rabbi Judah Loew** (vers 1520–1609) | Le « Maharal », grand savant de Prague. Une légende lui attribue la création du Golem |
+
+Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 
 ## Commandes
-
-**Touche H en jeu : un écran qui récapitule toutes les commandes.**
-
-### Le clic droit : la main qui attrape
-
-C'est toi qui décides quand t'accrocher : **le clic droit attrape**. Sans lui, tu ne t'accroches à rien et tu passes à côté.
-
-| Où | Clic droit |
-|---|---|
-| Au sol, face à un mur | Tu t'y accroches (un mur bas, tu t'y rétablis) |
-| En l'air (maintenu) | Tu attrapes ce qui passe à portée de main : un mur, un rebord, une perche, une enseigne, un câble de tyrolienne |
-| En sautant en sprint le long d'un mur (maintenu) | Tu cours sur le mur |
-| Sur un poteau de tyrolienne ou un monte-charge | Tu pars |
-
-Avec un **bloc en main**, le clic droit sert à construire, comme d'habitude. Quand il attrape quelque chose, l'objet en main n'est pas utilisé (pas de couteau lancé par erreur).
-
-![Escalade au clic droit : accroché, il monte avec Z jusqu'au sommet de la tour](apercu-escalade.jpg)
-![Les perches : saisie au clic droit, balancement, envol vers la suivante, arrivée](apercu-perches.jpg)
 
 ### Escalade (on reste là où on est)
 
 | Geste | Touches |
 |---|---|
-| S'accrocher | **Clic droit** face au mur, ou clic droit maintenu en sautant vers lui |
-| Monter / descendre | **Z / S** (en tenant Ctrl, plus vite) |
+| S'accrocher | **Espace** en poussant vers le mur, ou en sautant contre lui |
+| Monter / descendre | **Z / S** (Ctrl : plus vite ; le long d'une **gouttière**, deux fois plus vite) |
 | Se déplacer sur le côté | **Q / D** |
-| Bondir vers la prise du dessus | **Espace** |
-| Bondir sur le côté | **Q ou D + Espace** |
-| Saut arrière vers le mur d'en face | **S + Espace**, puis clic droit maintenu pour s'y raccrocher |
+| Bondir vers le haut / sur le côté | **Espace** / **Q ou D + Espace** |
+| Saut arrière vers le mur d'en face | **S + Espace** (on s'y raccroche tout seul) |
 | Lâcher | **Maj** |
-| En haut du mur | On se rétablit tout seul par-dessus le bord |
 
-### Rebords, course et chutes
+### Rebords, course, chutes, prises au clic droit
 
 | Geste | Touches |
 |---|---|
-| **S'accrocher à un rebord** | Clic droit maintenu en passant devant un bord à hauteur des mains |
-| Suspendu | **Z ou Espace** se hisser · **Q / D** glisser · **Q ou D + Espace** sauter au rebord voisin · **S** redescendre sur le mur · **Maj** lâcher |
-| **Courir sur un mur** | En sprint, sauter le long d'un mur avec Z enfoncé et **clic droit maintenu** (environ 1,5 s) ; **Espace** rebondit vers le mur d'en face |
-| **Bond** | Les sauts en sprint portent plus loin ; en sprint, les marches d'un bloc se montent seules |
-| **Saut de la foi** | Tomber dans une **meule**, du **foin**, du **feuillage** ou sur un **auvent** : aucun dégât |
-| **Roulade** | **Maj** en touchant le sol : jusqu'à 9 blocs de chute sans mal |
-
-### Les objets de parkour (onglet « L'Ombre » du mode créatif)
-
-| Objet | Comment s'en servir |
-|---|---|
-| **Poteau de tyrolienne** + **corde** | Corde en main, clic droit sur un poteau puis sur un autre (64 blocs max). Pour partir : **clic droit** sur le poteau du haut, ou **saute sur le câble, clic droit maintenu**. Pendant la glisse : Espace saute (assassinat aérien possible), Maj lâche |
-| **Monte-charge** | À poser au pied d'un mur. **Clic droit dessus** : le contrepoids tombe, tu montes le long de la corde (départ doux, puis de plus en plus vite) jusqu'au toit et tu t'y rétablis |
-| **Perche** | Barre à saisir au vol (**clic droit maintenu**) : on se balance, **Z** donne de l'élan et projette, Espace saute, Maj lâche |
-| **Enseigne de boutique** | Elle sort du mur : sa potence se saisit comme une perche |
-| **Poutre** | Pièce de bois étroite pour relier deux toits |
-| **Corniche** | Rebord de pierre à poser sur une façade : on s'y accroche, on le longe |
-| **Auvent** | Toile sur une façade : on tombe dessus sans se faire mal |
-| **Échafaudage** | Plateau sur poteaux, à empiler : des marches pour monter aux toits |
-| **Lampadaire** + **tête de lampadaire** | Le fût s'escalade, le chapeau sert de perchoir. Il éclaire |
-| **Perchoir** | Un point de vue à poser n'importe où : s'y tenir révèle les gardes 30 s |
-| **Meule de foin** | À empiler sur 2 de haut : on la traverse, on y plonge de très haut sans mal, on s'y cache debout |
-| **Puits** | Saute dedans : caché, les yeux au ras de la margelle. Un saut pour en sortir |
-| **Cabine à rideau** | Entre par le rideau : caché debout. Elle s'ouvre vers celui qui la pose |
-
-Les poses du personnage (escalade, suspension, tyrolienne, perche, course sur mur…) se voient en vue extérieure : touche **F5**.
+| **Rebord** | Automatique en tombant le long d'un mur. Z ou Espace se hisser · Q/D glisser · Q/D + Espace sauter au rebord voisin · S redescendre · Maj lâcher |
+| **Course sur mur** | En sprint, sauter le long d'un mur, Z enfoncé ; Espace rebondit vers le mur d'en face |
+| **Perche, enseigne, lanterne à potence, câble** | **Clic droit maintenu** en passant à portée : on se balance (Z = élan et projection) ou on glisse |
+| **Arbalète à grappin** | Clic droit vers le bord d'un toit (40 blocs) : on est tiré jusqu'en haut |
+| **Saut de la foi** | Dans une **meule**, une **charrette de foin**, du foin, du feuillage, sur un auvent ou un étal, ou dans la **Vltava** : aucun dégât. Pendant la chute, bras en croix |
+| **Roulade** | **Maj** en touchant le sol : jusqu'à 9 blocs sans mal |
+| **Point de vue** | Tiens-toi sur une **gargouille** ou un **perchoir** : la caméra fait le tour, tous les gardes sont révélés 30 s |
 
 ### Assassin
 
-![Un sapeur vu de dos, entouré de rouge, et l'invite « [R] Assassinat »](apercu-assassinat.jpg)
-![Caché dans un puits : « [R] Assassinat depuis la cachette »](apercu-puits.jpg)
+Dès qu'un garde peut être tué, il est **entouré de rouge** et l'invite **« [R] … »** s'affiche. Appuie sur **R** : la caméra passe en vue extérieure, et le coup se joue.
 
-Dès qu'un garde peut être tué, il est **entouré de rouge** et une invite s'affiche sous le viseur : **« [R] Assassinat »**. Appuie sur **R**. Il suffit d'avoir la lame de nacre dans l'inventaire.
+| Assassinat | Quand | Le geste |
+|---|---|---|
+| **Au sol** | Il ne t'a pas repéré, devant toi, à 3 blocs | Tu passes derrière lui, une main le saisit, l'autre frappe |
+| **Aérien** | Il est sous toi (toit, rebord, chute), même s'il t'a vu | Tu bondis en arc et retombes sur lui |
+| **Depuis la cachette** | Tu es caché, il passe tout près | Tu l'attires dans la cachette |
+| **Depuis le rebord** | Tu es suspendu, il marche au bord au-dessus | Tu le tires par-dessus le bord |
+| **Double** | Une lame dans chaque main (F) | Un 2ᵉ garde distrait tombe aussi |
 
-| Assassinat | Quand le contour rouge apparaît |
+### Discrétion
+
+| Pour te cacher | Comment |
 |---|---|
-| **Au sol** | Le garde ne t'a pas repéré, il est devant toi, à 3 blocs |
-| **Aérien** | Le garde est sous toi (depuis un toit, un rebord ou en tombant) : tu plonges sur lui, **même s'il t'a vu** |
-| **Depuis un rebord** | Tu es suspendu, et un garde marche au bord du toit juste au-dessus |
-| **Depuis une cachette** | Tu es caché (hautes herbes, buisson, meule, puits, cabine à rideau) et un garde passe tout près, de n'importe quel côté : il est **tiré dans la cachette** avec toi, et les autres ne voient pas le corps |
-| **Double** | Une lame dans chaque main (`F` pour en passer une en main gauche) : un 2ᵉ garde distrait tout près tombe aussi |
-| **Clic gauche** | Marche toujours : frapper un garde distrait avec la lame le tue d'un coup |
+| **La foule** | Marche parmi deux passants ou plus, sans courir : invisible |
+| **Cachettes** | Hautes herbes, buissons, feuillage (accroupi) ; **meule**, **puits**, **cabine à rideau** (debout) ; **charrette de foin** (accroupi) ; **banc** (clic droit pour s'asseoir) |
+| **Déguisement** | **Tenue de hallebardier** (clic droit) : les gardes ne te remarquent qu'à 2 blocs. Perdue si tu cours, grimpes ou frappes. Un hallebardier tué laisse sa tenue |
+| **Perdre un poursuivant** | Cache-toi : il perd ta trace s'il est à plus de 3,5 blocs |
 
-Un garde qui t'a repéré n'a plus de contour rouge (sauf pour l'assassinat aérien) : sème-le, ou aveugle-le avec une bombe de fumée.
+Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère sonne l'alarme.
 
-| Geste | Touches |
+### Objets
+
+| Objet | Effet |
 |---|---|
-| **Se cacher** | Accroupi dans les hautes herbes, une fougère, un buisson, ou sous des feuilles ; **debout** dans une meule, un puits ou une cabine à rideau |
-| **Perdre un poursuivant** | Cache-toi : un garde qui te poursuit perd ta trace s'il est à plus de 3,5 blocs |
-| **Couteaux de lancer** | Clic droit : un couteau part droit devant, rapide et silencieux, et tue d'un coup |
-| **Bombe de fumée** | Clic droit : les gardes autour perdent ta trace, aveuglés 5 s |
-| **Instinct** | **V** : révèle les ennemis à travers les murs (toutes les 15 s) |
-| **Siffler** | **B** : le garde le plus proche vient voir, sans donner l'alarme |
-| **Point de vue** | Tenir debout au sommet de la grande tour (colonne de lumière) ou sur un perchoir |
+| **Lame de nacre** | Assassinats (touche R ou clic gauche) |
+| **Couteaux de lancer** | Clic droit : tue à distance, sans bruit |
+| **Fléchette soporifique** | Le garde s'endort 30 s (il ne voit plus rien) |
+| **Fléchette empoisonnée** | Le garde s'effondre 4 s plus tard, sans un bruit |
+| **Thalers** | Jetés au sol : la foule accourt, les gardes viennent voir |
+| **Pétard** | Bruit et fumée : la foule s'enfuit, les gardes accourent |
+| **Bombe de fumée** | Les gardes autour perdent ta trace, aveuglés 5 s |
+| **Pain de seigle, pain d'épices, fromage, vin, bière** | À manger ; la bière donne de l'élan |
 
-Les touches R, V, B et H se changent dans Options › Commandes › « L'Ombre — Infiltration ».
+**Instinct** : V. **Siffler** : B. **Aide** : H. Ces touches se changent dans Options › Commandes › « L'Ombre — Infiltration ».
 
 ### Commandes du chat
 
 | Commande | Effet |
 |---|---|
-| `/ombre parcours` | Grande carte d'entraînement, **sans gardes**, et on y est emmené : les cachettes (à gauche du départ), escalade, course libre, bonds, course sur mur, rebond, rebords, saut de la foi, roulade, monte-charge, tyrolienne, perches, et une ville de 36 maisons avec tout le mobilier |
-| `/ombre arene` | Le fortin à infiltrer (9 gardes, une cible), avec une tyrolienne et un monte-charge |
+| `/ombre prague` | La Vieille-Ville de 1600, avec sa mission |
+| `/ombre kit` | Tout l'équipement de l'assassin |
+| `/ombre vitrine` | Les 188 blocs du mod exposés en rangées |
+| `/ombre parcours` | Grande carte d'entraînement au parkour, sans gardes |
+| `/ombre arene` | Un petit fortin à infiltrer |
 | `/ombre aide` | Le rappel des commandes dans le chat |
 
-## Comment les gardes te voient
+## Les blocs (trois onglets en mode créatif)
 
-- De **dos** (hors de leur angle de vue de 140°), ils te repèrent de 3 fois moins loin.
-- **Accroupi** : plus discret. **En sprint** : plus visible. **Dans le noir** : presque deux fois moins visible.
-- Dans une **cachette** : on ne te voit qu'à 2 blocs.
-- Un garde qui te repère **sonne l'alarme** (cloche) : les gardes à moins de 20 blocs accourent.
-- Un garde qui t'a repéré n'est plus assassinable de face : il faut le perdre de vue, ou l'aveugler avec la fumée.
+- **L'Ombre — Assassin et parkour** : poteau et corde de tyrolienne, monte-charge, perche, perchoir, meule, puits, cabine à rideau, poutres, corniches, enseignes, auvents (16 couleurs + rayés), échafaudage, lanternes, gouttière, balcons, banc, charrette, gargouille, charpente…
+- **L'Ombre — Prague 1600** : tuiles rouges, ardoise, pierre de taille, pierre gothique noircie, crépis pastel, sgraffite, pavés, dalles, parquet, carrelage, tapisseries, marbres, brique, devantures, boiserie (avec escaliers et dalles) ; horloge astronomique, bannière impériale, colonne d'annonces, statue, sphère armillaire, alambic, étagère de fioles, tonneau de bière, pupitre, carrosse, fontaine, volets, étals, affiches de 1600, fanions…
+- **L'Ombre — Objets et personnages** : la nourriture, les objets à lancer, la tenue, et les œufs des passants, des gardes et des personnages historiques.
 
-## Recettes
+## Pour les curieux
 
-- **Lame de nacre** : lingot de fer (en haut à droite), coquille de nautile (au centre), cuir (en bas à gauche).
-- **Bombe de fumée** (× 2) : poudre à canon + papier + charbon (sans ordre).
-- **Poteau de tyrolienne** (× 2) : crochet, bâton, bâton (en colonne). **Corde** (× 4) : laisse + 2 ficelles.
-- **Monte-charge** : rondins sur les côtés, crochet en haut au milieu, planches en bas.
-- **Perche** (× 4) : bâton, lingot de fer, bâton (en ligne). **Poutre** (× 6) : 3 rondins de sapin écorcés en ligne.
-- **Corniche** (× 6) : 3 pierres lisses, une brique de pierre dessous. **Auvent** (× 4) : 3 laines, 2 bâtons dessous.
-- **Échafaudage** (× 4) : 3 planches, 4 bâtons en dessous. **Lampadaire** (× 3) : 3 pierres noires polies en colonne.
-- **Tête de lampadaire** : pierre noire, pierre lumineuse, pierre noire (en colonne). **Enseigne** (× 2) : 3 lingots de fer en équerre + une planche.
-- **Perchoir** : une plume au-dessus d'un rondin.
-- **Meule de foin** : une botte de foin + du blé. **Puits** : 7 pierres autour d'un seau d'eau (le haut ouvert). **Cabine à rideau** : 7 planches autour d'une laine (le bas ouvert).
-- **Couteaux de lancer** (× 4) : lingot de fer + bâton + silex.
-
-## Pour les curieux : compiler soi-même
-
-Il faut Java 21. Dans ce dossier : `./gradlew build` (ou `gradlew.bat build` sous Windows). Le mod sort dans `build/libs/`.
-`./gradlew runClient` lance directement Minecraft avec le mod.
-
-| Fichier | Rôle |
-|---|---|
-| `Ombre.java` | Point d'entrée : branche chaque mécanique sur le jeu |
-| `Assassinat.java` | Les assassinats à la lame |
-| `Discretion.java` | À quelle distance un garde te voit (cachettes, dos, nuit…) |
-| `mixin/LivingEntityMixin.java` | Modifie Minecraft : escalade et discrétion |
-| `client/Parcours.java` | Le parkour : escalade libre, rebords, rétablissement, course sur mur, tyrolienne, monte-charge, perche |
-| `client/Animations.java` | Les poses du personnage pendant le parkour |
-| `client/EcranAide.java` | L'écran d'aide (touche H) |
-| `client/RenduCordes.java` | Le dessin des cordes de tyrolienne et de monte-charge |
-| `bloc/` | Les blocs de parkour (tyrolienne, monte-charge, perche, perchoir, mobilier) |
-| `CarteParcours.java` | La grande carte d'entraînement (`/ombre parcours`) |
-| `Gardes.java` | Alarme, points de vue, course libre, contrat rempli |
-| `Pouvoirs.java` | Instinct et sifflet |
-| `BombeFumee.java`, `Chute.java` | Fumée ; saut de la foi et roulade |
-| `Arene.java` | La carte : le fortin, son parcours et ses gardes |
+Compiler : `./gradlew build` (Java 21). Ressources (modèles, textures, noms, recettes) : `python3 outils/generer-ressources.py`.
