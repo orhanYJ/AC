@@ -245,7 +245,13 @@
    ],
    "faces": {
     "up": {
-     "texture": "#blanc"
+     "texture": "#blanc",
+     "uv": [
+      0,
+      0,
+      2,
+      16
+     ]
     }
    }
   },
@@ -262,7 +268,13 @@
    ],
    "faces": {
     "up": {
-     "texture": "#blanc"
+     "texture": "#blanc",
+     "uv": [
+      0,
+      0,
+      2,
+      16
+     ]
     }
    }
   },
@@ -279,7 +291,13 @@
    ],
    "faces": {
     "up": {
-     "texture": "#blanc"
+     "texture": "#blanc",
+     "uv": [
+      0,
+      0,
+      2,
+      16
+     ]
     }
    }
   }

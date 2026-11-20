@@ -59,6 +59,8 @@ public final class Gardes {
     private static final Set<String> SYNCHRO = new HashSet<>();
 
     public static void tick(MinecraftServer serveur) {
+        Assassinat.tickExecutions();
+
         // Course libre : en sprintant, on monte un bloc entier sans sauter (chaque tick)
         for (ServerPlayerEntity p : serveur.getPlayerManager().getPlayerList()) {
             if (p.isSprinting() && p.hasStatusEffect(fr.fenua.ombre.objet.Effets.DEGUISE)) {
@@ -175,6 +177,7 @@ public final class Gardes {
             m.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 600, 0, false, false));
             n++;
         }
+        if (ServerPlayNetworking.canSend(p, SynchroPayload.ID)) ServerPlayNetworking.send(p, new SynchroPayload());
         p.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("§6Point de vue")));
         p.networkHandler.sendPacket(new SubtitleS2CPacket(Text.literal("§7Synchronisé — " + n + " gardes révélés")));
         w.playSound(null, p.getBlockPos(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 0.8f, 0.7f);

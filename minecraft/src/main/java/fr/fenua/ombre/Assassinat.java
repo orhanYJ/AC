@@ -97,30 +97,81 @@ public final class Assassinat {
         String nom = typePossible(joueur, v, repere(v, joueur), Discretion.dansCachette(joueur));
         if (nom == null || !joueur.canSee(v)) return;
 
-        if (nom.equals(CACHETTE)) {
-            // On l'attire dans la cachette : son corps disparaît à la vue des autres
-            v.requestTeleport(joueur.getX(), joueur.getY(), joueur.getZ());
-        }
+        // L'assassinat est mis en scène : la victime est figée, le joueur fait son geste, puis le coup tombe
+        int type = nom.equals("Assassinat aérien") ? ExecutionPayload.AERIEN : nom.equals(CACHETTE) ? ExecutionPayload.CACHETTE
+                : nom.startsWith("Assassinat depuis le rebord") ? ExecutionPayload.REBORD : ExecutionPayload.SOL;
+        for (Execution x : EN_COURS) if (x.victime == v || x.joueur == joueur) return;   // déjà en cours
+        joueur.fallDistance = 0;
+        if (v instanceof MobEntity m) { m.setTarget(null); m.getNavigation().stop(); }
+        EN_COURS.add(new Execution(joueur, v, type, nom));
+        if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(joueur, ExecutionPayload.ID))
+            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(joueur,
+                    new ExecutionPayload(type, v.getId(), v.getX(), v.getY(), v.getZ(), v.getBodyYaw()));
+        sw.playSound(null, joueur.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 0.4f, 1.4f);
+    }
 
-        if (nom.equals("Assassinat aérien")) {
-            // On plonge sur lui : le joueur atterrit à sa place, sans dégâts de chute
-            joueur.fallDistance = 0;
-            joueur.requestTeleport(v.getX(), v.getY(), v.getZ());
-        }
-        tuer(sw, joueur, v);
-        joueur.swingHand(Hand.MAIN_HAND, true);
+    /** Un assassinat en train de se jouer. */
+    private static final class Execution {
+        final net.minecraft.server.network.ServerPlayerEntity joueur;
+        final LivingEntity victime;
+        final int type;
+        final String nom;
+        int t;
 
-        // Double assassinat : une lame dans l'autre main et un second garde distrait tout près
-        if (joueur.getOffHandStack().isOf(OmbreItems.LAME)) {
-            for (LivingEntity autre : sw.getEntitiesByClass(LivingEntity.class, v.getBoundingBox().expand(2.5),
-                    x -> x != v && visable(x) && !repere(x, joueur))) {
-                tuer(sw, joueur, autre);
-                joueur.swingHand(Hand.OFF_HAND, true);
-                nom = "Double assassinat";
-                break;
+        Execution(net.minecraft.server.network.ServerPlayerEntity j, LivingEntity v, int type, String nom) {
+            this.joueur = j; this.victime = v; this.type = type; this.nom = nom;
+        }
+    }
+
+    private static final java.util.List<Execution> EN_COURS = new java.util.ArrayList<>();
+
+    /** Chaque tick : la victime reste figée (ou est tirée), puis le coup tombe à la fin du geste. */
+    public static void tickExecutions() {
+        java.util.Iterator<Execution> it = EN_COURS.iterator();
+        while (it.hasNext()) {
+            Execution x = it.next();
+            x.t++;
+            LivingEntity v = x.victime;
+            if (!v.isAlive() || x.joueur.isRemoved() || x.joueur.getWorld() != v.getWorld()) { it.remove(); continue; }
+            if (v instanceof MobEntity m) { m.setTarget(null); m.getNavigation().stop(); }
+            switch (x.type) {
+                case ExecutionPayload.CACHETTE -> {
+                    // On l'attire dans la cachette
+                    net.minecraft.util.math.Vec3d p = v.getPos().lerp(x.joueur.getPos(), 0.3);
+                    v.requestTeleport(p.x, p.y, p.z);
+                }
+                case ExecutionPayload.REBORD -> {
+                    // On le tire par-dessus le bord : il passe devant le joueur et tombe
+                    if (x.t == 3) {
+                        double dx = x.joueur.getX() - v.getX(), dz = x.joueur.getZ() - v.getZ(), n = Math.max(0.01, Math.sqrt(dx * dx + dz * dz));
+                        v.setVelocity(dx / n * 0.45, 0.25, dz / n * 0.45);
+                        v.velocityModified = true;
+                    }
+                }
+                default -> {
+                    v.setVelocity(0, Math.min(0, v.getVelocity().y), 0);
+                    v.velocityModified = true;
+                }
+            }
+            if (x.t >= ExecutionPayload.DUREE[x.type]) {
+                it.remove();
+                ServerWorld sw = (ServerWorld) v.getWorld();
+                x.joueur.fallDistance = 0;
+                tuer(sw, x.joueur, v);
+                x.joueur.swingHand(Hand.MAIN_HAND, true);
+                String nom = x.nom;
+                if (x.joueur.getOffHandStack().isOf(OmbreItems.LAME)) {
+                    for (LivingEntity autre : sw.getEntitiesByClass(LivingEntity.class, v.getBoundingBox().expand(2.5),
+                            e -> e != v && visable(e) && !repere(e, x.joueur))) {
+                        tuer(sw, x.joueur, autre);
+                        x.joueur.swingHand(Hand.OFF_HAND, true);
+                        nom = "Double assassinat";
+                        break;
+                    }
+                }
+                x.joueur.sendMessage(Text.literal("§7✦ " + nom), true);
             }
         }
-        joueur.sendMessage(Text.literal("§7✦ " + nom), true);
     }
 
     /** Vrai si la créature a le joueur pour cible (elle sait où il est). */

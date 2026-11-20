@@ -88,6 +88,23 @@ public final class Objets {
 
     public static final Item TENUE = new Tenue(new Item.Settings().maxCount(4));
 
+    /**
+     * Lance-grappin : clic droit vers le bord d'un toit (40 blocs au plus). Le crochet s'y accroche,
+     * on est tiré jusqu'en haut et on se rétablit. Le mouvement est calculé chez le joueur (voir Parcours).
+     */
+    public static class Grappin extends Item {
+        public Grappin(Settings s) { super(s); }
+        @Override
+        public TypedActionResult<ItemStack> use(World w, PlayerEntity joueur, Hand main) {
+            if (w.isClient() && fr.fenua.ombre.bloc.CoteClient.ICI[0] != null) fr.fenua.ombre.bloc.CoteClient.ICI[0].grappin();
+            if (!w.isClient()) w.playSound(null, joueur.getBlockPos(), SoundEvents.ITEM_CROSSBOW_SHOOT, SoundCategory.PLAYERS, 0.8f, 1.3f);
+            joueur.getItemCooldownManager().set(this, 30);
+            return TypedActionResult.success(joueur.getStackInHand(main), w.isClient());
+        }
+    }
+
+    public static final Item GRAPPIN = new Grappin(new Item.Settings().maxCount(1));
+
     public static EntityType<Projectile> PROJECTILE;
 
     /** Dans l'ordre de l'onglet « Objets ». */
@@ -105,6 +122,7 @@ public final class Objets {
         objet("flechette_soporifique", FLECHETTE_SOPORIFIQUE);
         objet("flechette_empoisonnee", FLECHETTE_EMPOISONNEE);
         objet("tenue_gardien", TENUE);
+        objet("lance_grappin", GRAPPIN);
         PROJECTILE = Registry.register(Registries.ENTITY_TYPE, Identifier.of(Ombre.MOD_ID, "projectile"),
                 EntityType.Builder.<Projectile>create(Projectile::new, SpawnGroup.MISC).dimensions(0.25f, 0.25f)
                         .maxTrackingRange(4).trackingTickInterval(10).build("projectile"));

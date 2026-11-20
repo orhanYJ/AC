@@ -7,6 +7,7 @@ import net.minecraft.client.MinecraftClient;
 import fr.fenua.ombre.bloc.CoteClient;
 import fr.fenua.ombre.bloc.OmbreBlocs;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -38,6 +39,21 @@ public class OmbreClient implements ClientModInitializer {
 
         // Le serveur dit qui nous a repérés ; l'invite d'assassinat s'affiche sous le viseur
         ClientPlayNetworking.registerGlobalReceiver(VigilancePayload.ID, (payload, ctx) -> Assassin.recevoir(payload.reperes()));
+        ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ExecutionPayload.ID, (payload, ctx) -> Parcours.executer(payload));
+        ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.SynchroPayload.ID, (payload, ctx) -> Parcours.synchro());
+
+        // La corde du lance-grappin, de la main jusqu'au crochet
+        WorldRenderEvents.AFTER_ENTITIES.register(ctx -> {
+            net.minecraft.util.math.Vec3d ancre = Parcours.ancreGrappin();
+            MinecraftClient mc = MinecraftClient.getInstance();
+            if (ancre == null || mc.player == null || ctx.matrixStack() == null || ctx.consumers() == null) return;
+            net.minecraft.util.math.Vec3d cam = ctx.camera().getPos();
+            net.minecraft.util.math.Vec3d main = mc.player.getLerpedPos(ctx.tickCounter().getTickDelta(true)).add(0, 1.9, 0);
+            ctx.matrixStack().push();
+            ctx.matrixStack().translate(-cam.x, -cam.y, -cam.z);
+            RenduCordes.dessiner(ctx.matrixStack(), ctx.consumers(), mc.world, BlockPos.ORIGIN, main, ancre, false);
+            ctx.matrixStack().pop();
+        });
         HudRenderCallback.EVENT.register((ctx, compteur) -> Assassin.dessiner(ctx, MinecraftClient.getInstance()));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -53,6 +69,7 @@ public class OmbreClient implements ClientModInitializer {
         CoteClient.ICI[0] = new CoteClient() {
             @Override public void tyrolienne(BlockPos de, BlockPos vers) { Parcours.demarrerTyrolienne(de, vers); }
             @Override public void monteCharge(BlockPos pos, Direction mur, int sommet) { Parcours.demarrerMonteCharge(pos, mur, sommet); }
+            @Override public void grappin() { Parcours.lancerGrappin(); }
         };
 
         // L'eau du puits et de la fontaine prend la couleur de l'eau

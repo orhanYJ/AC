@@ -11,6 +11,7 @@ import net.minecraft.util.math.Vec3d;
 public interface CoteClient {
     void tyrolienne(BlockPos depart, BlockPos arrivee);
     void monteCharge(BlockPos pos, Direction mur, int sommet);
+    void grappin();
 
     /** Rempli par OmbreClient. */
     CoteClient[] ICI = new CoteClient[1];

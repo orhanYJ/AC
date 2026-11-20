@@ -84,22 +84,58 @@
    ],
    "faces": {
     "north": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      6,
+      5
+     ]
     },
     "south": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      6,
+      5
+     ]
     },
     "east": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      5,
+      5
+     ]
     },
     "west": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      5,
+      5
+     ]
     },
     "up": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      6,
+      5
+     ]
     },
     "down": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      6,
+      5
+     ]
     }
    }
   },
@@ -116,22 +152,58 @@
    ],
    "faces": {
     "north": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      4,
+      2
+     ]
     },
     "south": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      4,
+      2
+     ]
     },
     "east": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      3,
+      2
+     ]
     },
     "west": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      3,
+      2
+     ]
     },
     "up": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      4,
+      3
+     ]
     },
     "down": {
-     "texture": "#bete"
+     "texture": "#bete",
+     "uv": [
+      0,
+      0,
+      4,
+      3
+     ]
     }
    }
   },
@@ -212,7 +284,13 @@
    ],
    "faces": {
     "south": {
-     "texture": "#oeil"
+     "texture": "#oeil",
+     "uv": [
+      0,
+      0,
+      1.0,
+      1
+     ]
     }
    }
   },
@@ -229,7 +307,13 @@
    ],
    "faces": {
     "south": {
-     "texture": "#oeil"
+     "texture": "#oeil",
+     "uv": [
+      0,
+      0,
+      1.0,
+      1
+     ]
     }
    }
   }

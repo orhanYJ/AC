@@ -342,13 +342,16 @@ icone("flechette_soporifique", flechette((90, 110, 200)))
 icone("flechette_empoisonnee", flechette((70, 160, 50)))
 icone("tenue_gardien", lambda d, t: (d.polygon([(4, 3), (11, 3), (14, 6), (12, 8), (11, 7), (11, 14), (4, 14), (4, 7), (3, 8), (1, 6)], fill=(35, 45, 80)),
                                      [d.point((8, y), fill=(200, 200, 210)) for y in (5, 8, 11)], d.rectangle((6, 1, 9, 3), fill=(30, 30, 50))))
+icone("lance_grappin", lambda d, t: (d.rectangle((3, 8, 10, 11), fill=(70, 50, 35)), d.rectangle((9, 7, 13, 9), fill=(110, 110, 120)),
+                                     d.line((13, 8, 15, 5), fill=(170, 170, 180)), d.line((13, 8, 15, 11), fill=(170, 170, 180)), d.line((14, 8, 15, 8), fill=(170, 170, 180)),
+                                     d.rectangle((4, 11, 6, 14), fill=(60, 40, 28)), d.line((10, 9, 3, 3), fill=(150, 112, 70))), "minecraft:item/handheld")
 for o in ["passant", "gardien", "gendarme", "officier"]:
     ecrire(f"{A}/models/item/oeuf_{o}.json", {"parent": "minecraft:item/template_spawn_egg"})
 NOMS.update({
     "item.ombre.baguette": "Baguette", "item.ombre.croissant": "Croissant", "item.ombre.fromage": "Fromage", "item.ombre.vin": "Bouteille de vin",
     "item.ombre.cafe": "Tasse de café", "item.ombre.ecus": "Écus (à jeter : la foule accourt)", "item.ombre.petard": "Pétard (bruit et fumée)",
     "item.ombre.flechette_soporifique": "Fléchette soporifique", "item.ombre.flechette_empoisonnee": "Fléchette empoisonnée",
-    "item.ombre.tenue_gardien": "Tenue de gardien (déguisement)",
+    "item.ombre.tenue_gardien": "Tenue de gardien (déguisement)", "item.ombre.lance_grappin": "Lance-grappin",
     "item.ombre.oeuf_passant": "Œuf de passant", "item.ombre.oeuf_gardien": "Œuf de gardien de la paix", "item.ombre.oeuf_gendarme": "Œuf de gendarme",
     "item.ombre.oeuf_officier": "Œuf d'officier",
     "entity.ombre.passant": "Passant", "entity.ombre.gardien": "Gardien de la paix", "entity.ombre.gendarme": "Gendarme",
@@ -360,7 +363,8 @@ for n, ingr, k in [("baguette", ["wheat", "wheat", "wheat"], 2), ("croissant", [
                    ("vin", ["glass_bottle", "sweet_berries", "sweet_berries"], 1), ("cafe", ["cocoa_beans", "water_bucket", "sugar"], 2),
                    ("ecus", ["gold_nugget", "gold_nugget"], 8), ("petard", ["gunpowder", "paper", "red_dye"], 3),
                    ("flechette_soporifique", ["arrow", "poppy"], 2), ("flechette_empoisonnee", ["arrow", "spider_eye"], 2),
-                   ("tenue_gardien", ["blue_wool", "blue_wool", "iron_nugget", "black_wool"], 1)]:
+                   ("tenue_gardien", ["blue_wool", "blue_wool", "iron_nugget", "black_wool"], 1),
+                   ("lance_grappin", ["crossbow", "tripwire_hook", "lead"], 1)]:
     sans_forme(n, ingr, k, "misc")
 
 # ───────────── Icônes d'effets (18 × 18) ─────────────
@@ -473,3 +477,30 @@ for l in ("fr_fr", "en_us"):
     dd.update(NOMS)
     json.dump(dd, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 print(f"{len(NOMS)} noms, ressources générées.")
+
+# ───────────── Placage des pièces qui dépassent du bloc ─────────────
+# Une pièce qui sort du cube 0–16 (le dos d'une cabine de 2 blocs, une hampe, une tête de gargouille…)
+# irait chercher sa texture hors de sa case, dans l'image voisine. On lui donne des coordonnées
+# de texture explicites (« uv »), ramenées dans la case.
+def plaquer(dossier):
+    n = 0
+    for f in os.listdir(dossier):
+        p = os.path.join(dossier, f)
+        m = json.load(open(p))
+        if "elements" not in m: continue
+        change = False
+        for e in m["elements"]:
+            a, b = e["from"], e["to"]
+            dehors = any(v < 0 or v > 16 for v in a + b)
+            if not dehors: continue
+            for face, d in e["faces"].items():
+                if "uv" in d: continue
+                if face in ("north", "south"): w, h = b[0] - a[0], b[1] - a[1]
+                elif face in ("east", "west"): w, h = b[2] - a[2], b[1] - a[1]
+                else: w, h = b[0] - a[0], b[2] - a[2]
+                d["uv"] = [0, 0, round(min(16, max(0.5, w)), 2), round(min(16, max(0.5, h)), 2)]
+                change = True
+        if change:
+            ecrire(p, m); n += 1
+    return n
+print("modèles corrigés :", plaquer(f"{A}/models/block"))

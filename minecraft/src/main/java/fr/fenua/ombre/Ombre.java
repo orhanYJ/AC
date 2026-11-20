@@ -42,6 +42,8 @@ public class Ombre implements ModInitializer {
         // Touches spéciales envoyées par le client (instinct, siffler, assassiner)
         PayloadTypeRegistry.playC2S().register(ActionPayload.ID, ActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(VigilancePayload.ID, VigilancePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ExecutionPayload.ID, ExecutionPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(SynchroPayload.ID, SynchroPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ActionPayload.ID,
                 (payload, context) -> Pouvoirs.agir(context.player(), payload.action(), payload.cible()));
 
@@ -54,6 +56,13 @@ public class Ombre implements ModInitializer {
                         .then(CommandManager.literal("parcours")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> CarteParcours.construire(ctx.getSource())))
+                        .then(CommandManager.literal("paris")
+                                .requires(src -> src.hasPermissionLevel(2))
+                                .executes(ctx -> CarteParis.construire(ctx.getSource())))
+                        .then(CommandManager.literal("kit")
+                                .requires(src -> src.hasPermissionLevel(2))
+                                .executes(ctx -> { Kit.donner(ctx.getSource().getPlayerOrThrow());
+                                    ctx.getSource().sendFeedback(() -> Text.literal("§6Équipement de l'assassin§r reçu."), false); return 1; }))
                         .then(CommandManager.literal("vitrine")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> Vitrine.construire(ctx.getSource())))

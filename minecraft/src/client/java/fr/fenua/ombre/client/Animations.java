@@ -78,6 +78,52 @@ public final class Animations {
                 m.rightLeg.pitch = -1.0f;
                 m.leftLeg.pitch = 0.6f;
             }
+            case PLONGEON -> {                  // le saut de la foi, bras en croix
+                m.rightArm.roll = 1.45f;
+                m.leftArm.roll = -1.45f;
+                m.rightArm.pitch = -0.2f;
+                m.leftArm.pitch = -0.2f;
+                m.rightLeg.pitch = 0.15f;
+                m.leftLeg.pitch = 0.15f;
+            }
+            case GRAPPIN -> {                   // tiré par la corde, le lanceur tendu au-dessus de la tête
+                m.rightArm.pitch = -2.9f;
+                m.leftArm.pitch = -2.4f;
+                m.rightLeg.pitch = -0.4f;
+                m.leftLeg.pitch = 0.2f;
+            }
+            case EXEC_SOL -> {                  // une main saisit, l'autre frappe
+                float k = Parcours.progresExec();
+                m.leftArm.pitch = -1.5f;
+                m.leftArm.yaw = 0.3f;
+                m.rightArm.pitch = k < 0.55f ? -2.7f : -1.3f;
+                m.rightArm.yaw = -0.2f;
+                m.rightLeg.pitch = 0.4f;
+                m.leftLeg.pitch = -0.5f;
+            }
+            case EXEC_AERIEN -> {               // la lame levée, on tombe sur lui
+                float k = Parcours.progresExec();
+                m.rightArm.pitch = k < 0.8f ? -3.0f : -1.0f;
+                m.leftArm.pitch = k < 0.8f ? -2.6f : -1.6f;
+                m.leftArm.roll = -0.4f;
+                m.rightLeg.pitch = -1.2f;
+                m.leftLeg.pitch = -0.6f;
+            }
+            case EXEC_CACHETTE -> {             // on l'attrape et on le tire à soi
+                float k = Parcours.progresExec();
+                m.rightArm.pitch = -1.6f + k * 1.0f;
+                m.leftArm.pitch = -1.6f + k * 0.8f;
+                m.rightLeg.pitch = -0.6f;
+                m.leftLeg.pitch = 0.3f;
+            }
+            case EXEC_REBORD -> {               // suspendu d'une main, l'autre tire le garde par-dessus le bord
+                float k = Parcours.progresExec();
+                m.leftArm.pitch = -3.0f;
+                m.rightArm.pitch = -2.8f + k * 1.4f;
+                m.rightArm.roll = 0.3f;
+                m.rightLeg.pitch = 0.2f;
+                m.leftLeg.pitch = -0.2f;
+            }
             default -> {}
         }
     }

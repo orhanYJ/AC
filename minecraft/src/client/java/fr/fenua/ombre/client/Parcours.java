@@ -44,10 +44,10 @@ import net.minecraft.world.World;
 public final class Parcours {
     private Parcours() {}
 
-    enum Etat { LIBRE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE }
+    enum Etat { LIBRE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, EXEC, GRAPPIN }
 
     /** Poses reprises par les animations (Animations). */
-    public enum Pose { AUCUNE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, BOND }
+    public enum Pose { AUCUNE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, BOND, PLONGEON, GRAPPIN, EXEC_SOL, EXEC_AERIEN, EXEC_CACHETTE, EXEC_REBORD }
 
     private static Etat etat = Etat.LIBRE;
     private static double murX, murZ;          // direction du mur (vers lui), vecteur unité
@@ -85,7 +85,14 @@ public final class Parcours {
             case TYRO -> Pose.TYRO;
             case LIFT -> Pose.LIFT;
             case PERCHE -> Pose.PERCHE;
-            default -> poseBond > 0 ? Pose.BOND : Pose.AUCUNE;
+            case EXEC -> switch (execType) {
+                case fr.fenua.ombre.ExecutionPayload.AERIEN -> Pose.EXEC_AERIEN;
+                case fr.fenua.ombre.ExecutionPayload.CACHETTE -> Pose.EXEC_CACHETTE;
+                case fr.fenua.ombre.ExecutionPayload.REBORD -> Pose.EXEC_REBORD;
+                default -> Pose.EXEC_SOL;
+            };
+            case GRAPPIN -> Pose.GRAPPIN;
+            default -> poseBond > 0 ? Pose.BOND : plongeon ? Pose.PLONGEON : Pose.AUCUNE;
         };
     }
 
@@ -129,7 +136,11 @@ public final class Parcours {
                 case TYRO -> tyro(p, in, nouveauSaut);
                 case LIFT -> lift(p);
                 case PERCHE -> perche(p, in, nouveauSaut);
+                case EXEC -> execution(client, p);
+                case GRAPPIN -> grappin(p);
             }
+            plongeon = etat == Etat.LIBRE && !sol && p.getVelocity().y < -0.75;
+            tourner(client, p);
             float corps = corpsVersMur();
             if (!Float.isNaN(corps)) p.setBodyYaw(corps);
         } finally {
@@ -586,6 +597,134 @@ public final class Parcours {
             if (CoteClient.pointCable(c.a(), c.b(), t).distanceTo(mains) < 1.5) return true;
         }
         return false;
+    }
+
+    // ───────────────────────── PLONGEON, SYNCHRONISATION ─────────────────────────
+
+    private static boolean plongeon;
+    private static int tour;                    // ticks restants du tour de caméra (synchronisation)
+    private static net.minecraft.client.option.Perspective vueAvantTour;
+
+    /** Point de vue synchronisé : la caméra fait le tour du joueur, comme un aigle qui plane. */
+    public static void synchro() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        tour = 72;
+        vueAvantTour = client.options.getPerspective();
+        client.options.setPerspective(net.minecraft.client.option.Perspective.THIRD_PERSON_BACK);
+    }
+
+    private static void tourner(MinecraftClient client, ClientPlayerEntity p) {
+        if (tour <= 0) return;
+        tour--;
+        p.setYaw(p.getYaw() + 5f);
+        p.setPitch(MathHelper.lerp(0.1f, p.getPitch(), 18f));
+        if (tour == 0 && vueAvantTour != null) client.options.setPerspective(vueAvantTour);
+    }
+
+    // ───────────────────────── LANCE-GRAPPIN ─────────────────────────
+
+    private static Vec3d grappinAncre, grappinBut;
+
+    /** Le crochet du lance-grappin, s'il est accroché (pour dessiner la corde). */
+    public static Vec3d ancreGrappin() { return etat == Etat.GRAPPIN ? grappinAncre : null; }
+
+    public static void lancerGrappin() {
+        ClientPlayerEntity p = MinecraftClient.getInstance().player;
+        if (p == null || etat == Etat.GRAPPIN || etat == Etat.EXEC) return;
+        net.minecraft.util.hit.HitResult h = p.raycast(40, 0, false);
+        if (!(h instanceof net.minecraft.util.hit.BlockHitResult bh) || h.getType() != net.minecraft.util.hit.HitResult.Type.BLOCK) {
+            p.sendMessage(Text.literal("§7Le crochet ne trouve rien où s'accrocher."), true);
+            return;
+        }
+        World w = p.getWorld();
+        BlockPos b = bh.getBlockPos();
+        // Le haut du mur visé : on monte la colonne jusqu'au premier endroit libre sur 2 blocs
+        int haut = Integer.MIN_VALUE;
+        for (int y = b.getY(); y <= b.getY() + 8; y++) {
+            BlockPos c = b.withY(y);
+            if (!w.getBlockState(c).getCollisionShape(w, c).isEmpty()
+                    && w.getBlockState(c.up()).getCollisionShape(w, c.up()).isEmpty()
+                    && w.getBlockState(c.up(2)).getCollisionShape(w, c.up(2)).isEmpty()) { haut = y + 1; break; }
+        }
+        if (haut == Integer.MIN_VALUE) { p.sendMessage(Text.literal("§7Pas de bord où se hisser là-haut."), true); return; }
+        double dx = bh.getPos().x - p.getX(), dz = bh.getPos().z - p.getZ(), n = Math.max(0.01, Math.sqrt(dx * dx + dz * dz));
+        murX = dx / n; murZ = dz / n;
+        cible = haut;
+        grappinAncre = new Vec3d(bh.getPos().x, haut, bh.getPos().z);
+        grappinBut = new Vec3d(bh.getPos().x - murX * 0.7, haut - 1.2, bh.getPos().z - murZ * 0.7);
+        changer(Etat.GRAPPIN);
+        p.playSound(SoundEvents.ENTITY_FISHING_BOBBER_THROW, 0.8f, 0.8f);
+        rattrape();
+    }
+
+    private static void grappin(ClientPlayerEntity p) {
+        Vec3d d = grappinBut.subtract(p.getPos());
+        double l = d.length();
+        if (l < 1.0 || duree > 80 || (duree > 4 && p.horizontalCollision && p.getY() > cible - 2.2)) {
+            hisser(p, murX, murZ, cible);
+            return;
+        }
+        double v = Math.min(1.1, 0.25 + duree * 0.06);
+        p.setVelocity(d.multiply(Math.min(v, l * 0.5) / l));
+        if (duree % 4 == 0) p.playSound(SoundEvents.BLOCK_CHAIN_STEP, 0.3f, 1.2f);
+        if (duree % 10 == 0) rattrape();
+    }
+
+    // ───────────────────────── ASSASSINAT MIS EN SCÈNE ─────────────────────────
+
+    private static int execType, execDuree;
+    private static Vec3d execCible;
+    private static float execYaw;
+    private static net.minecraft.client.option.Perspective vueAvant;
+    private static Etat etatAvantExec = Etat.LIBRE;
+
+    /** Progression du geste d'assassinat, de 0 à 1 (pour les poses). */
+    static float progresExec() { return execDuree == 0 ? 0 : Math.min(1f, (float) duree / execDuree); }
+
+    /** Le serveur a lancé un assassinat : on joue le geste, la pose, et la caméra passe en vue extérieure. */
+    public static void executer(fr.fenua.ombre.ExecutionPayload e) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        ClientPlayerEntity p = client.player;
+        if (p == null) return;
+        etatAvantExec = etat == Etat.REBORD ? Etat.REBORD : Etat.LIBRE;
+        execType = e.type();
+        execDuree = fr.fenua.ombre.ExecutionPayload.DUREE[e.type()];
+        execCible = new Vec3d(e.x(), e.y(), e.z());
+        execYaw = e.yaw();
+        vueAvant = client.options.getPerspective();
+        if (vueAvant.isFirstPerson()) client.options.setPerspective(net.minecraft.client.option.Perspective.THIRD_PERSON_BACK);
+        changer(Etat.EXEC);
+        p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, 0.5f, 0.8f);
+    }
+
+    private static void execution(MinecraftClient client, ClientPlayerEntity p) {
+        int reste = Math.max(1, execDuree - duree);
+        Vec3d pos = p.getPos();
+        switch (execType) {
+            case fr.fenua.ombre.ExecutionPayload.AERIEN -> {
+                // Un bond en arc jusque sur la victime
+                Vec3d but = execCible.add(0, 0.2, 0);
+                Vec3d v = but.subtract(pos).multiply(1.0 / reste);
+                p.setVelocity(v.x, v.y + (reste > 3 ? 0.06 : 0), v.z);
+            }
+            case fr.fenua.ombre.ExecutionPayload.SOL -> {
+                // Un pas derrière la victime
+                float r = execYaw * MathHelper.RADIANS_PER_DEGREE;
+                Vec3d but = execCible.add(MathHelper.sin(r) * 0.75, 0, -MathHelper.cos(r) * 0.75);
+                Vec3d v = but.subtract(pos);
+                p.setVelocity(v.x * 0.35, p.getVelocity().y, v.z * 0.35);
+            }
+            default -> p.setVelocity(0, etatAvantExec == Etat.REBORD || execType == fr.fenua.ombre.ExecutionPayload.REBORD ? 0 : p.getVelocity().y, 0);
+        }
+        // On regarde la victime
+        double dx = execCible.x - p.getX(), dz = execCible.z - p.getZ();
+        if (dx * dx + dz * dz > 0.04) p.setBodyYaw((float) Math.toDegrees(Math.atan2(-dx, dz)));
+        if (duree % 5 == 0) rattrape();
+        if (duree >= execDuree + 6) {
+            changer(etatAvantExec == Etat.REBORD && execType == fr.fenua.ombre.ExecutionPayload.REBORD ? Etat.REBORD : Etat.LIBRE);
+            if (vueAvant != null) client.options.setPerspective(vueAvant);
+            vueAvant = null;
+        }
     }
 
     // ───────────────────────── gestes communs ─────────────────────────
