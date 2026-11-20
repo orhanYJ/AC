@@ -2,6 +2,8 @@
 
 Un mod **Fabric** pour **Minecraft Java 1.21.1** : jouer en assassin discret, avec du parkour et un fortin à infiltrer.
 
+![Le fortin construit par /ombre arene, au coucher du soleil : gardes en rouge, cible en or, colonne de lumière du point de vue](apercu.jpg)
+
 Fichier à installer : [`telecharger/ombre-infiltration-0.1.0.jar`](telecharger/ombre-infiltration-0.1.0.jar)
 
 ## Installation (une seule fois)
