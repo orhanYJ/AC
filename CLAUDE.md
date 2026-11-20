@@ -141,6 +141,7 @@ Chaque niveau a désormais son relief : tertres de 1,5 à 4,5 m dans les espaces
 Projet séparé du jeu web : **« L'Ombre — Infiltration »**, mod **Fabric** pour **Minecraft Java 1.21.1** (Loom 1.11, Yarn, Fabric API 0.116). Code Java commenté en français, mode d'emploi pour le propriétaire dans `minecraft/README.md`.
 
 - Compiler : `cd minecraft && ./gradlew build` (Java 21) ; le `.jar` sort dans `build/libs/`, une copie à jour est livrée dans `minecraft/telecharger/`.
+- **À chaque nouvelle version, donner au propriétaire le lien direct du `.jar`** (demande expresse) : `https://github.com/orhanYJ/AC/raw/<branche>/minecraft/telecharger/ombre-infiltration-0.1.0.jar`, avec la branche où il a été poussé (aujourd'hui `claude/elegant-feynman-qh6m7g`).
 - Tester sans écran : `./gradlew runServer --args=nogui` (la console lit les commandes tapées, `run/eula.txt` à `eula=true`, monde plat conseillé dans `run/server.properties`), puis `execute positioned 0 -60 0 rotated 0 0 run ombre arene` et `execute if entity @e[tag=ombre_garde]` (9 gardes attendus).
 - Côté serveur (`src/main`) : assassinats (`Assassinat`), discrétion par le facteur de distance de Minecraft (`Discretion`, branché par `mixin/LivingEntityMixin`, qui fait aussi l'escalade), alarme et points de vue (`Gardes`, étiquettes `ombre_garde`, `ombre_cible`, marqueur `ombre_vue`), instinct et sifflet (`Pouvoirs`, via `ActionPayload`), fumée, saut de la foi et roulade, fortin (`Arene`, commande `/ombre arene`).
 - Blocs (`bloc/`) : `PoteauTyrolienne` (entité de bloc qui retient l'autre bout ; on relie avec la `CORDE`, `relier()` pour les cartes), `MonteCharge` (orienté vers le mur, `sommet()` trouve le toit), `Perche`, `Perchoir` (point de vue en bloc, synchronisé par `Gardes.perchoirs`), et le mobilier de `Mobilier` (poutre, corniche, enseigne, auvent, échafaudage, lampadaire). Modèles 3D en JSON avec les textures de Minecraft (aucune image nouvelle sauf la corde). `CoteClient` fait le pont vers le client (départ de tyrolienne ou de monte-charge) et porte la forme du câble (`pointCable`).
@@ -150,7 +151,7 @@ Projet séparé du jeu web : **« L'Ombre — Infiltration »**, mod **Fabric** 
 - **Piège des mondes plats** : le sol y est à y = -60, donc une hauteur peut être négative. Ne jamais coder « pas trouvé » par -1 (le monte-charge l'a fait : il ne marchait jamais en monde plat). `MonteCharge.AUCUN` vaut `Integer.MIN_VALUE`.
 - Tester en jouant pour de vrai : Xvfb + `python-xlib` (XTest) envoient de vrais clics et touches au client lancé par `./gradlew runClient`. Le joueur est placé en écrivant la balise `Player` de `level.dat` (`nbtlib`) d'une copie du monde construit par le serveur ; captures avec `import -window root`.
 - `/ombre parcours` (`CarteParcours`) : carte de 65 × 200 blocs construite en coordonnées locales (a vers la droite, b vers l'avant) pour suivre le regard du joueur.
-- Le parkour n'a pas été essayé à la main ici (pas de clavier sur l'écran virtuel) : les retours du propriétaire servent à régler les valeurs.
+- Le parkour se joue au **clic droit** (la main qui attrape), à la demande du propriétaire : pas d'accrochage ni de saut automatiques. Escalade, monte-charge, perches et assassinat depuis un puits ont été vérifiés en jouant sur l'écran virtuel ; les retours du propriétaire servent à régler le reste.
 
 ## Pistes ouvertes
 
