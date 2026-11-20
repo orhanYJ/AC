@@ -18,5 +18,9 @@
   "key.ombre.instinct": "Instinct (révéler les gardes)",
   "key.ombre.siffler": "Siffler (attirer un garde)",
   "key.ombre.aide": "Aide (toutes les commandes)",
-  "key.ombre.assassiner": "Assassiner (le garde entouré de rouge)"
+  "key.ombre.assassiner": "Assassiner (le garde entouré de rouge)",
+  "block.ombre.meule": "Meule de foin (cachette)",
+  "item.ombre.couteau_lancer": "Couteau de lancer",
+  "block.ombre.puits": "Puits (cachette)",
+  "block.ombre.cabine": "Cabine à rideau (cachette)"
 }

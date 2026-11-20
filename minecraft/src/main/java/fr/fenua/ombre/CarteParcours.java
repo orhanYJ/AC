@@ -6,6 +6,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.block.SignBlock;
+import net.minecraft.block.TallPlantBlock;
+import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.state.property.Properties;
 import fr.fenua.ombre.bloc.OmbreBlocs;
 import fr.fenua.ombre.bloc.PoteauTyrolienne;
@@ -146,6 +148,7 @@ public final class CarteParcours {
     private void batir() {
         aplanir();
         depart();
+        cachettes();
         escalade();
         courseLibre();
         bonds();
@@ -182,6 +185,21 @@ public final class CarteParcours {
         panneau(3, 3, "Pas de gardes", "Tomber à l'eau", "ne fait rien", "/ombre aide");
         lanterne(-5, 4);
         lanterne(5, 4);
+    }
+
+    /** 10. À gauche du départ : toutes les cachettes, côte à côte, pour les essayer. */
+    private void cachettes() {
+        panneau(-9, -1, "CACHETTES", "Meule, puits,", "cabine, herbes.", "R = attirer");
+        boite(-17, -1, 0, -8, -1, 6, Blocks.GRASS_BLOCK);
+        boite(-17, 0, 0, -16, 1, 1, OmbreBlocs.MEULE);
+        set(-13, 0, 1, OmbreBlocs.PUITS);
+        set(-10, 0, 1, vers(OmbreBlocs.CABINE, 'a'));
+        for (int a = -17; a <= -9; a++)
+            for (int b = 4; b <= 6; b++) {
+                set(a, 0, b, Blocks.TALL_GRASS.getDefaultState().with(TallPlantBlock.HALF, DoubleBlockHalf.LOWER));
+                set(a, 1, b, Blocks.TALL_GRASS.getDefaultState().with(TallPlantBlock.HALF, DoubleBlockHalf.UPPER));
+            }
+        lanterne(-8, 0);
     }
 
     /** 1. Quatre murs de hauteurs croissantes, avec du foin au pied pour redescendre. */
@@ -259,12 +277,11 @@ public final class CarteParcours {
 
     /** 7. Une tour de 22 blocs, une poutre, du foin ; et trois piliers pour la roulade. */
     private void sautDeLaFoi() {
-        panneau(-4, 116, "7. SAUT DE", "LA FOI", "Grimpe, puis", "saute au foin");
+        panneau(-4, 116, "7. SAUT DE", "LA FOI", "Saute dans la", "meule, cache-toi");
         boite(-1, 0, 117, 1, 21, 119, Blocks.STONE_BRICKS);
         for (int y = 0; y <= 21; y += 4) boite(-1, y, 117, 1, y, 119, Blocks.CHISELED_STONE_BRICKS);
         boite(0, 21, 120, 0, 21, 124, poutre(true));
-        boite(-2, 0, 123, 2, 0, 127, Blocks.HAY_BLOCK);
-        boite(-1, 1, 124, 1, 1, 126, Blocks.HAY_BLOCK);
+        boite(-2, 0, 123, 2, 1, 127, OmbreBlocs.MEULE);              // meule de foin : on s'y cache aussi
         set(-1, 22, 119, Blocks.LANTERN);
         // Monte-charge au pied de la tour (côté -a), tyrolienne du sommet vers une plate-forme à 21 blocs
         set(-2, 0, 118, vers(OmbreBlocs.MONTE_CHARGE, 'a'));
@@ -348,8 +365,7 @@ public final class CarteParcours {
             int a = A0 + hasard.nextInt(N * CASE), b = BV + hasard.nextInt(N * CASE);
             if (!w.getBlockState(pos(a, 0, b)).isAir()) continue;
             if (k % 3 == 0) {
-                boite(a - 1, 0, b - 1, a + 1, 0, b + 1, Blocks.HAY_BLOCK);
-                set(a, 1, b, Blocks.HAY_BLOCK);
+                boite(a - 1, 0, b - 1, a + 1, 1, b + 1, OmbreBlocs.MEULE);
             } else {
                 boite(a, 0, b, a, 2 + hasard.nextInt(6), b, Blocks.SPRUCE_LOG);
             }
@@ -362,6 +378,11 @@ public final class CarteParcours {
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++)
                 if (!(i == 3 && j == 3)) mobilier(a0[i][j], b0[i][j], a1[i][j], b1[i][j], h[i][j]);
+        // Puits dans les rues
+        for (int k = 0, n = 0; k < 60 && n < 6; k++) {
+            int a = A0 + hasard.nextInt(N * CASE), b = BV + hasard.nextInt(N * CASE);
+            if (w.getBlockState(pos(a, 0, b)).isAir() && w.getBlockState(pos(a, 1, b)).isAir()) { set(a, 0, b, OmbreBlocs.PUITS); n++; }
+        }
         // Lampadaires dans les rues
         for (int k = 0; k < 30; k++) {
             int a = A0 + hasard.nextInt(N * CASE), b = BV + hasard.nextInt(N * CASE);
@@ -372,8 +393,7 @@ public final class CarteParcours {
         int bord = a1[3][3];
         boite(bord + 1, 23, tb, bord + 3, 23, tb, OmbreBlocs.POUTRE.getDefaultState()
                 .with(Properties.HORIZONTAL_AXIS, droite.getAxis()));
-        boite(bord + 2, 0, tb - 1, bord + 4, 0, tb + 1, Blocks.HAY_BLOCK);
-        set(bord + 3, 1, tb, Blocks.HAY_BLOCK);
+        boite(bord + 2, 0, tb - 1, bord + 4, 1, tb + 1, OmbreBlocs.MEULE);
     }
 
     /**
@@ -388,6 +408,9 @@ public final class CarteParcours {
             set(a, 3, b0 - 1, vers(OmbreBlocs.ENSEIGNE, 'b'));
             boite(a0 + 1, 2, b0 - 1, a1 - 1, 2, b0 - 1, vers(OmbreBlocs.AUVENT, 'b'));
         }
+        // Une cabine à rideau contre la façade, ouverte sur la rue
+        if (hasard.nextInt(3) == 0 && w.getBlockState(pos(a1 - 1, 0, b0 - 1)).isAir())
+            set(a1 - 1, 0, b0 - 1, vers(OmbreBlocs.CABINE, 'B'));
         // Façade droite (côté +a) : le mur est vers -a
         if (h >= 8 && hasard.nextBoolean()) boite(a1 + 1, h - 3, b0, a1 + 1, h - 3, b1, vers(OmbreBlocs.CORNICHE, 'A'));
         if (hasard.nextInt(3) == 0) set(a1 + 1, 4, (b0 + b1) / 2, vers(OmbreBlocs.ENSEIGNE, 'A'));

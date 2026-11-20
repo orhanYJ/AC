@@ -173,8 +173,7 @@ public final class Arene {
         remplir(10, 15, -2, 12, 15, -2, Blocks.STRIPPED_SPRUCE_LOG.getDefaultState()
                 .with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.X));
         // Le foin, sous le bout de la poutre (le saut de la foi)
-        remplir(11, 0, -3, 13, 0, -1, Blocks.HAY_BLOCK);
-        set(12, 1, -2, Blocks.HAY_BLOCK);
+        remplir(11, 0, -3, 13, 1, -1, fr.fenua.ombre.bloc.OmbreBlocs.MEULE);   // meule : on s'y cache aussi
         // Une tyrolienne du sommet jusqu'à la tour nord-est… où veille une sentinelle
         set(9, 16, -3, fr.fenua.ombre.bloc.OmbreBlocs.POTEAU);
         set(MUR - 1, 10, -MUR + 1, fr.fenua.ombre.bloc.OmbreBlocs.POTEAU);
@@ -252,6 +251,12 @@ public final class Arene {
         set(0, 0, 0, Blocks.CAMPFIRE);
         for (int[] p : new int[][]{{2, 1}, {-2, -1}, {1, -2}}) set(p[0], 0, p[1], Blocks.SPRUCE_LOG.getDefaultState()
                 .with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.X));
+        // Un puits dans la cour, une cabine à rideau contre la caserne
+        set(-5, 0, -2, fr.fenua.ombre.bloc.OmbreBlocs.PUITS);
+        set(-9, 0, 7, fr.fenua.ombre.bloc.OmbreBlocs.CABINE.getDefaultState()
+                .with(net.minecraft.state.property.Properties.HORIZONTAL_FACING, Direction.SOUTH));
+        // Une meule contre la caserne : cachette pour attendre une ronde
+        remplir(-6, 0, 8, -5, 1, 9, fr.fenua.ombre.bloc.OmbreBlocs.MEULE);
         // Pile de caisses près de la palissade ouest (un marchepied)
         remplir(-17, 0, -3, -16, 0, -2, Blocks.SPRUCE_PLANKS);
         set(-17, 1, -3, Blocks.SPRUCE_PLANKS);

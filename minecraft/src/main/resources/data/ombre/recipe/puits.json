@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "C C",
+  "CWC",
+  "CCC"
+ ],
+ "key": {
+  "C": {
+   "item": "minecraft:cobblestone"
+  },
+  "W": {
+   "item": "minecraft:water_bucket"
+  }
+ },
+ "result": {
+  "id": "ombre:puits",
+  "count": 1
+ }
+}

@@ -38,9 +38,9 @@ public final class RenduCordes {
         public void render(MonteCharge.Entite e, float dt, MatrixStack m, VertexConsumerProvider vcp, int lum, int ov) {
             World w = e.getWorld();
             if (w == null) return;
-            Direction mur = e.getCachedState().get(Properties.HORIZONTAL_FACING);
+            Direction mur = MonteCharge.murReel(w, e.getPos(), e.getCachedState().get(Properties.HORIZONTAL_FACING));
+            if (mur == null) return;
             int sommet = MonteCharge.sommet(w, e.getPos(), mur);
-            if (sommet < 0) return;
             double x = 0.5 + mur.getOffsetX() * 0.38, z = 0.5 + mur.getOffsetZ() * 0.38;
             dessiner(m, vcp, w, e.getPos(), new Vec3d(x, 0.9, z), new Vec3d(x, sommet - e.getPos().getY() + 0.4, z), false);
         }

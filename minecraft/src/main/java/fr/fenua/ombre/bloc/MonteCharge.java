@@ -69,31 +69,48 @@ public class MonteCharge extends HorizontalFacingBlock implements BlockEntityPro
 
     @Override
     protected ActionResult onUse(BlockState s, World w, BlockPos pos, PlayerEntity joueur, BlockHitResult hit) {
-        Direction mur = s.get(FACING);
-        int sommet = sommet(w, pos, mur);
-        if (sommet < 0) {
-            if (w.isClient()) joueur.sendMessage(Text.literal("§7Le monte-charge doit être posé au pied d'un mur, face à lui."), true);
+        Direction mur = murReel(w, pos, s.get(FACING));
+        if (mur == null) {
+            if (w.isClient()) joueur.sendMessage(Text.literal("§7Le monte-charge doit être collé au pied d'un mur d'au moins 2 blocs."), true);
             return ActionResult.SUCCESS;
         }
+        int sommet = sommet(w, pos, mur);
         if (!w.isClient()) w.playSound(null, pos, SoundEvents.ENTITY_LEASH_KNOT_BREAK, SoundCategory.BLOCKS, 1f, 0.8f);
         else if (CoteClient.ICI[0] != null) CoteClient.ICI[0].monteCharge(pos, mur, sommet);
         return ActionResult.SUCCESS;
     }
 
     /**
-     * La hauteur (y) du haut du mur devant la plate-forme : le premier vide au-dessus d'un bloc plein.
-     * -1 s'il n'y a pas de mur d'au moins 2 blocs.
+     * Le côté où se trouve vraiment le mur : celui vers lequel il est tourné si c'est bon,
+     * sinon le premier des trois autres qui convient. null s'il n'y a de mur nulle part.
      */
+    public static Direction murReel(BlockView w, BlockPos pos, Direction prefere) {
+        if (sommet(w, pos, prefere) != AUCUN) return prefere;
+        for (Direction d : Direction.Type.HORIZONTAL) if (sommet(w, pos, d) != AUCUN) return d;
+        return null;
+    }
+
+    /**
+     * La hauteur (y) du haut du mur : en montant le long du mur, le premier endroit où il s'arrête
+     * et laisse la place d'un homme (2 blocs vides) — une fenêtre d'un bloc ne compte pas.
+     * AUCUN s'il n'y a pas de mur d'au moins 2 blocs juste à côté.
+     * (Attention : dans un monde plat, les hauteurs sont négatives — le sol est à -60 —,
+     * donc « pas trouvé » ne peut pas s'écrire -1.)
+     */
+    public static final int AUCUN = Integer.MIN_VALUE;
+
     public static int sommet(BlockView w, BlockPos pos, Direction mur) {
         BlockPos col = pos.offset(mur);
-        for (int y = pos.getY() + 1; y <= pos.getY() + 64; y++) {
+        if (vide(w, col.up()) || vide(w, col.up(2))) return AUCUN;   // il faut un vrai mur, pas une marche
+        for (int y = pos.getY() + 3; y <= pos.getY() + 64; y++) {
             BlockPos c = col.withY(y);
-            if (w.getBlockState(c).getCollisionShape(w, c).isEmpty()
-                    && !w.getBlockState(c.down()).getCollisionShape(w, c.down()).isEmpty()) {
-                return y - pos.getY() >= 2 ? y : -1;
-            }
+            if (vide(w, c) && vide(w, c.up()) && !vide(w, c.down())) return y;
         }
-        return -1;
+        return AUCUN;
+    }
+
+    private static boolean vide(BlockView w, BlockPos p) {
+        return w.getBlockState(p).getCollisionShape(w, p).isEmpty();
     }
 
     /** Sert seulement à dessiner la corde jusqu'au toit. */

@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "PPP",
+  "PWP",
+  "P P"
+ ],
+ "key": {
+  "P": {
+   "tag": "minecraft:planks"
+  },
+  "W": {
+   "tag": "minecraft:wool"
+  }
+ },
+ "result": {
+  "id": "ombre:cabine",
+  "count": 1
+ }
+}

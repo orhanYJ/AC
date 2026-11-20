@@ -60,17 +60,20 @@ public final class Assassinat {
     /** Portées, identiques côté joueur (pour le contour rouge) et côté serveur (pour vérifier). */
     public static final double SOL_H = 3.2, SOL_V = 1.3;          // au sol : 3,2 blocs, même niveau
     public static final double AIR_H = 3.2, AIR_MIN = 1.4, AIR_MAX = 9;   // aérien : le garde est en dessous
+    public static final double CACHE_H = 3.6;                         // depuis une cachette : tout autour
+    public static final String CACHETTE = "Assassinat depuis la cachette";
     public static final double REBORD_H = 2.8, REBORD_MIN = 0.8, REBORD_MAX = 3.2; // depuis un rebord : il est au-dessus
 
     /** Quel assassinat est possible sur cette créature, ou null. Le même calcul sert des deux côtés. */
     @Nullable
-    public static String typePossible(PlayerEntity joueur, LivingEntity v, boolean repere) {
+    public static String typePossible(PlayerEntity joueur, LivingEntity v, boolean repere, boolean cachette) {
         double dx = v.getX() - joueur.getX(), dz = v.getZ() - joueur.getZ();
         double h = Math.sqrt(dx * dx + dz * dz);
         double dy = joueur.getY() - v.getY();
         if (dy >= AIR_MIN && dy <= AIR_MAX && h <= AIR_H) return "Assassinat aérien";
         if (repere) return null;
         if (-dy >= REBORD_MIN && -dy <= REBORD_MAX && h <= REBORD_H) return "Assassinat depuis le rebord";
+        if (cachette && Math.abs(dy) <= SOL_V && h <= CACHE_H) return CACHETTE;
         if (Math.abs(dy) <= SOL_V && h <= SOL_H) return "Assassinat";
         return null;
     }
@@ -91,8 +94,13 @@ public final class Assassinat {
         Entity e = sw.getEntityById(id);
         if (!aLaLame(joueur) || !visable(e) || joueur.isSpectator()) return;
         LivingEntity v = (LivingEntity) e;
-        String nom = typePossible(joueur, v, repere(v, joueur));
+        String nom = typePossible(joueur, v, repere(v, joueur), Discretion.dansCachette(joueur));
         if (nom == null || !joueur.canSee(v)) return;
+
+        if (nom.equals(CACHETTE)) {
+            // On l'attire dans la cachette : son corps disparaît à la vue des autres
+            v.requestTeleport(joueur.getX(), joueur.getY(), joueur.getZ());
+        }
 
         if (nom.equals("Assassinat aérien")) {
             // On plonge sur lui : le joueur atterrit à sa place, sans dégâts de chute

@@ -17,7 +17,10 @@ public final class OmbreItems {
 
     public static final Item BOMBE_FUMEE = new BombeFumee(new Item.Settings().maxCount(16));
 
+    public static final Item COUTEAUX = new CouteauLancer(new Item.Settings().maxCount(16));
+
     public static void enregistrer() {
+        Registry.register(Registries.ITEM, Identifier.of(Ombre.MOD_ID, "couteau_lancer"), COUTEAUX);
         Registry.register(Registries.ITEM, Identifier.of(Ombre.MOD_ID, "lame_de_nacre"), LAME);
         Registry.register(Registries.ITEM, Identifier.of(Ombre.MOD_ID, "bombe_fumee"), BOMBE_FUMEE);
     }

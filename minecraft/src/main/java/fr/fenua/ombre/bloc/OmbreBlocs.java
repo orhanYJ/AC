@@ -51,6 +51,14 @@ public final class OmbreBlocs {
     public static final Mobilier.TeteLampadaire TETE_LAMPADAIRE = new Mobilier.TeteLampadaire(AbstractBlock.Settings.create()
             .strength(2f).sounds(BlockSoundGroup.LANTERN).nonOpaque().luminance(s -> 15));
 
+    public static final Meule MEULE = new Meule(AbstractBlock.Settings.create()
+            .strength(0.5f).sounds(BlockSoundGroup.GRASS).nonOpaque().noCollision());
+
+    public static final Cachettes.Puits PUITS = new Cachettes.Puits(AbstractBlock.Settings.create()
+            .strength(2f).sounds(BlockSoundGroup.STONE).nonOpaque());
+    public static final Cachettes.Cabine CABINE = new Cachettes.Cabine(AbstractBlock.Settings.create()
+            .strength(1f).sounds(BlockSoundGroup.WOOD).nonOpaque());
+
     public static final Item CORDE = new Item(new Item.Settings().maxCount(16));
 
     public static BlockEntityType<PoteauTyrolienne.Entite> POTEAU_ENTITE;
@@ -68,6 +76,9 @@ public final class OmbreBlocs {
         bloc("echafaudage", ECHAFAUDAGE);
         bloc("lampadaire", LAMPADAIRE);
         bloc("tete_lampadaire", TETE_LAMPADAIRE);
+        bloc("meule", MEULE);
+        bloc("puits", PUITS);
+        bloc("cabine", CABINE);
         Registry.register(Registries.ITEM, id("corde_tyrolienne"), CORDE);
 
         POTEAU_ENTITE = Registry.register(Registries.BLOCK_ENTITY_TYPE, id("poteau_tyrolienne"),
@@ -81,6 +92,10 @@ public final class OmbreBlocs {
                 .entries((ctx, e) -> {
                     e.add(OmbreItems.LAME);
                     e.add(OmbreItems.BOMBE_FUMEE);
+                    e.add(OmbreItems.COUTEAUX);
+                    e.add(MEULE);
+                    e.add(PUITS);
+                    e.add(CABINE);
                     e.add(POTEAU);
                     e.add(CORDE);
                     e.add(MONTE_CHARGE);

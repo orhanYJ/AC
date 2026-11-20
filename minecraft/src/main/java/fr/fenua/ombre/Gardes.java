@@ -48,6 +48,9 @@ public final class Gardes {
     public static final String ALERTE = "ombre_alerte";
     public static final String VUE = "ombre_vue";
 
+    /** Caché à plus de cette distance d'un poursuivant, il perd ta trace. */
+    public static final double PERDU = 3.5;
+
     /** Distance à laquelle un garde qui t'a repéré prévient les autres. */
     public static final double PORTEE_ALARME = 20;
 
@@ -72,8 +75,17 @@ public final class Gardes {
             for (ServerPlayerEntity p : serveur.getPlayerManager().getPlayerList()) {
                 if (!ServerPlayNetworking.canSend(p, VigilancePayload.ID)) continue;
                 List<Integer> ids = new ArrayList<>();
+                boolean cache = Discretion.dansCachette(p);
                 for (MobEntity m : p.getServerWorld().getEntitiesByClass(MobEntity.class, p.getBoundingBox().expand(24),
-                        m -> m.getTarget() == p)) ids.add(m.getId());
+                        m -> m.getTarget() == p)) {
+                    // Caché, on se fait oublier de ceux qui ne sont pas sur nous (comme dans Assassin's Creed)
+                    if (cache && m.squaredDistanceTo(p) > PERDU * PERDU) {
+                        m.setTarget(null);
+                        m.getNavigation().stop();
+                        continue;
+                    }
+                    ids.add(m.getId());
+                }
                 ServerPlayNetworking.send(p, new VigilancePayload(ids));
             }
         }

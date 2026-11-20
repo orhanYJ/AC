@@ -11,6 +11,7 @@ import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import fr.fenua.ombre.bloc.OmbreBlocs;
 
 /**
  * La discrétion : à quelle distance un garde te repère.
@@ -52,16 +53,21 @@ public final class Discretion {
         return (dx * rx + dz * rz) / len < COS_CONE;
     }
 
-    /** Accroupi dans les hautes herbes, une fougère, un buisson, ou la tête sous des feuilles. */
+    /**
+     * Dans une meule de foin, un puits ou une cabine à rideau (même debout), ou accroupi dans les hautes herbes,
+     * une fougère, un buisson, ou la tête sous des feuilles.
+     */
     public static boolean dansCachette(PlayerEntity joueur) {
-        if (!joueur.isSneaking()) return false;
         World w = joueur.getWorld();
         BlockPos pieds = joueur.getBlockPos();
+        if (w.getBlockState(pieds).isOf(OmbreBlocs.MEULE) && w.getBlockState(pieds.up()).isOf(OmbreBlocs.MEULE)) return true;
+        if (w.getBlockState(pieds).isOf(OmbreBlocs.PUITS) || w.getBlockState(pieds).isOf(OmbreBlocs.CABINE)) return true;
+        if (!joueur.isSneaking()) return false;
         return cache(w.getBlockState(pieds)) || cache(w.getBlockState(pieds.up()));
     }
 
     private static boolean cache(BlockState s) {
         return s.isOf(Blocks.TALL_GRASS) || s.isOf(Blocks.LARGE_FERN) || s.isOf(Blocks.SWEET_BERRY_BUSH)
-                || s.isOf(Blocks.HAY_BLOCK) || s.isIn(BlockTags.LEAVES);
+                || s.isOf(OmbreBlocs.MEULE) || s.isIn(BlockTags.LEAVES);
     }
 }

@@ -63,7 +63,7 @@ Dans le jeu : Options › Graphismes › Shader Packs. Une ville la nuit, avec l
 | Suspendu | **Z ou Espace** se hisser · **Q / D** glisser · **Q ou D + Espace** sauter au rebord voisin · **S** redescendre sur le mur · **Maj** lâcher |
 | **Courir sur un mur** | En sprint, sauter le long d'un mur avec Z enfoncé (environ 1,5 s) ; **Espace** rebondit vers le mur d'en face |
 | **Bond** | Les sauts en sprint portent plus loin ; en sprint, les marches d'un bloc se montent seules |
-| **Saut de la foi** | Tomber dans du **foin**, du **feuillage** ou sur un **auvent** : aucun dégât |
+| **Saut de la foi** | Tomber dans une **meule**, du **foin**, du **feuillage** ou sur un **auvent** : aucun dégât |
 | **Roulade** | **Maj** en touchant le sol : jusqu'à 9 blocs de chute sans mal |
 
 ### Les objets de parkour (onglet « L'Ombre » du mode créatif)
@@ -80,12 +80,16 @@ Dans le jeu : Options › Graphismes › Shader Packs. Une ville la nuit, avec l
 | **Échafaudage** | Plateau sur poteaux, à empiler : des marches pour monter aux toits |
 | **Lampadaire** + **tête de lampadaire** | Le fût s'escalade, le chapeau sert de perchoir. Il éclaire |
 | **Perchoir** | Un point de vue à poser n'importe où : s'y tenir révèle les gardes 30 s |
+| **Meule de foin** | À empiler sur 2 de haut : on la traverse, on y plonge de très haut sans mal, on s'y cache debout |
+| **Puits** | Saute dedans : caché, les yeux au ras de la margelle. Un saut pour en sortir |
+| **Cabine à rideau** | Entre par le rideau : caché debout. Elle s'ouvre vers celui qui la pose |
 
 Les poses du personnage (escalade, suspension, tyrolienne, perche, course sur mur…) se voient en vue extérieure : touche **F5**.
 
 ### Assassin
 
 ![Un sapeur vu de dos, entouré de rouge, et l'invite « [R] Assassinat »](apercu-assassinat.jpg)
+![Caché dans un puits : « [R] Assassinat depuis la cachette »](apercu-puits.jpg)
 
 Dès qu'un garde peut être tué, il est **entouré de rouge** et une invite s'affiche sous le viseur : **« [R] Assassinat »**. Appuie sur **R**. Il suffit d'avoir la lame de nacre dans l'inventaire.
 
@@ -94,6 +98,7 @@ Dès qu'un garde peut être tué, il est **entouré de rouge** et une invite s'a
 | **Au sol** | Le garde ne t'a pas repéré, il est devant toi, à 3 blocs |
 | **Aérien** | Le garde est sous toi (depuis un toit, un rebord ou en tombant) : tu plonges sur lui, **même s'il t'a vu** |
 | **Depuis un rebord** | Tu es suspendu, et un garde marche au bord du toit juste au-dessus |
+| **Depuis une cachette** | Tu es caché (hautes herbes, buisson, meule, puits, cabine à rideau) et un garde passe tout près, de n'importe quel côté : il est **tiré dans la cachette** avec toi, et les autres ne voient pas le corps |
 | **Double** | Une lame dans chaque main (`F` pour en passer une en main gauche) : un 2ᵉ garde distrait tout près tombe aussi |
 | **Clic gauche** | Marche toujours : frapper un garde distrait avec la lame le tue d'un coup |
 
@@ -101,7 +106,9 @@ Un garde qui t'a repéré n'a plus de contour rouge (sauf pour l'assassinat aér
 
 | Geste | Touches |
 |---|---|
-| **Se cacher** | Accroupi dans les hautes herbes, une fougère, un buisson, ou sous des feuilles |
+| **Se cacher** | Accroupi dans les hautes herbes, une fougère, un buisson, ou sous des feuilles ; **debout** dans une meule, un puits ou une cabine à rideau |
+| **Perdre un poursuivant** | Cache-toi : un garde qui te poursuit perd ta trace s'il est à plus de 3,5 blocs |
+| **Couteaux de lancer** | Clic droit : un couteau part droit devant, rapide et silencieux, et tue d'un coup |
 | **Bombe de fumée** | Clic droit : les gardes autour perdent ta trace, aveuglés 5 s |
 | **Instinct** | **V** : révèle les ennemis à travers les murs (toutes les 15 s) |
 | **Siffler** | **B** : le garde le plus proche vient voir, sans donner l'alarme |
@@ -113,7 +120,7 @@ Les touches R, V, B et H se changent dans Options › Commandes › « L'Ombre �
 
 | Commande | Effet |
 |---|---|
-| `/ombre parcours` | Grande carte d'entraînement, **sans gardes**, et on y est emmené : escalade, course libre, bonds, course sur mur, rebond, rebords, saut de la foi, roulade, monte-charge, tyrolienne, perches, et une ville de 36 maisons avec tout le mobilier |
+| `/ombre parcours` | Grande carte d'entraînement, **sans gardes**, et on y est emmené : les cachettes (à gauche du départ), escalade, course libre, bonds, course sur mur, rebond, rebords, saut de la foi, roulade, monte-charge, tyrolienne, perches, et une ville de 36 maisons avec tout le mobilier |
 | `/ombre arene` | Le fortin à infiltrer (9 gardes, une cible), avec une tyrolienne et un monte-charge |
 | `/ombre aide` | Le rappel des commandes dans le chat |
 
@@ -136,6 +143,8 @@ Les touches R, V, B et H se changent dans Options › Commandes › « L'Ombre �
 - **Échafaudage** (× 4) : 3 planches, 4 bâtons en dessous. **Lampadaire** (× 3) : 3 pierres noires polies en colonne.
 - **Tête de lampadaire** : pierre noire, pierre lumineuse, pierre noire (en colonne). **Enseigne** (× 2) : 3 lingots de fer en équerre + une planche.
 - **Perchoir** : une plume au-dessus d'un rondin.
+- **Meule de foin** : une botte de foin + du blé. **Puits** : 7 pierres autour d'un seau d'eau (le haut ouvert). **Cabine à rideau** : 7 planches autour d'une laine (le bas ouvert).
+- **Couteaux de lancer** (× 4) : lingot de fer + bâton + silex.
 
 ## Pour les curieux : compiler soi-même
 
