@@ -136,6 +136,16 @@ Chaque niveau a désormais son relief : tertres de 1,5 à 4,5 m dans les espaces
 - Garder **un seul fichier HTML autonome**. Seules sources externes autorisées : cdnjs, jsdelivr, Google Fonts — `outils/verifier-script.js` refuse tout le reste. Three.js est chargé depuis cdnjs, avec **jsdelivr en secours** ; si aucune des deux ne répond, la page affiche un message en français au lieu d'un écran noir.
 - **Mise en ligne** : GitHub Pages en mode « Deploy from a branch », sur la branche par défaut, dossier **`/docs`**. `docs/index.html` renvoie vers `docs/fenua.html`, `docs/.nojekyll` évite le passage par Jekyll. Tout ce qui doit être servi en ligne va donc dans `docs/`. Activer Pages est un réglage du dépôt : un workflow ne peut pas le faire (le jeton d'Actions n'a pas le droit de créer le site).
 
+## Mod Minecraft (`minecraft/`)
+
+Projet séparé du jeu web : **« L'Ombre — Infiltration »**, mod **Fabric** pour **Minecraft Java 1.21.1** (Loom 1.11, Yarn, Fabric API 0.116). Code Java commenté en français, mode d'emploi pour le propriétaire dans `minecraft/README.md`.
+
+- Compiler : `cd minecraft && ./gradlew build` (Java 21) ; le `.jar` sort dans `build/libs/`, une copie à jour est livrée dans `minecraft/telecharger/`.
+- Tester sans écran : `./gradlew runServer --args=nogui` (la console lit les commandes tapées, `run/eula.txt` à `eula=true`, monde plat conseillé dans `run/server.properties`), puis `execute positioned 0 -60 0 rotated 0 0 run ombre arene` et `execute if entity @e[tag=ombre_garde]` (9 gardes attendus).
+- Côté serveur (`src/main`) : assassinats (`Assassinat`), discrétion par le facteur de distance de Minecraft (`Discretion`, branché par `mixin/LivingEntityMixin`, qui fait aussi l'escalade), alarme et points de vue (`Gardes`, étiquettes `ombre_garde`, `ombre_cible`, marqueur `ombre_vue`), instinct et sifflet (`Pouvoirs`, via `ActionPayload`), fumée, saut de la foi et roulade, fortin (`Arene`, commande `/ombre arene`).
+- Côté client (`src/client`) : touches V et B, et **tout le parkour** (`Parcours` : rebords, rétablissement, course sur mur, rebond, saut arrière, bond), car Minecraft laisse le client décider de ses mouvements. Le client prévient le serveur (`RATTRAPE`) pour qu'il oublie une chute rattrapée.
+- Le parkour n'a pas été essayé en jeu ici (pas d'écran) : les retours du propriétaire servent à régler les valeurs.
+
 ## Pistes ouvertes
 
 - Voltigeurs qui escaladent à la poursuite du joueur ; fusiliers qui visent depuis les toits voisins.

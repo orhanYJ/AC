@@ -35,3 +35,6 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 java { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
+
+// Pour taper des commandes dans la console de `./gradlew runServer`
+tasks.matching { it.name == 'runServer' }.configureEach { standardInput = System.in }

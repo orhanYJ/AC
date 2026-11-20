@@ -10,6 +10,8 @@ import net.minecraft.util.Identifier;
 public record ActionPayload(int action) implements CustomPayload {
     public static final int INSTINCT = 0;
     public static final int SIFFLER = 1;
+    /** Le client s'est rattrapé (rebord, course sur mur) : on oublie la hauteur de chute. */
+    public static final int RATTRAPE = 2;
 
     public static final Id<ActionPayload> ID = new Id<>(Identifier.of(Ombre.MOD_ID, "action"));
     public static final PacketCodec<RegistryByteBuf, ActionPayload> CODEC =

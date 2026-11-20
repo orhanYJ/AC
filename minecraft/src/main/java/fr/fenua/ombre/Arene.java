@@ -61,6 +61,7 @@ public final class Arene {
         poudriere();
         decor();
         herbes();
+        parcours();
         raccorder();
         gardes();
 
@@ -275,6 +276,39 @@ public final class Arene {
         for (int x = -14; x <= -5; x++) for (int z = 20; z <= 23; z++) if ((x + z * 5) % 9 != 0) hauteHerbe(x, z);
         for (int x = -16; x <= -9; x++) for (int z = 10; z <= 16; z++) if ((x * 3 + z) % 7 != 0) hauteHerbe(x, z);
         for (int x = 13; x <= 16; x++) for (int z = 13; z <= 16; z++) hauteHerbe(x, z);
+    }
+
+    /**
+     * Le parcours en hauteur, d'un seul tenant :
+     * caisses → palissade ouest → toit de la caserne → trois poteaux → toit du capitaine
+     * → poutre de 8 m → poutre vers la grande tour → escalade → point de vue → saut de la foi.
+     * Plus, à l'est, un couloir entre deux murs pour enchaîner les courses sur mur.
+     */
+    private static void parcours() {
+        BlockState poteau = Blocks.SPRUCE_LOG.getDefaultState();
+        BlockState poutreX = Blocks.STRIPPED_SPRUCE_LOG.getDefaultState()
+                .with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.X);
+        BlockState poutreZ = Blocks.STRIPPED_SPRUCE_LOG.getDefaultState()
+                .with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.Z);
+        // Trois poteaux entre la caserne et la maison du capitaine (sauts de 2 blocs)
+        remplir(-8, 0, 0, -8, 7, 0, poteau);
+        remplir(-6, 0, -3, -6, 7, -3, poteau);
+        remplir(-6, 0, -5, -6, 8, -5, poteau);
+        set(-6, 9, -5, Blocks.SPRUCE_SLAB);
+        // Poutre du toit du capitaine vers l'est, puis vers le sud jusqu'à la grande tour
+        set(-2, 8, -10, Blocks.AIR);                         // ouverture dans le parapet
+        remplir(-1, 8, -10, 6, 8, -10, poutreX);
+        remplir(6, 8, -9, 6, 8, -3, poutreZ);
+        for (int[] q : new int[][]{{2, -10}, {6, -10}, {6, -6}}) remplir(q[0], 0, q[1], q[0], 7, q[1], poteau);
+        set(6, 9, -10, Blocks.LANTERN);
+        // Couloir de course sur mur : deux murs de 6 blocs face à face, 2 blocs d'écart
+        remplir(13, 0, 0, 13, 5, 7, Blocks.STONE_BRICKS);
+        remplir(16, 0, 0, 16, 5, 7, Blocks.STONE_BRICKS);
+        remplir(13, 2, 0, 13, 2, 7, Blocks.MOSSY_STONE_BRICKS);
+        remplir(16, 4, 0, 16, 4, 7, Blocks.MOSSY_STONE_BRICKS);
+        remplir(14, 5, 7, 15, 5, 7, Blocks.SPRUCE_SLAB.getDefaultState()
+                .with(net.minecraft.block.SlabBlock.TYPE, net.minecraft.block.enums.SlabType.TOP));
+        remplir(17, 5, 3, 17, 5, 4, Blocks.SPRUCE_PLANKS);  // un pont vers la palissade
     }
 
     /** Recalcule les raccords (barrières, murets, escaliers) une fois tout posé. */

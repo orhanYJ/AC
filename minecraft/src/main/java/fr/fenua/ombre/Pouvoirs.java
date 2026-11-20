@@ -28,6 +28,7 @@ public final class Pouvoirs {
         long t = w.getTime();
         if (action == ActionPayload.INSTINCT) instinct(p, w, t);
         else if (action == ActionPayload.SIFFLER) siffler(p, w, t);
+        else if (action == ActionPayload.RATTRAPE && !p.isOnGround()) p.fallDistance = 0;
     }
 
     /** Révèle 10 s les gardes et les monstres à 40 blocs, à travers les murs. */
