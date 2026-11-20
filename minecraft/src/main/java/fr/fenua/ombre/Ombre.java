@@ -37,10 +37,11 @@ public class Ombre implements ModInitializer {
         // Chaque tick : alarme qui se propage, points de vue, course libre
         ServerTickEvents.END_SERVER_TICK.register(Gardes::tick);
 
-        // Touches spéciales envoyées par le client (instinct, siffler)
+        // Touches spéciales envoyées par le client (instinct, siffler, assassiner)
         PayloadTypeRegistry.playC2S().register(ActionPayload.ID, ActionPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(VigilancePayload.ID, VigilancePayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ActionPayload.ID,
-                (payload, context) -> Pouvoirs.agir(context.player(), payload.action()));
+                (payload, context) -> Pouvoirs.agir(context.player(), payload.action(), payload.cible()));
 
         // Commandes /ombre arene et /ombre aide
         CommandRegistrationCallback.EVENT.register((dispatcher, registres, env) ->

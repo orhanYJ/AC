@@ -3,6 +3,12 @@
   "minVersion": "0.8",
   "package": "fr.fenua.ombre.client.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["PosesMixin"],
-  "injectors": { "defaultRequire": 1 }
+  "client": [
+    "PosesMixin",
+    "ContourMixin",
+    "CouleurContourMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

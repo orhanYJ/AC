@@ -1,6 +1,7 @@
 package fr.fenua.ombre;
 
 import net.minecraft.entity.Entity;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -64,6 +65,17 @@ public final class Gardes {
                 pas.addTemporaryModifier(new EntityAttributeModifier(COURSE, 0.5, EntityAttributeModifier.Operation.ADD_VALUE));
             else if (!veut && pas.hasModifier(COURSE))
                 pas.removeModifier(COURSE);
+        }
+
+        // Quatre fois par seconde : dire à chaque joueur quelles créatures l'ont repéré
+        if (serveur.getTicks() % 5 == 0) {
+            for (ServerPlayerEntity p : serveur.getPlayerManager().getPlayerList()) {
+                if (!ServerPlayNetworking.canSend(p, VigilancePayload.ID)) continue;
+                List<Integer> ids = new ArrayList<>();
+                for (MobEntity m : p.getServerWorld().getEntitiesByClass(MobEntity.class, p.getBoundingBox().expand(24),
+                        m -> m.getTarget() == p)) ids.add(m.getId());
+                ServerPlayNetworking.send(p, new VigilancePayload(ids));
+            }
         }
 
         if (serveur.getTicks() % 10 != 0) return;   // le reste, deux fois par seconde

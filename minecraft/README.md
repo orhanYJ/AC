@@ -85,18 +85,27 @@ Les poses du personnage (escalade, suspension, tyrolienne, perche, course sur mu
 
 ### Assassin
 
+Dès qu'un garde peut être tué, il est **entouré de rouge** et une invite s'affiche sous le viseur : **« [R] Assassinat »**. Appuie sur **R**. Il suffit d'avoir la lame de nacre dans l'inventaire.
+
+| Assassinat | Quand le contour rouge apparaît |
+|---|---|
+| **Au sol** | Le garde ne t'a pas repéré, il est devant toi, à 3 blocs |
+| **Aérien** | Le garde est sous toi (depuis un toit, un rebord ou en tombant) : tu plonges sur lui, **même s'il t'a vu** |
+| **Depuis un rebord** | Tu es suspendu, et un garde marche au bord du toit juste au-dessus |
+| **Double** | Une lame dans chaque main (`F` pour en passer une en main gauche) : un 2ᵉ garde distrait tout près tombe aussi |
+| **Clic gauche** | Marche toujours : frapper un garde distrait avec la lame le tue d'un coup |
+
+Un garde qui t'a repéré n'a plus de contour rouge (sauf pour l'assassinat aérien) : sème-le, ou aveugle-le avec une bombe de fumée.
+
 | Geste | Touches |
 |---|---|
-| **Assassiner** | Frapper avec la **lame de nacre** une créature qui ne t'a pas repéré |
-| **Assassinat aérien** | Frapper en tombant sur la créature (la chute est annulée) |
-| **Double assassinat** | Une lame dans chaque main (`F` pour passer la 2ᵉ en main gauche) |
 | **Se cacher** | Accroupi dans les hautes herbes, une fougère, un buisson, ou sous des feuilles |
 | **Bombe de fumée** | Clic droit : les gardes autour perdent ta trace, aveuglés 5 s |
 | **Instinct** | **V** : révèle les ennemis à travers les murs (toutes les 15 s) |
 | **Siffler** | **B** : le garde le plus proche vient voir, sans donner l'alarme |
 | **Point de vue** | Tenir debout au sommet de la grande tour (colonne de lumière) ou sur un perchoir |
 
-Les touches V, B et H se changent dans Options › Commandes › « L'Ombre — Infiltration ».
+Les touches R, V, B et H se changent dans Options › Commandes › « L'Ombre — Infiltration ».
 
 ### Commandes du chat
 

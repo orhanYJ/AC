@@ -15,20 +15,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/** Les deux touches : Instinct (V) et Siffler (B). */
+/** Les touches : Instinct (V), Siffler (B) ; Assassiner (R) passe à Assassinat. */
 public final class Pouvoirs {
     private Pouvoirs() {}
 
     private static final Map<UUID, Long> PROCHAIN_INSTINCT = new HashMap<>();
     private static final Map<UUID, Long> PROCHAIN_SIFFLET = new HashMap<>();
 
-    public static void agir(ServerPlayerEntity p, int action) {
+    public static void agir(ServerPlayerEntity p, int action, int cible) {
         if (p.isSpectator()) return;
         ServerWorld w = p.getServerWorld();
         long t = w.getTime();
         if (action == ActionPayload.INSTINCT) instinct(p, w, t);
         else if (action == ActionPayload.SIFFLER) siffler(p, w, t);
         else if (action == ActionPayload.RATTRAPE && !p.isOnGround()) p.fallDistance = 0;
+        else if (action == ActionPayload.ASSASSINER) Assassinat.parTouche(p, cible);
     }
 
     /** Révèle 10 s les gardes et les monstres à 40 blocs, à travers les murs. */
