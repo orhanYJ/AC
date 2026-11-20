@@ -4,6 +4,12 @@ Un mod **Fabric** pour **Minecraft Java 1.21.1** : jouer en assassin discret, av
 
 ![Le fortin construit par /ombre arene, au coucher du soleil : gardes en rouge, cible en or, colonne de lumière du point de vue](apercu.jpg)
 
+La carte d'entraînement (`/ombre parcours`) : la ville et ses toits, la tour avec sa tyrolienne, une rue avec corniches, enseignes et auvents.
+
+![La ville vue d'en haut](apercu-ville.jpg)
+![La tour, sa tyrolienne et la ville](apercu-tour.jpg)
+![Une rue : corniches, enseignes, auvents](apercu-rue.jpg)
+
 Fichier à installer : [`telecharger/ombre-infiltration-0.1.0.jar`](telecharger/ombre-infiltration-0.1.0.jar)
 
 ## Installation (une seule fois)

@@ -2,7 +2,6 @@
  "parent": "minecraft:block/block",
  "textures": {
   "toile": "minecraft:block/red_wool",
-  "bande": "minecraft:block/white_wool",
   "bois": "minecraft:block/stripped_oak_log",
   "particle": "minecraft:block/red_wool"
  },
@@ -46,38 +45,6 @@
     ],
     "axis": "x",
     "angle": -22.5
-   }
-  },
-  {
-   "from": [
-    0,
-    7.8,
-    15
-   ],
-   "to": [
-    16,
-    9,
-    16
-   ],
-   "faces": {
-    "north": {
-     "texture": "#bande"
-    },
-    "south": {
-     "texture": "#bande"
-    },
-    "east": {
-     "texture": "#bande"
-    },
-    "west": {
-     "texture": "#bande"
-    },
-    "up": {
-     "texture": "#bande"
-    },
-    "down": {
-     "texture": "#bande"
-    }
    }
   },
   {
