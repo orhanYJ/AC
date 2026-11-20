@@ -7,7 +7,7 @@
     "PosesMixin",
     "ContourMixin",
     "CouleurContourMixin",
-    "BordMixin"
+    "ClicMixin"
   ],
   "injectors": {
     "defaultRequire": 1

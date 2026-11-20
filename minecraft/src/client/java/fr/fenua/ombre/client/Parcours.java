@@ -26,18 +26,20 @@ import net.minecraft.world.World;
  *
  * Les états :
  *  LIBRE      : marche, course, saut. Le saut en sprint porte plus loin (bond).
- *  MUR        : accroché à un mur, on reste en place. Z/S montent et descendent (vers le mur / à l'opposé),
+ *  MUR        : accroché à un mur (clic droit), on reste en place. Z/S montent et descendent (vers le mur / à l'opposé),
  *               Q/D se déplacent sur le côté. Espace : bond vers le haut ; avec Q/D, bond sur le côté ;
- *               en tirant à l'opposé du mur, saut arrière vers le mur d'en face (on s'y raccroche).
+ *               en tirant à l'opposé du mur, saut arrière vers le mur d'en face (clic droit pour s'y raccrocher).
  *               Maj : lâcher. En haut, on se rétablit tout seul.
- *  REBORD     : suspendu par les mains à un bord. Q/D glissent, Q/D + Espace sautent vers le bord voisin,
+ *  REBORD     : suspendu par les mains à un bord (clic droit en passant devant). Q/D glissent, Q/D + Espace sautent vers le bord voisin,
  *               Z ou Espace se hissent, S redescend sur le mur, Maj lâche.
  *  HISSE      : le rétablissement par-dessus un bord.
  *  MUR_COURU  : course sur un mur, en sprint. Espace rebondit vers le mur d'en face.
  *  TYRO       : glisse le long d'une tyrolienne. Espace saute, Maj lâche.
- *  LIFT       : monte-charge (Espace dessus, ou clic droit) : on monte jusqu'au toit.
- *  Course libre (sprint + Z) : mur bas = rétablissement, mur haut = escalade, bord de toit = saut
- *               vers l'appui d'en face, ou arrêt net au-dessus d'un grand vide.
+ *  LIFT       : monte-charge (clic droit dessus) : on monte jusqu'au toit.
+ *
+ * Le CLIC DROIT est la main qui attrape : au sol face à un mur, on s'y accroche ; en l'air, tant qu'il
+ * est maintenu, on saisit ce qui passe à portée (mur, rebord, perche, enseigne, câble), et la course sur
+ * mur ne part qu'avec lui. Sans clic droit, on ne s'accroche à rien. (Avec un bloc en main, il sert à construire.)
  *  PERCHE     : balancé sous une perche ou une enseigne ; Z donne de l'élan et projette, Espace saute, Maj lâche.
  */
 public final class Parcours {
@@ -52,11 +54,11 @@ public final class Parcours {
     private static double murX, murZ;          // direction du mur (vers lui), vecteur unité
     private static int duree;                  // ticks passés dans l'état courant
     private static int sansPrise;              // ticks sans pouvoir s'accrocher (après un lâcher, un saut)
-    private static int chercheMur;             // ticks où l'on s'accroche au premier mur touché (après un saut)
     private static int bondMur;                // ticks d'un bond vers le haut le long du mur
     private static int poseBond;               // ticks de la pose de bond
     private static double cible;               // hauteur visée (rétablissement, monte-charge)
     private static boolean sautAvant, solAvant;
+    private static boolean prise, priseAvant;    // le clic droit : la main qui attrape
 
     // Tyrolienne
     private static Vec3d cableA, cableB;
@@ -64,8 +66,6 @@ public final class Parcours {
     private static BlockPos cableFin;
     // Monte-charge
     private static double liftX, liftZ;
-    // Course libre : s'arrêter net au bord d'un grand vide (lu par mixin/BordMixin)
-    static boolean bordProtege;
     // Perche
     private static Vec3d pivot;
     private static double balX, balZ, theta, omega;
@@ -91,7 +91,6 @@ public final class Parcours {
 
     static double balancement() { return theta; }
 
-    public static boolean bordProtege() { return bordProtege; }
 
     /** Orientation du corps (en degrés) quand il fait face au mur, ou NaN. */
     static float corpsVersMur() {
@@ -110,15 +109,14 @@ public final class Parcours {
         boolean saut = in.jumping;
         boolean nouveauSaut = saut && !sautAvant;
         boolean sol = p.isOnGround();
+        prise = client.options.useKey.isPressed() && mainLibre(p);
         try {
             if (p.getAbilities().flying || p.isSpectator() || p.isFallFlying() || p.hasVehicle() || p.isSleeping()
                     || (p.isTouchingWater() && etat != Etat.TYRO)) {
                 etat = Etat.LIBRE;
                 return;
             }
-            if (!(etat == Etat.LIBRE && p.isOnGround() && client.options.sprintKey.isPressed())) bordProtege = false;
             if (sansPrise > 0) sansPrise--;
-            if (chercheMur > 0) chercheMur--;
             if (poseBond > 0) poseBond--;
             duree++;
             switch (etat) {
@@ -136,6 +134,7 @@ public final class Parcours {
         } finally {
             sautAvant = saut;
             solAvant = sol;
+            priseAvant = prise;
         }
     }
 
@@ -148,6 +147,7 @@ public final class Parcours {
 
     private static void libre(MinecraftClient client, ClientPlayerEntity p, Input in, boolean nouveauSaut, boolean sol) {
         Vec3d v = p.getVelocity();
+        boolean nouvellePrise = prise && !priseAvant;
         double[] e = entree(p, in);
         double[] f = devant(p);
 
@@ -158,20 +158,12 @@ public final class Parcours {
             return;
         }
 
-        // Espace sur un monte-charge ou à côté d'un poteau de tyrolienne : on part, sans clic droit
-        if (sol && nouveauSaut && partirSansClic(p)) return;
-
-        // Course libre : sprint + Z, le corps choisit le geste tout seul
-        if (sol && client.options.sprintKey.isPressed() && in.movementForward > 0 && !in.sneaking && !in.jumping) {
-            if (courseLibre(p, f)) return;
-        } else {
-            bordProtege = false;
-        }
-
-        // Depuis le sol : Espace en poussant contre un mur haut = on s'y accroche
-        if (sol && nouveauSaut) {
-            double[] d = murAutour(p, norme(e) > 0.1 ? e : f);
-            if (d != null && dot(e, d) > 0.5 && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)) {
+        // Au sol, clic droit face à un mur : on s'y accroche (ou on s'y rétablit s'il est bas)
+        if (sol && nouvellePrise) {
+            double[] d = murAutour(p, f);
+            if (d != null && bloqueBuste(p, d[0] * 0.35, d[1] * 0.35, 1.0)) {
+                double h = hauteurRebord(p, p.getX() + d[0] * 0.6, p.getZ() + d[1] * 0.6, 0.9, 2.4);
+                if (!Double.isNaN(h)) { hisser(p, d[0], d[1], h); return; }
                 accrocher(p, d);
                 bondMur = 5;
                 p.setVelocity(d[0] * 0.04, 0.42, d[1] * 0.04);
@@ -180,18 +172,19 @@ public final class Parcours {
         }
         if (sol) return;
 
-        // Une perche ou une enseigne à portée de main, ou un câble de tyrolienne
-        if (sansPrise == 0 && attraperPerche(p)) return;
-        if (sansPrise == 0 && v.y < 0.25 && attraperCable(p)) return;
+        // En l'air, on n'attrape rien sans le clic droit (la main qui saisit)
+        if (!prise || sansPrise > 0) return;
 
-        if (sansPrise > 0 && chercheMur == 0) return;
+        // Une perche ou une enseigne à portée de main, ou un câble de tyrolienne
+        if (attraperPerche(p)) return;
+        if (v.y < 0.25 && attraperCable(p)) return;
         double vh = Math.sqrt(v.x * v.x + v.z * v.z);
         double[] pref = vh > 0.08 ? new double[]{v.x / vh, v.z / vh} : (norme(e) > 0.1 ? e : f);
 
-        // En tombant le long d'un mur dont le haut passe aux mains : on s'accroche au rebord
-        if (v.y < -0.05 && !in.sneaking) {
+        // Le haut d'un mur passe aux mains : on s'accroche au rebord
+        if (v.y < 0.1 && !in.sneaking) {
             double[] d = murAutour(p, pref);
-            if (d != null && !Double.isNaN(hauteurRebord(p, p.getX() + d[0] * 0.6, p.getZ() + d[1] * 0.6, 1.0, 2.3))) {
+            if (d != null && !Double.isNaN(hauteurRebord(p, p.getX() + d[0] * 0.6, p.getZ() + d[1] * 0.6, 0.9, 2.4))) {
                 murX = d[0]; murZ = d[1];
                 changer(Etat.REBORD);
                 p.setVelocity(0, 0, 0);
@@ -202,7 +195,7 @@ public final class Parcours {
         }
 
         // Course sur mur : en sprint, en l'air, un mur sur le côté, Z enfoncé
-        if (in.movementForward > 0 && vh > 0.2 && v.y < 0.25 && chercheMur == 0) {
+        if (in.movementForward > 0 && vh > 0.2 && v.y < 0.25) {
             for (int cote = -1; cote <= 1; cote += 2) {
                 double sx = -f[1] * cote, sz = f[0] * cote;          // perpendiculaire au regard
                 if (bloque(p, sx * 0.3, sz * 0.3) && bloqueBuste(p, sx * 0.6, sz * 0.6, 0.6)) {
@@ -215,10 +208,11 @@ public final class Parcours {
             }
         }
 
-        // S'accrocher à un mur en l'air : en poussant vers lui, ou juste après un saut de mur à mur
+        // S'accrocher au mur qu'on touche
         if (!in.sneaking) {
             double[] d = murAutour(p, pref);
-            if (d != null && (chercheMur > 0 || dot(e, d) > 0.3) && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)) {
+            if (d == null) d = murAutour(p, norme(e) > 0.1 ? e : devant(p));
+            if (d != null && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)) {
                 accrocher(p, d);
                 p.setVelocity(0, Math.max(v.y, -0.1), 0);
             }
@@ -259,10 +253,10 @@ public final class Parcours {
             if (Math.abs(cote) > 0.5) {                          // bond sur le côté
                 double s = Math.signum(cote);
                 p.setVelocity(tx * s * 0.45 + murX * 0.08, 0.4, tz * s * 0.45 + murZ * 0.08);
-                sauter(p, 3, 14);
+                sauter(p, 3);
             } else if (vers < -0.5) {                            // saut arrière, vers le mur d'en face
                 p.setVelocity(-murX * 0.55, 0.45, -murZ * 0.55);
-                sauter(p, 5, 18);
+                sauter(p, 5);
             } else {                                             // bond vers le haut
                 bondMur = 9;
                 p.setVelocity(murX * 0.04, 0.62, murZ * 0.04);
@@ -306,10 +300,10 @@ public final class Parcours {
             if (Math.abs(cote) > 0.5) {                          // saut vers le rebord voisin
                 double s = Math.signum(cote);
                 p.setVelocity(tx * s * 0.45 + murX * 0.06, 0.34, tz * s * 0.45 + murZ * 0.06);
-                sauter(p, 3, 0);
+                sauter(p, 3);
             } else if (vers < -0.5) {                            // saut arrière
                 p.setVelocity(-murX * 0.55, 0.45, -murZ * 0.55);
-                sauter(p, 5, 18);
+                sauter(p, 5);
             } else {
                 monterDuRebord(p);
             }
@@ -366,7 +360,7 @@ public final class Parcours {
         if (nouveauSaut) {                                       // rebond vers le mur d'en face
             double[] f = devant(p);
             p.setVelocity(-murX * 0.5 + f[0] * 0.3, 0.55, -murZ * 0.5 + f[1] * 0.3);
-            sauter(p, 4, 14);
+            sauter(p, 4);
             return;
         }
         boolean finie = duree > 32 || in.movementForward <= 0 || !bloque(p, murX * 0.3, murZ * 0.3) || p.isOnGround();
@@ -423,7 +417,7 @@ public final class Parcours {
         if (in.sneaking) { lacher(10); return; }
         if (nouveauSaut) {
             p.setVelocity(dir.x * cableV, 0.4, dir.z * cableV);
-            sauter(p, 8, 0);
+            sauter(p, 8);
             return;
         }
         cableV = Math.min(0.95, cableV + 0.03 + Math.max(0, -dir.y) * 0.04);
@@ -517,7 +511,7 @@ public final class Parcours {
             double vs = MAINS * omega * Math.cos(theta) + 0.3, vy = MAINS * omega * Math.sin(theta) + 0.3;
             p.setVelocity(balX * vs, Math.max(vy, 0.35), balZ * vs);
             poseBond = 10;
-            sauter(p, 7, 0);
+            sauter(p, 7);
             return;
         }
         Vec3d pieds = pivot.add(balX * MAINS * Math.sin(theta), -MAINS * Math.cos(theta), balZ * MAINS * Math.sin(theta));
@@ -526,30 +520,7 @@ public final class Parcours {
         if (duree > 200) lacher(10);
     }
 
-    // ───────────────────────── sans clic droit ─────────────────────────
-
-    /** Espace debout sur un monte-charge, ou tout près d'un poteau de tyrolienne qui descend : on part. */
-    private static boolean partirSansClic(ClientPlayerEntity p) {
-        World w = p.getWorld();
-        BlockPos pieds = p.getBlockPos();
-        BlockState s = w.getBlockState(pieds);
-        if (s.isOf(OmbreBlocs.MONTE_CHARGE)) {
-            Direction mur = fr.fenua.ombre.bloc.MonteCharge.murReel(w, pieds, s.get(Properties.HORIZONTAL_FACING));
-            if (mur != null) {
-                demarrerMonteCharge(pieds, mur, fr.fenua.ombre.bloc.MonteCharge.sommet(w, pieds, mur));
-                return true;
-            }
-        }
-        for (BlockPos b : BlockPos.iterate(pieds.add(-1, 0, -1), pieds.add(1, 1, 1))) {
-            if (w.getBlockState(b).isOf(OmbreBlocs.POTEAU)
-                    && w.getBlockEntity(b) instanceof fr.fenua.ombre.bloc.PoteauTyrolienne.Entite e
-                    && e.cible != null && e.cible.getY() <= b.getY() + 1) {
-                demarrerTyrolienne(b.toImmutable(), e.cible);
-                return etat == Etat.TYRO;
-            }
-        }
-        return false;
-    }
+    // ───────────────────────── la main qui attrape (clic droit) ─────────────────────────
 
     /** En l'air, les mains passent près d'un câble : on s'y accroche et on glisse vers le bas. */
     private static boolean attraperCable(ClientPlayerEntity p) {
@@ -563,64 +534,64 @@ public final class Parcours {
             Vec3d d = bas.subtract(haut);
             double t = MathHelper.clamp(mains.subtract(haut).dotProduct(d) / d.lengthSquared(), 0, 1);
             if (t < 0.05 || t > 0.9) continue;
-            if (CoteClient.pointCable(haut, bas, t).distanceTo(mains) > 0.9) continue;
+            if (CoteClient.pointCable(haut, bas, t).distanceTo(mains) > 1.1) continue;
             lancerCable(p, haut, bas, fin, t);
             return true;
         }
         return false;
     }
 
+    /** Le clic droit sert au parkour sauf avec un bloc en main (on construit). */
+    private static boolean mainLibre(ClientPlayerEntity p) {
+        return !(p.getMainHandStack().getItem() instanceof net.minecraft.item.BlockItem);
+    }
+
     /**
-     * Course libre (sprint + Z) : face à un mur bas, on s'y rétablit ; face à un mur haut, on l'escalade ;
-     * au bord d'un toit, on saute vers l'appui d'en face, ou on s'arrête net au-dessus d'un grand vide.
+     * Le clic droit doit-il servir au parkour plutôt qu'à l'objet tenu ? (lu par mixin/ClicMixin)
+     * Oui si l'on est accroché, ou s'il y a quelque chose à attraper à portée de main.
      */
-    private static boolean courseLibre(ClientPlayerEntity p, double[] f) {
-        bordProtege = false;
-        if (bloqueBuste(p, f[0] * 0.3, f[1] * 0.3, 1.0)) {
-            double h = hauteurRebord(p, p.getX() + f[0] * 0.6, p.getZ() + f[1] * 0.6, 0.9, 2.4);
-            if (!Double.isNaN(h)) { hisser(p, f[0], f[1], h); return true; }
-            double[] d = murAutour(p, f);
-            if (d != null) {
-                accrocher(p, d);
-                bondMur = 5;
-                p.setVelocity(d[0] * 0.04, 0.42, d[1] * 0.04);
-                return true;
-            }
+    public static boolean clicPourParkour(MinecraftClient client) {
+        ClientPlayerEntity p = client.player;
+        if (p == null || !mainLibre(p) || p.getAbilities().flying || p.isSpectator()) return false;
+        if (etat != Etat.LIBRE) return true;
+        // Un poteau, un monte-charge ou un bloc utile visé : on laisse Minecraft s'en occuper
+        if (client.crosshairTarget instanceof net.minecraft.util.hit.BlockHitResult bh
+                && client.crosshairTarget.getType() == net.minecraft.util.hit.HitResult.Type.BLOCK) {
+            BlockState s = p.getWorld().getBlockState(bh.getBlockPos());
+            if (s.isOf(OmbreBlocs.POTEAU) || s.isOf(OmbreBlocs.MONTE_CHARGE) || s.hasBlockEntity()) return false;
         }
-        // Au bord : plus de sol à 45 cm devant, sur 2 blocs de profondeur
+        double[] f = devant(p);
+        if (p.isOnGround()) return murAutour(p, f) != null && bloqueBuste(p, f[0] * 0.35, f[1] * 0.35, 1.0);
+        for (Direction d : Direction.Type.HORIZONTAL)
+            if (bloqueBuste(p, d.getOffsetX() * 0.3, d.getOffsetZ() * 0.3, 0.6)) return true;
+        return percheProche(p) || cableProche(p);
+    }
+
+    private static boolean percheProche(ClientPlayerEntity p) {
         World w = p.getWorld();
-        double ax = p.getX() + f[0] * 0.45, az = p.getZ() + f[1] * 0.45;
-        BlockPos sous1 = BlockPos.ofFloored(ax, p.getY() - 0.5, az), sous2 = sous1.down();
-        if (!w.getBlockState(sous1).getCollisionShape(w, sous1).isEmpty() || !w.getBlockState(sous2).getCollisionShape(w, sous2).isEmpty())
-            return false;
-        for (double dist = 1.5; dist <= 5.0; dist += 0.5) {
-            double h = hauteurRebord(p, p.getX() + f[0] * dist, p.getZ() + f[1] * dist, -4, 1.2);
-            if (!Double.isNaN(h)) {
-                Vec3d v = p.getVelocity();
-                double vit = Math.max(0.42, Math.min(0.55, 0.3 + dist * 0.05));
-                p.setVelocity(f[0] * vit, h > p.getY() + 0.3 ? 0.52 : 0.45, f[1] * vit);
-                poseBond = 10;
-                p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.4f);
-                return true;
-            }
+        for (BlockPos b : BlockPos.iterate(BlockPos.ofFloored(p.getX() - 1, p.getY() + 1, p.getZ() - 1),
+                BlockPos.ofFloored(p.getX() + 1, p.getY() + 3, p.getZ() + 1))) {
+            BlockState s = w.getBlockState(b);
+            if (s.isOf(OmbreBlocs.PERCHE) || s.isOf(OmbreBlocs.ENSEIGNE)) return true;
         }
-        // Rien en face : au-dessus d'un vide de plus de 4 blocs, on s'arrête au bord (Espace pour sauter quand même)
-        int vide = 0;
-        for (int i = 1; i <= 5; i++) {
-            BlockPos b = BlockPos.ofFloored(ax, p.getY() - 0.5 - i + 1, az);
-            if (!w.getBlockState(b).getCollisionShape(w, b).isEmpty()) break;
-            vide++;
+        return false;
+    }
+
+    private static boolean cableProche(ClientPlayerEntity p) {
+        Vec3d mains = p.getPos().add(0, MAINS, 0);
+        for (RenduCordes.Cable c : RenduCordes.CABLES.values()) {
+            Vec3d d = c.b().subtract(c.a());
+            double t = MathHelper.clamp(mains.subtract(c.a()).dotProduct(d) / d.lengthSquared(), 0, 1);
+            if (CoteClient.pointCable(c.a(), c.b(), t).distanceTo(mains) < 1.5) return true;
         }
-        bordProtege = vide >= 5;
         return false;
     }
 
     // ───────────────────────── gestes communs ─────────────────────────
 
-    private static void sauter(ClientPlayerEntity p, int sans, int cherche) {
+    private static void sauter(ClientPlayerEntity p, int sans) {
         changer(Etat.LIBRE);
         sansPrise = sans;
-        chercheMur = cherche;
         p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.2f);
         rattrape();
     }
@@ -628,7 +599,6 @@ public final class Parcours {
     private static void lacher(int sans) {
         changer(Etat.LIBRE);
         sansPrise = sans;
-        chercheMur = 0;
     }
 
     /** Dit au serveur d'oublier la chute en cours (sinon il compterait les dégâts depuis le début). */

@@ -204,7 +204,7 @@ public final class CarteParcours {
 
     /** 1. Quatre murs de hauteurs croissantes, avec du foin au pied pour redescendre. */
     private void escalade() {
-        panneau(-2, 6, "1. ESCALADE", "Espace contre", "le mur. Z S Q D", "Maj = lâcher");
+        panneau(-2, 6, "1. ESCALADE", "Clic droit au", "mur. Z S Q D", "Maj = lâcher");
         int[][] murs = {{-11, -8, 3}, {-5, -2, 6}, {2, 5, 10}, {8, 11, 15}};
         Block[] mat = {Blocks.COBBLESTONE, Blocks.STONE_BRICKS, Blocks.BRICKS, Blocks.DEEPSLATE_BRICKS};
         for (int i = 0; i < murs.length; i++) {
@@ -238,7 +238,7 @@ public final class CarteParcours {
 
     /** 4. Un mur le long d'une fosse d'eau de 10 blocs : on court dessus. */
     private void courseSurMur() {
-        panneau(2, 57, "4. COURSE", "SUR MUR", "Sprinte, saute", "le long, Z tenu");
+        panneau(2, 57, "4. COURSE", "SUR MUR", "Sprint, saut le", "long, clic droit");
         bassin(-4, 60, 3, 69);
         boite(-6, 0, 57, -5, 5, 72, Blocks.STONE_BRICKS);
         boite(-6, 2, 57, -5, 2, 72, Blocks.MOSSY_STONE_BRICKS);     // une bande pour lire la hauteur
@@ -261,7 +261,7 @@ public final class CarteParcours {
 
     /** 6. Trois murs de plus en plus hauts : on saute, on s'accroche au bord, on se hisse. */
     private void rebords() {
-        panneau(-3, 97, "6. REBORDS", "Saute au mur :", "on s'accroche.", "Espace = monter");
+        panneau(-3, 97, "6. REBORDS", "Saute au mur,", "clic droit tenu.", "Espace = monter");
         panneau(3, 97, "Q / D : glisser", "Maj : lâcher", "S + Espace :", "saut arrière");
         boite(-2, 0, 98, 2, 0, 98, Blocks.SMOOTH_STONE);           // deux marches
         boite(-2, 0, 99, 2, 1, 99, Blocks.SMOOTH_STONE);
@@ -305,7 +305,7 @@ public final class CarteParcours {
 
     /** 9. Perches au-dessus d'un bassin : on s'y balance de l'une à l'autre. */
     private void perches() {
-        panneau(16, 25, "9. PERCHES", "Saute dessus,", "Z = élan et", "projection");
+        panneau(16, 25, "9. PERCHES", "Saute, clic", "droit tenu. Z =", "élan, projection");
         boite(18, 0, 26, 22, 0, 26, Blocks.SMOOTH_STONE);
         boite(18, 0, 27, 22, 1, 27, Blocks.SMOOTH_STONE);
         boite(18, 0, 28, 22, 2, 28, Blocks.SMOOTH_STONE);

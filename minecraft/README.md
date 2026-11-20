@@ -42,37 +42,39 @@ Dans le jeu : Options › Graphismes › Shader Packs. Une ville la nuit, avec l
 
 **Touche H en jeu : un écran qui récapitule toutes les commandes.**
 
-### Escalade (comme dans Assassin's Creed : on reste là où on est)
+### Le clic droit : la main qui attrape
+
+C'est toi qui décides quand t'accrocher : **le clic droit attrape**. Sans lui, tu ne t'accroches à rien et tu passes à côté.
+
+| Où | Clic droit |
+|---|---|
+| Au sol, face à un mur | Tu t'y accroches (un mur bas, tu t'y rétablis) |
+| En l'air (maintenu) | Tu attrapes ce qui passe à portée de main : un mur, un rebord, une perche, une enseigne, un câble de tyrolienne |
+| En sautant en sprint le long d'un mur (maintenu) | Tu cours sur le mur |
+| Sur un poteau de tyrolienne ou un monte-charge | Tu pars |
+
+Avec un **bloc en main**, le clic droit sert à construire, comme d'habitude. Quand il attrape quelque chose, l'objet en main n'est pas utilisé (pas de couteau lancé par erreur).
+
+### Escalade (on reste là où on est)
 
 | Geste | Touches |
 |---|---|
-| S'accrocher à un mur | **Espace** en poussant vers le mur, ou sauter vers lui (on s'accroche au vol) |
+| S'accrocher | **Clic droit** face au mur, ou clic droit maintenu en sautant vers lui |
 | Monter / descendre | **Z / S** (en tenant Ctrl, plus vite) |
 | Se déplacer sur le côté | **Q / D** |
 | Bondir vers la prise du dessus | **Espace** |
 | Bondir sur le côté | **Q ou D + Espace** |
-| Saut arrière vers le mur d'en face | **S + Espace** (on se raccroche tout seul de l'autre côté) |
+| Saut arrière vers le mur d'en face | **S + Espace**, puis clic droit maintenu pour s'y raccrocher |
 | Lâcher | **Maj** |
 | En haut du mur | On se rétablit tout seul par-dessus le bord |
-
-### Course libre : Ctrl + Z (comme dans Assassin's Creed)
-
-En sprint, le corps choisit le geste tout seul :
-
-| Devant toi | Ce qui se passe |
-|---|---|
-| Un mur bas (jusqu'à 2,4 blocs) | Tu t'y rétablis d'un geste |
-| Un mur plus haut | Tu l'escalades tout seul, sans Espace (Ctrl + Z tenus : on monte vite) |
-| Le bord d'un toit, avec un appui en face (5 blocs max) | Tu sautes tout seul dessus |
-| Le bord d'un grand vide, sans rien en face | Tu t'arrêtes net au bord ; **Espace** pour sauter quand même |
 
 ### Rebords, course et chutes
 
 | Geste | Touches |
 |---|---|
-| **S'accrocher à un rebord** | Automatique en tombant le long d'un mur dont le haut passe aux mains |
+| **S'accrocher à un rebord** | Clic droit maintenu en passant devant un bord à hauteur des mains |
 | Suspendu | **Z ou Espace** se hisser · **Q / D** glisser · **Q ou D + Espace** sauter au rebord voisin · **S** redescendre sur le mur · **Maj** lâcher |
-| **Courir sur un mur** | En sprint, sauter le long d'un mur avec Z enfoncé (environ 1,5 s) ; **Espace** rebondit vers le mur d'en face |
+| **Courir sur un mur** | En sprint, sauter le long d'un mur avec Z enfoncé et **clic droit maintenu** (environ 1,5 s) ; **Espace** rebondit vers le mur d'en face |
 | **Bond** | Les sauts en sprint portent plus loin ; en sprint, les marches d'un bloc se montent seules |
 | **Saut de la foi** | Tomber dans une **meule**, du **foin**, du **feuillage** ou sur un **auvent** : aucun dégât |
 | **Roulade** | **Maj** en touchant le sol : jusqu'à 9 blocs de chute sans mal |
@@ -81,9 +83,9 @@ En sprint, le corps choisit le geste tout seul :
 
 | Objet | Comment s'en servir |
 |---|---|
-| **Poteau de tyrolienne** + **corde** | Corde en main, clic droit sur un poteau puis sur un autre (64 blocs max). Pour partir : **Espace** à côté du poteau du haut (ou clic droit dessus), ou **saute sur le câble** au vol. Pendant la glisse : Espace saute (assassinat aérien possible), Maj lâche |
-| **Monte-charge** | À poser au pied d'un mur. **Monte dessus et appuie sur Espace** (ou clic droit) : le contrepoids tombe, tu montes le long de la corde jusqu'au toit et tu t'y rétablis |
-| **Perche** | Barre à saisir au vol : on se balance, **Z** donne de l'élan et projette, Espace saute, Maj lâche |
+| **Poteau de tyrolienne** + **corde** | Corde en main, clic droit sur un poteau puis sur un autre (64 blocs max). Pour partir : **clic droit** sur le poteau du haut, ou **saute sur le câble, clic droit maintenu**. Pendant la glisse : Espace saute (assassinat aérien possible), Maj lâche |
+| **Monte-charge** | À poser au pied d'un mur. **Clic droit dessus** : le contrepoids tombe, tu montes le long de la corde (départ doux, puis de plus en plus vite) jusqu'au toit et tu t'y rétablis |
+| **Perche** | Barre à saisir au vol (**clic droit maintenu**) : on se balance, **Z** donne de l'élan et projette, Espace saute, Maj lâche |
 | **Enseigne de boutique** | Elle sort du mur : sa potence se saisit comme une perche |
 | **Poutre** | Pièce de bois étroite pour relier deux toits |
 | **Corniche** | Rebord de pierre à poser sur une façade : on s'y accroche, on le longe |
