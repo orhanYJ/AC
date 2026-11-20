@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:paper"
+  },
+  {
+   "item": "minecraft:brown_dye"
+  }
+ ],
+ "result": {
+  "id": "ombre:affiche_carte_du_ciel",
+  "count": 2
+ }
+}

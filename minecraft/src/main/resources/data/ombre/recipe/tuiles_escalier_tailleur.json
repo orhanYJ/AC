@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "ombre:tuiles"
+ },
+ "result": {
+  "id": "ombre:tuiles_escalier",
+  "count": 1
+ }
+}

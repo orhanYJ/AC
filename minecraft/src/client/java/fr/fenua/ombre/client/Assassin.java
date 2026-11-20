@@ -81,7 +81,7 @@ public final class Assassin {
             else if (Discretion.dansCachette(client.player)) cache = "§aCaché";
             else if (Discretion.dansLaFoule(client.player)) cache = "§aDans la foule";
             if (client.player.hasStatusEffect(fr.fenua.ombre.objet.Effets.DEGUISE))
-                ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal("§9Déguisé en gardien"), w / 2, h - 72, 0xFFFFFF);
+                ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal("§6Déguisé en hallebardier"), w / 2, h - 72, 0xFFFFFF);
             if (cache != null) ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal(cache), w / 2, h - 60, 0xFFFFFF);
         }
         if (cible == null || type == null || client.options.hudHidden) return;

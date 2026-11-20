@@ -1,0 +1,8 @@
+{
+ "parent": "minecraft:block/slab_top",
+ "textures": {
+  "bottom": "ombre:block/pierre_de_taille",
+  "top": "ombre:block/pierre_de_taille",
+  "side": "ombre:block/pierre_de_taille"
+ }
+}

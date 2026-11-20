@@ -29,7 +29,7 @@ public final class Discretion {
         double f = 1.0;
         if (dansCachette(joueur) || dansLaFoule(joueur)) return 0.0;
         if (observateur instanceof LivingEntity o && o.hasStatusEffect(Effets.ENDORMI)) return 0.0;   // il dort
-        // Déguisé en gardien : les gardes ne te remarquent qu'à 2 blocs
+        // Déguisé en hallebardier : les gardes ne te remarquent qu'à 2 blocs
         if (joueur.hasStatusEffect(Effets.DEGUISE) && observateur != null && estGarde(observateur)) return 0.0;
 
         if (joueur.isSneaking()) f *= 0.75;          // s'ajoute au ×0,8 de Minecraft
@@ -47,10 +47,10 @@ public final class Discretion {
         return f;
     }
 
-    /** Un garde : ceux du mod (gardien, gendarme, officier) ou toute créature étiquetée « ombre_garde ». */
+    /** Un garde : ceux du mod (hallebardier, arbalétrier, capitaine) ou toute créature étiquetée « ombre_garde ». */
     public static boolean estGarde(Entity e) {
-        return e instanceof fr.fenua.ombre.entite.Gardes.Gardien || e instanceof fr.fenua.ombre.entite.Gardes.Gendarme
-                || e instanceof fr.fenua.ombre.entite.Gardes.Officier || e.getCommandTags().contains(Gardes.GARDE);
+        return e instanceof fr.fenua.ombre.entite.Gardes.Hallebardier || e instanceof fr.fenua.ombre.entite.Gardes.Arbaletrier
+                || e instanceof fr.fenua.ombre.entite.Gardes.Capitaine || e.getCommandTags().contains(Gardes.GARDE);
     }
 
     /** Dans la foule : au moins deux passants à moins de 2,5 blocs, et on marche (on ne court pas, on ne saute pas). */

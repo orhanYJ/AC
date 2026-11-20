@@ -41,8 +41,8 @@ public class EcranAide extends Screen {
             new String[]{"  ou au vol", "Saute sur le câble, clic droit maintenu : on glisse vers le bas"},
             new String[]{"  pendant la glisse", "Espace : sauter (assassinat aérien possible) ; Maj : lâcher"},
             new String[]{"Monte-charge", "Posé au pied d'un mur. Clic droit dessus : on monte jusqu'au toit"},
-            new String[]{"Perche, enseigne, réverbère", "Saute dessus, clic droit maintenu : on se balance. Z : élan et projection"},
-            new String[]{"Lance-grappin", "Clic droit vers le bord d'un toit (40 blocs) : on est tiré jusqu'en haut"},
+            new String[]{"Perche, enseigne, lanterne", "Saute dessus, clic droit maintenu : on se balance. Z : élan et projection"},
+            new String[]{"Arbalète à grappin", "Clic droit vers le bord d'un toit (40 blocs) : on est tiré jusqu'en haut"},
             new String[]{"Poutre, corniche", "Pour courir et s'accrocher ; échafaudages et lampadaires s'escaladent"},
             new String[]{"Perchoir", "Point de vue : s'y tenir révèle les gardes pendant 30 s"},
             new String[]{"#Assassin", ""},
@@ -56,9 +56,9 @@ public class EcranAide extends Screen {
             new String[]{"Clic gauche (lame)", "Marche aussi : frapper un garde distrait le tue d'un coup"},
             new String[]{"Clic droit (couteaux)", "Couteau de lancer : tue à distance, sans bruit"},
             new String[]{"Clic droit (fléchettes)", "Soporifique : le garde s'endort 30 s. Empoisonnée : il tombe 4 s plus tard"},
-            new String[]{"Clic droit (écus)", "Jetés au sol : la foule accourt, les gardes viennent voir"},
+            new String[]{"Clic droit (thalers)", "Jetés au sol : la foule accourt, les gardes viennent voir"},
             new String[]{"Clic droit (pétard)", "Bruit et fumée : la foule s'enfuit, les gardes accourent"},
-            new String[]{"Tenue de gardien", "Déguisé : les gardes ne te voient qu'à 2 blocs (perdu si tu cours, grimpes, frappes)"},
+            new String[]{"Tenue de hallebardier", "Déguisé : les gardes ne te voient qu'à 2 blocs (perdu si tu cours, grimpes, frappes)"},
             new String[]{"Clic droit (bombe)", "Fumée : les gardes autour perdent ta trace 5 s"},
             new String[]{"V", "Instinct : voir les ennemis à travers les murs (toutes les 15 s)"},
             new String[]{"B", "Siffler : attirer le garde le plus proche"},
@@ -69,8 +69,9 @@ public class EcranAide extends Screen {
             new String[]{"Banc public", "Clic droit : assis, on se fond dans le décor. Maj pour se relever"},
             new String[]{"Charrette de foin", "On y plonge sans mal ; accroupi dedans, on est caché"},
             new String[]{"Dans la foule", "Marche parmi deux passants ou plus (sans courir) : invisible"},
+            new String[]{"Clic droit sur Tycho, Kepler…", "Les personnages réels racontent leur histoire et donnent les missions"},
             new String[]{"#Commandes du chat", ""},
-            new String[]{"/ombre paris", "Un quartier de Paris en 1889 : foule, gardes, tour de fer, une cible"},
+            new String[]{"/ombre prague", "La Vieille-Ville de Prague en 1600 : foule, gardes, Týn, pont Charles, cibles"},
             new String[]{"/ombre kit", "Tout l'équipement de l'assassin"},
             new String[]{"/ombre vitrine", "Tous les blocs du mod exposés en rangées"},
             new String[]{"/ombre parcours", "Grande carte d'entraînement au parkour (sans gardes)"},
@@ -79,7 +80,7 @@ public class EcranAide extends Screen {
             new String[]{"H", "Cet écran"}
     );
 
-    public EcranAide() { super(Text.literal("L'Ombre — Paris 1889 — toutes les commandes")); }
+    public EcranAide() { super(Text.literal("L'Ombre — Prague 1600 — toutes les commandes")); }
 
     @Override
     protected void init() {

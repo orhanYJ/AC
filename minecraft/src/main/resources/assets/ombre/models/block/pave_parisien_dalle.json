@@ -1,8 +1,0 @@
-{
- "parent": "minecraft:block/slab",
- "textures": {
-  "bottom": "ombre:block/pave_parisien",
-  "top": "ombre:block/pave_parisien",
-  "side": "ombre:block/pave_parisien"
- }
-}

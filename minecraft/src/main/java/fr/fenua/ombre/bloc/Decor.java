@@ -23,9 +23,9 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
 /**
- * Le mobilier de Paris 1889. Chaque bloc est une forme (une liste de boîtes en pixels, de 0 à 16),
+ * Le mobilier de la Prague de 1600. Chaque bloc est une forme (une liste de boîtes en pixels, de 0 à 16),
  * dessinée « face au nord » pour les blocs orientés, et tournée selon leur sens.
- *  - MURAL : on le pose sur un mur, il s'y accroche (gouttière, balcon, réverbère, horloge…).
+ *  - MURAL : on le pose sur un mur, il s'y accroche (gouttière, balcon, lanterne, horloge…).
  *  - LIBRE : il se tourne vers celui qui le pose (banc, étal, charrette…).
  */
 public final class Decor {

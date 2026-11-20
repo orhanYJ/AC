@@ -65,7 +65,7 @@ public final class Gardes {
         for (ServerPlayerEntity p : serveur.getPlayerManager().getPlayerList()) {
             if (p.isSprinting() && p.hasStatusEffect(fr.fenua.ombre.objet.Effets.DEGUISE)) {
                 p.removeStatusEffect(fr.fenua.ombre.objet.Effets.DEGUISE);
-                p.sendMessage(Text.literal("§7Déguisement perdu : un gardien ne court pas."), true);
+                p.sendMessage(Text.literal("§7Déguisement perdu : un hallebardier ne court pas."), true);
             }
             EntityAttributeInstance pas = p.getAttributeInstance(EntityAttributes.GENERIC_STEP_HEIGHT);
             if (pas == null) continue;
@@ -184,9 +184,9 @@ public final class Gardes {
         w.spawnParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 1, p.getZ(), 30, 1.5, 0.5, 1.5, 0.02);
     }
 
-    /** Une cible tombe : contrat rempli. Un gardien tué laisse sa tenue. */
+    /** Une cible tombe : contrat rempli. Un hallebardier tué laisse sa tenue. */
     public static void apresMort(LivingEntity mort, DamageSource source) {
-        if (mort instanceof fr.fenua.ombre.entite.Gardes.Gardien && source.getAttacker() instanceof PlayerEntity)
+        if (mort instanceof fr.fenua.ombre.entite.Gardes.Hallebardier && source.getAttacker() instanceof PlayerEntity)
             mort.dropStack(new net.minecraft.item.ItemStack(fr.fenua.ombre.objet.Objets.TENUE));
         if (!(mort.getWorld() instanceof ServerWorld w) || !mort.getCommandTags().contains(CIBLE)) return;
         Text titre = Text.literal("§6Contrat rempli");

@@ -21,24 +21,28 @@ public final class Entites {
     private Entites() {}
 
     public static EntityType<Passant> PASSANT;
-    public static EntityType<Gardes.Gardien> GARDIEN;
-    public static EntityType<Gardes.Gendarme> GENDARME;
-    public static EntityType<Gardes.Officier> OFFICIER;
+    public static EntityType<Figure> FIGURE;
+    public static EntityType<Gardes.Hallebardier> HALLEBARDIER;
+    public static EntityType<Gardes.Arbaletrier> ARBALETRIER;
+    public static EntityType<Gardes.Capitaine> CAPITAINE;
     public static final List<Item> OEUFS = new ArrayList<>();
 
     public static void enregistrer() {
         PASSANT = type("passant", EntityType.Builder.create(Passant::new, SpawnGroup.CREATURE));
-        GARDIEN = type("gardien", EntityType.Builder.create(Gardes.Gardien::new, SpawnGroup.MONSTER));
-        GENDARME = type("gendarme", EntityType.Builder.create(Gardes.Gendarme::new, SpawnGroup.MONSTER));
-        OFFICIER = type("officier", EntityType.Builder.create(Gardes.Officier::new, SpawnGroup.MONSTER));
+        FIGURE = type("personnage", EntityType.Builder.create(Figure::new, SpawnGroup.CREATURE));
+        HALLEBARDIER = type("hallebardier", EntityType.Builder.create(Gardes.Hallebardier::new, SpawnGroup.MONSTER));
+        ARBALETRIER = type("arbaletrier", EntityType.Builder.create(Gardes.Arbaletrier::new, SpawnGroup.MONSTER));
+        CAPITAINE = type("capitaine", EntityType.Builder.create(Gardes.Capitaine::new, SpawnGroup.MONSTER));
         FabricDefaultAttributeRegistry.register(PASSANT, Passant.attributs());
-        FabricDefaultAttributeRegistry.register(GARDIEN, VindicatorEntity.createVindicatorAttributes());
-        FabricDefaultAttributeRegistry.register(GENDARME, PillagerEntity.createPillagerAttributes());
-        FabricDefaultAttributeRegistry.register(OFFICIER, VindicatorEntity.createVindicatorAttributes());
+        FabricDefaultAttributeRegistry.register(FIGURE, Figure.attributs());
+        FabricDefaultAttributeRegistry.register(HALLEBARDIER, VindicatorEntity.createVindicatorAttributes());
+        FabricDefaultAttributeRegistry.register(ARBALETRIER, PillagerEntity.createPillagerAttributes());
+        FabricDefaultAttributeRegistry.register(CAPITAINE, VindicatorEntity.createVindicatorAttributes());
         oeuf("passant", PASSANT, 0x3B3B46, 0xD8B48C);
-        oeuf("gardien", GARDIEN, 0x1F2A48, 0xC0C6D0);
-        oeuf("gendarme", GENDARME, 0x1F2A48, 0xF0F0F0);
-        oeuf("officier", OFFICIER, 0x1F2A48, 0xE2B13C);
+        oeuf("personnage", FIGURE, 0x1C1C1C, 0xD4AF37);
+        oeuf("hallebardier", HALLEBARDIER, 0xB52A2A, 0xF0C419);
+        oeuf("arbaletrier", ARBALETRIER, 0x6B4A2B, 0xB8BCC4);
+        oeuf("capitaine", CAPITAINE, 0x1C1C1C, 0xE2B13C);
     }
 
     private static <T extends net.minecraft.entity.Entity> EntityType<T> type(String nom, EntityType.Builder<T> b) {

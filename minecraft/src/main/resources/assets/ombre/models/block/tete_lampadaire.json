@@ -2,7 +2,9 @@
  "parent": "minecraft:block/block",
  "textures": {
   "fer": "minecraft:block/polished_blackstone",
-  "verre": "minecraft:block/glowstone",
+  "verre": "minecraft:block/glass",
+  "feu": "minecraft:block/glowstone",
+  "bois": "minecraft:block/stripped_dark_oak_log",
   "particle": "minecraft:block/polished_blackstone"
  },
  "elements": [
@@ -14,11 +16,43 @@
    ],
    "to": [
     10,
-    4,
+    3,
     10
    ],
    "faces": {
     "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  },
+  {
+   "from": [
+    4,
+    3,
+    4
+   ],
+   "to": [
+    12,
+    4,
+    12
+   ],
+   "faces": {
+    "north": {
      "texture": "#fer"
     },
     "south": {
@@ -40,14 +74,14 @@
   },
   {
    "from": [
+    4.5,
     4,
-    4,
-    4
+    4.5
    ],
    "to": [
-    12,
-    12,
-    12
+    11.5,
+    11,
+    11.5
    ],
    "faces": {
     "north": {
@@ -72,14 +106,78 @@
   },
   {
    "from": [
-    3,
-    12,
-    3
+    6,
+    5,
+    6
    ],
    "to": [
-    13,
-    15,
-    13
+    10,
+    10,
+    10
+   ],
+   "faces": {
+    "north": {
+     "texture": "#feu"
+    },
+    "south": {
+     "texture": "#feu"
+    },
+    "east": {
+     "texture": "#feu"
+    },
+    "west": {
+     "texture": "#feu"
+    },
+    "up": {
+     "texture": "#feu"
+    },
+    "down": {
+     "texture": "#feu"
+    }
+   }
+  },
+  {
+   "from": [
+    3.5,
+    11,
+    3.5
+   ],
+   "to": [
+    12.5,
+    12.5,
+    12.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  },
+  {
+   "from": [
+    5,
+    12.5,
+    5
+   ],
+   "to": [
+    11,
+    14,
+    11
    ],
    "faces": {
     "north": {
@@ -105,7 +203,7 @@
   {
    "from": [
     7,
-    15,
+    14,
     7
    ],
    "to": [

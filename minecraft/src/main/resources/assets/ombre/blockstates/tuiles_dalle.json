@@ -1,0 +1,13 @@
+{
+ "variants": {
+  "type=bottom": {
+   "model": "ombre:block/tuiles_dalle"
+  },
+  "type=top": {
+   "model": "ombre:block/tuiles_dalle_top"
+  },
+  "type=double": {
+   "model": "ombre:block/tuiles"
+  }
+ }
+}

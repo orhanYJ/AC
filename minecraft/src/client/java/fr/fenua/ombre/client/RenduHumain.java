@@ -28,4 +28,8 @@ public class RenduHumain<T extends MobEntity> extends BipedEntityRenderer<T, Pla
     static { for (int i = 0; i < PASSANTS.length; i++) PASSANTS[i] = tex("passant_" + i); }
 
     public static Identifier passant(Passant p) { return PASSANTS[p.variante()]; }
+
+    private static final String[] FIGURES = {"tycho_brahe", "kepler", "rodolphe_ii", "rabbi_loew"};
+
+    public static Identifier figure(fr.fenua.ombre.entite.Figure f) { return tex(FIGURES[f.qui()]); }
 }

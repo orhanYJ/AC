@@ -5,7 +5,7 @@ public final class Aide {
     private Aide() {}
 
     public static final String TEXTE = String.join("\n",
-            "§6§lL'Ombre — Paris 1889",
+            "§6§lL'Ombre — Prague 1600",
             "§6Touche H§r : l'écran avec toutes les commandes détaillées.",
             "§eEscalade§r : Espace contre un mur. Z/S monter-descendre, Q/D côté, Espace bondir, S+Espace saut arrière, Maj lâcher.",
             "§eClic droit maintenu§r : saisir les perches, enseignes, réverbères et câbles de tyrolienne.",
@@ -13,8 +13,8 @@ public final class Aide {
             "§eRebords§r : en tombant le long d'un mur, on saisit le bord. Z/Espace se hisser, Q/D glisser, Q/D+Espace sauter, Maj lâcher.",
             "§eObjets§r : tyrolienne (corde entre deux poteaux), monte-charge, perches, enseignes, corniches, auvents… (onglet « L'Ombre »).",
             "§eCourse sur mur§r : en sprint, saute le long d'un mur (Z enfoncé). Espace = rebondir vers le mur d'en face.",
-            "§eFoule, bancs, déguisement§r : marche parmi les passants, assieds-toi sur un banc, ou enfile une tenue de gardien.",
-            "§eObjets§r : lance-grappin, écus, pétards, fléchettes (soporifique, empoisonnée), couteaux, fumée.",
+            "§eFoule, bancs, déguisement§r : marche parmi les passants, assieds-toi sur un banc, ou enfile une tenue de hallebardier.",
+            "§eObjets§r : arbalète à grappin, thalers, pétards, fléchettes (soporifique, empoisonnée), couteaux, fumée.",
             "§eLame de nacre§r : frappe une créature qui ne t'a pas repéré = assassinat. Depuis une chute = assassinat aérien.",
             "   Une lame dans chaque main = double assassinat.",
             "§eSaut de la foi§r : tombe dans une botte de foin, aucun dégât. §eRoulade§r : accroupi à l'atterrissage, chute de 9 blocs sans mal.",
@@ -25,5 +25,6 @@ public final class Aide {
             "§ePoint de vue§r : monte tout en haut de la grande tour pour synchroniser et révéler le fortin.",
             "§eArène§r : §l/ombre arene§r construit un fortin à 30 blocs devant toi (de préférence en monde plat).",
             "§eParcours§r : §l/ombre parcours§r construit une grande carte d'entraînement (200 blocs, sans gardes) et t'y emmène.",
-            "§eParis§r : §l/ombre paris§r construit un quartier de 1889 et t'y emmène. §l/ombre kit§r : l'équipement. §l/ombre vitrine§r : tous les blocs.");
+            "§ePrague§r : §l/ombre prague§r construit la Vieille-Ville de 1600 et t'y emmène. Clic droit sur Tycho Brahe ou Kepler : la mission.",
+            "§l/ombre kit§r : l'équipement. §l/ombre vitrine§r : tous les blocs.");
 }

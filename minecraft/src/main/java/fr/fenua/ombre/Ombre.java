@@ -56,9 +56,9 @@ public class Ombre implements ModInitializer {
                         .then(CommandManager.literal("parcours")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> CarteParcours.construire(ctx.getSource())))
-                        .then(CommandManager.literal("paris")
+                        .then(CommandManager.literal("prague")
                                 .requires(src -> src.hasPermissionLevel(2))
-                                .executes(ctx -> CarteParis.construire(ctx.getSource())))
+                                .executes(ctx -> CartePrague.construire(ctx.getSource())))
                         .then(CommandManager.literal("kit")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> { Kit.donner(ctx.getSource().getPlayerOrThrow());

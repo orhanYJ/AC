@@ -26,14 +26,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Un passant du Paris de 1889 : il flâne, regarde autour de lui, s'arrête devant les gens.
+ * Un passant de Prague, en 1600 : il flâne, regarde autour de lui, s'arrête devant les gens.
  * Marcher parmi deux passants ou plus, sans courir, te fond dans la foule (voir Discretion).
  * Il s'enfuit en criant quand un assassinat a lieu près de lui, ou au bruit d'un pétard,
- * et accourt vers des écus jetés au sol.
+ * et accourt vers des thalers jetés au sol.
  */
 public class Passant extends PathAwareEntity {
     public static final int VARIANTES = 8;
-    public static final String[] NOMS = {"Bourgeois", "Ouvrier", "Dame", "Élégante", "Marchande", "Gamin", "Artiste", "Étudiant"};
+    public static final String[] NOMS = {"Bourgeois", "Artisan", "Paysanne", "Dame de qualité", "Marchande", "Gamin", "Moine", "Étudiant"};
     private static final TrackedData<Integer> VARIANTE = DataTracker.registerData(Passant.class, TrackedDataHandlerRegistry.INTEGER);
 
     public Passant(EntityType<? extends PathAwareEntity> type, World w) { super(type, w); }

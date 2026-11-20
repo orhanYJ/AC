@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "ombre:pave"
+ },
+ "result": {
+  "id": "ombre:pave_dalle",
+  "count": 2
+ }
+}

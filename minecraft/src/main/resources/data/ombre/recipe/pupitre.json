@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:lectern"
+  },
+  {
+   "item": "minecraft:book"
+  }
+ ],
+ "result": {
+  "id": "ombre:pupitre",
+  "count": 1
+ }
+}

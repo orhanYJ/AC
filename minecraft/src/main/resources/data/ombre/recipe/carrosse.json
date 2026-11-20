@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:minecart"
+  },
+  {
+   "item": "minecraft:black_wool"
+  },
+  {
+   "item": "minecraft:gold_nugget"
+  }
+ ],
+ "result": {
+  "id": "ombre:carrosse",
+  "count": 1
+ }
+}

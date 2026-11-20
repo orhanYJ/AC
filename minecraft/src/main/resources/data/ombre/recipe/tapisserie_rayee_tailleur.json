@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "minecraft:paper"
+ },
+ "result": {
+  "id": "ombre:tapisserie_rayee",
+  "count": 1
+ }
+}

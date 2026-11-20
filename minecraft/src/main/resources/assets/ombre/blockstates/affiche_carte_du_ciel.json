@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/affiche_carte_du_ciel"
+  },
+  "facing=east": {
+   "model": "ombre:block/affiche_carte_du_ciel",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/affiche_carte_du_ciel",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/affiche_carte_du_ciel",
+   "y": 270
+  }
+ }
+}

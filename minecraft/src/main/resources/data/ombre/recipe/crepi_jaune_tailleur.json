@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "minecraft:sandstone"
+ },
+ "result": {
+  "id": "ombre:crepi_jaune",
+  "count": 1
+ }
+}

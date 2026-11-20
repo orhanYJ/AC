@@ -19,8 +19,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
- * Ce qu'on lance : écus, pétard, fléchettes. Le même projectile, son effet dépend de l'objet.
- *  - Écus : en tombant, ils tintent ; la foule accourt pour les ramasser, les gardes viennent voir.
+ * Ce qu'on lance : thalers, pétard, fléchettes. Le même projectile, son effet dépend de l'objet.
+ *  - Thalers : en tombant, ils tintent ; la foule accourt pour les ramasser, les gardes viennent voir.
  *  - Pétard : une détonation et de la fumée ; la foule s'enfuit, les gardes accourent voir.
  *  - Fléchette soporifique : le garde touché s'endort 30 s.
  *  - Fléchette empoisonnée : le garde touché s'effondre 4 s plus tard, sans un bruit.
@@ -29,7 +29,7 @@ public class Projectile extends ThrownItemEntity {
     public Projectile(EntityType<? extends Projectile> type, World w) { super(type, w); }
     public Projectile(EntityType<? extends Projectile> type, LivingEntity lanceur, World w) { super(type, lanceur, w); }
 
-    @Override protected Item getDefaultItem() { return Objets.ECUS; }
+    @Override protected Item getDefaultItem() { return Objets.THALERS; }
 
     @Override
     protected void onEntityHit(EntityHitResult hit) {
@@ -46,7 +46,7 @@ public class Projectile extends ThrownItemEntity {
         if (!(getWorld() instanceof ServerWorld sw)) return;
         ItemStack s = getStack();
         Vec3d p = hit.getPos();
-        if (s.isOf(Objets.ECUS)) {
+        if (s.isOf(Objets.THALERS)) {
             sw.spawnParticles(new ItemStackParticleEffect(ParticleTypes.ITEM, s), p.x, p.y + 0.2, p.z, 14, 0.4, 0.2, 0.4, 0.15);
             sw.playSound(null, p.x, p.y, p.z, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 0.7f, 1.6f);
             Distractions.attirer(sw, p, 12, 9);

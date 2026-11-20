@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/carrosse"
+  },
+  "facing=east": {
+   "model": "ombre:block/carrosse",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/carrosse",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/carrosse",
+   "y": 270
+  }
+ }
+}

@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "ombre:pierre_de_taille"
+ },
+ "result": {
+  "id": "ombre:pierre_de_taille_escalier",
+  "count": 1
+ }
+}

@@ -2,7 +2,8 @@
  "parent": "minecraft:block/block",
  "textures": {
   "affiches": "ombre:block/affiches_colonne",
-  "vert": "minecraft:block/green_terracotta",
+  "bois": "minecraft:block/dark_oak_planks",
+  "cuivre": "minecraft:block/oxidized_copper",
   "particle": "ombre:block/affiches_colonne"
  },
  "elements": [
@@ -19,22 +20,22 @@
    ],
    "faces": {
     "north": {
-     "texture": "#vert"
+     "texture": "#bois"
     },
     "south": {
-     "texture": "#vert"
+     "texture": "#bois"
     },
     "east": {
-     "texture": "#vert"
+     "texture": "#bois"
     },
     "west": {
-     "texture": "#vert"
+     "texture": "#bois"
     },
     "up": {
-     "texture": "#vert"
+     "texture": "#bois"
     },
     "down": {
-     "texture": "#vert"
+     "texture": "#bois"
     }
    }
   },
@@ -119,7 +120,7 @@
    ],
    "faces": {
     "north": {
-     "texture": "#vert",
+     "texture": "#bois",
      "uv": [
       0,
       0,
@@ -128,7 +129,7 @@
      ]
     },
     "south": {
-     "texture": "#vert",
+     "texture": "#bois",
      "uv": [
       0,
       0,
@@ -137,7 +138,7 @@
      ]
     },
     "east": {
-     "texture": "#vert",
+     "texture": "#bois",
      "uv": [
       0,
       0,
@@ -146,7 +147,7 @@
      ]
     },
     "west": {
-     "texture": "#vert",
+     "texture": "#bois",
      "uv": [
       0,
       0,
@@ -155,7 +156,7 @@
      ]
     },
     "up": {
-     "texture": "#vert",
+     "texture": "#bois",
      "uv": [
       0,
       0,
@@ -164,7 +165,7 @@
      ]
     },
     "down": {
-     "texture": "#vert",
+     "texture": "#bois",
      "uv": [
       0,
       0,
@@ -187,7 +188,7 @@
    ],
    "faces": {
     "north": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -196,7 +197,7 @@
      ]
     },
     "south": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -205,7 +206,7 @@
      ]
     },
     "east": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -214,7 +215,7 @@
      ]
     },
     "west": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -223,7 +224,7 @@
      ]
     },
     "up": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -232,7 +233,7 @@
      ]
     },
     "down": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -255,7 +256,7 @@
    ],
    "faces": {
     "north": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -264,7 +265,7 @@
      ]
     },
     "south": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -273,7 +274,7 @@
      ]
     },
     "east": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -282,7 +283,7 @@
      ]
     },
     "west": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -291,7 +292,7 @@
      ]
     },
     "up": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -300,7 +301,7 @@
      ]
     },
     "down": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -323,7 +324,7 @@
    ],
    "faces": {
     "north": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -332,7 +333,7 @@
      ]
     },
     "south": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -341,7 +342,7 @@
      ]
     },
     "east": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -350,7 +351,7 @@
      ]
     },
     "west": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -359,7 +360,7 @@
      ]
     },
     "up": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,
@@ -368,7 +369,7 @@
      ]
     },
     "down": {
-     "texture": "#vert",
+     "texture": "#cuivre",
      "uv": [
       0,
       0,

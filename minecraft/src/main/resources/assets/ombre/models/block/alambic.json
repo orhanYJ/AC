@@ -1,0 +1,189 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "cuivre": "minecraft:block/copper_block",
+  "verre": "minecraft:block/glass",
+  "fer": "minecraft:block/polished_blackstone",
+  "feu": "minecraft:block/magma_block",
+  "particle": "minecraft:block/copper_block"
+ },
+ "elements": [
+  {
+   "from": [
+    3,
+    0,
+    3
+   ],
+   "to": [
+    13,
+    3,
+    13
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  },
+  {
+   "from": [
+    5,
+    1,
+    5
+   ],
+   "to": [
+    11,
+    2.5,
+    11
+   ],
+   "faces": {
+    "up": {
+     "texture": "#feu"
+    }
+   }
+  },
+  {
+   "from": [
+    4,
+    3,
+    4
+   ],
+   "to": [
+    12,
+    10,
+    12
+   ],
+   "faces": {
+    "north": {
+     "texture": "#cuivre"
+    },
+    "south": {
+     "texture": "#cuivre"
+    },
+    "east": {
+     "texture": "#cuivre"
+    },
+    "west": {
+     "texture": "#cuivre"
+    },
+    "up": {
+     "texture": "#cuivre"
+    },
+    "down": {
+     "texture": "#cuivre"
+    }
+   }
+  },
+  {
+   "from": [
+    6,
+    10,
+    6
+   ],
+   "to": [
+    10,
+    13,
+    10
+   ],
+   "faces": {
+    "north": {
+     "texture": "#cuivre"
+    },
+    "south": {
+     "texture": "#cuivre"
+    },
+    "east": {
+     "texture": "#cuivre"
+    },
+    "west": {
+     "texture": "#cuivre"
+    },
+    "up": {
+     "texture": "#cuivre"
+    },
+    "down": {
+     "texture": "#cuivre"
+    }
+   }
+  },
+  {
+   "from": [
+    7,
+    12,
+    7
+   ],
+   "to": [
+    14,
+    13,
+    8
+   ],
+   "faces": {
+    "north": {
+     "texture": "#cuivre"
+    },
+    "south": {
+     "texture": "#cuivre"
+    },
+    "east": {
+     "texture": "#cuivre"
+    },
+    "west": {
+     "texture": "#cuivre"
+    },
+    "up": {
+     "texture": "#cuivre"
+    },
+    "down": {
+     "texture": "#cuivre"
+    }
+   }
+  },
+  {
+   "from": [
+    12,
+    2,
+    11
+   ],
+   "to": [
+    15,
+    8,
+    14
+   ],
+   "faces": {
+    "north": {
+     "texture": "#verre"
+    },
+    "south": {
+     "texture": "#verre"
+    },
+    "east": {
+     "texture": "#verre"
+    },
+    "west": {
+     "texture": "#verre"
+    },
+    "up": {
+     "texture": "#verre"
+    },
+    "down": {
+     "texture": "#verre"
+    }
+   }
+  }
+ ]
+}

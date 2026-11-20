@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/affiche_comete"
+  },
+  "facing=east": {
+   "model": "ombre:block/affiche_comete",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/affiche_comete",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/affiche_comete",
+   "y": 270
+  }
+ }
+}

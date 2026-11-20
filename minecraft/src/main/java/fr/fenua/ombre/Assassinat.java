@@ -78,9 +78,11 @@ public final class Assassinat {
         return null;
     }
 
-    /** Peut-on viser cette créature ? (vivante, pas un joueur, pas un boss) */
+    /** Peut-on viser cette créature ? (vivante, pas un joueur, pas un boss, ni un civil ni un personnage réel) */
     public static boolean visable(Entity e) {
-        return e instanceof MobEntity m && m.isAlive() && !(e instanceof WitherEntity);
+        return e instanceof MobEntity m && m.isAlive() && !(e instanceof WitherEntity)
+                && !(e instanceof fr.fenua.ombre.entite.Passant) && !(e instanceof fr.fenua.ombre.entite.Figure)
+                && !(e instanceof net.minecraft.entity.passive.IronGolemEntity);
     }
 
     /** Le joueur porte-t-il la lame (n'importe où dans son inventaire) ? */

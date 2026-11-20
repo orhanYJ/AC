@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * /ombre vitrine : expose tous les blocs du mod en rangées, devant un mur de pierre de Paris,
+ * /ombre vitrine : expose tous les blocs du mod en rangées, devant un mur de pierre de taille,
  * pour les voir d'un coup. Les blocs muraux (balcons, enseignes, affiches…) s'accrochent au mur.
  */
 public final class Vitrine {
@@ -26,7 +26,7 @@ public final class Vitrine {
         List<Block> blocs = new ArrayList<>();
         for (Block b : Registries.BLOCK) if (Registries.BLOCK.getId(b).getNamespace().equals(Ombre.MOD_ID)) blocs.add(b);
         int parRangee = 20, rangees = (blocs.size() + parRangee - 1) / parRangee;
-        BlockState fond = Registries.BLOCK.get(net.minecraft.util.Identifier.of(Ombre.MOD_ID, "pierre_de_paris")).getDefaultState();
+        BlockState fond = Registries.BLOCK.get(net.minecraft.util.Identifier.of(Ombre.MOD_ID, "pierre_de_taille")).getDefaultState();
         BlockState sol = Registries.BLOCK.get(net.minecraft.util.Identifier.of(Ombre.MOD_ID, "parquet")).getDefaultState();
         for (int r = 0; r < rangees; r++) {
             int z = o.getZ() + r * 5;

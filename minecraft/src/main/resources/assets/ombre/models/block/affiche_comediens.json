@@ -1,0 +1,29 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "papier": "ombre:block/affiche_comediens",
+  "particle": "ombre:block/affiche_comediens"
+ },
+ "elements": [
+  {
+   "from": [
+    1,
+    1,
+    0
+   ],
+   "to": [
+    15,
+    15,
+    0.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#papier"
+    },
+    "south": {
+     "texture": "#papier"
+    }
+   }
+  }
+ ]
+}

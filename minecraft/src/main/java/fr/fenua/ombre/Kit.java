@@ -11,8 +11,8 @@ public final class Kit {
 
     public static void donner(ServerPlayerEntity j) {
         Object[][] kit = {{OmbreItems.LAME, 1}, {Objets.GRAPPIN, 1}, {OmbreItems.COUTEAUX, 16}, {OmbreItems.BOMBE_FUMEE, 8},
-                {Objets.ECUS, 32}, {Objets.PETARD, 8}, {Objets.FLECHETTE_SOPORIFIQUE, 8}, {Objets.FLECHETTE_EMPOISONNEE, 8},
-                {Objets.TENUE, 2}, {Objets.BAGUETTE, 8}, {Objets.CAFE, 4}, {OmbreItems.LAME, 1}};
+                {Objets.THALERS, 32}, {Objets.PETARD, 8}, {Objets.FLECHETTE_SOPORIFIQUE, 8}, {Objets.FLECHETTE_EMPOISONNEE, 8},
+                {Objets.TENUE, 2}, {Objets.PAIN_SEIGLE, 8}, {Objets.BIERE, 4}, {OmbreItems.LAME, 1}};
         for (Object[] o : kit) j.getInventory().offerOrDrop(new ItemStack((Item) o[0], (Integer) o[1]));
     }
 }

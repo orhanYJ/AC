@@ -1,6 +1,0 @@
-{
- "parent": "minecraft:block/cube_all",
- "textures": {
-  "all": "ombre:block/papier_peint_fleuri"
- }
-}

@@ -75,7 +75,7 @@ public class OmbreClient implements ClientModInitializer {
         // L'eau du puits et de la fontaine prend la couleur de l'eau
         ColorProviderRegistry.BLOCK.register((etat, monde, pos, i) -> 0x3F76E4, OmbreBlocs.PUITS, OmbreBlocs.FONTAINE);
         // Les blocs ajourés (grilles, treillis, verre) : les trous restent transparents
-        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), OmbreBlocs.BALCON, OmbreBlocs.TREILLIS,
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), OmbreBlocs.BALCON, OmbreBlocs.CHARPENTE,
                 OmbreBlocs.REVERBERE, OmbreBlocs.LUCARNE, OmbreBlocs.COLONNE, OmbreBlocs.AFFICHE);
 
         // Les variantes ajourées (grilles de balcon, fleurs des étals, verre des réverbères)
@@ -83,9 +83,10 @@ public class OmbreClient implements ClientModInitializer {
 
         // Les personnages et ce qu'on lance
         EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.PASSANT, ctx -> new RenduHumain<>(ctx, RenduHumain::passant));
-        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.GARDIEN, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("gardien")));
-        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.GENDARME, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("gendarme")));
-        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.OFFICIER, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("officier")));
+        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.FIGURE, ctx -> new RenduHumain<>(ctx, RenduHumain::figure));
+        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.HALLEBARDIER, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("hallebardier")));
+        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.ARBALETRIER, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("arbaletrier")));
+        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.CAPITAINE, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("capitaine")));
         EntityRendererRegistry.register(fr.fenua.ombre.objet.Objets.PROJECTILE, FlyingItemEntityRenderer::new);
 
         BlockEntityRendererFactories.register(OmbreBlocs.POTEAU_ENTITE, ctx -> new RenduCordes.Poteau());

@@ -1,0 +1,587 @@
+package fr.fenua.ombre;
+
+import fr.fenua.ombre.bloc.OmbreBlocs;
+import fr.fenua.ombre.bloc.PoteauTyrolienne;
+import fr.fenua.ombre.entite.Entites;
+import fr.fenua.ombre.entite.Figure;
+import fr.fenua.ombre.entite.Passant;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.StairsBlock;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.mob.PathAwareEntity;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.registry.Registries;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.Team;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+
+import java.util.Random;
+
+/**
+ * /ombre prague : la Vieille-Ville de Prague en 1600, au nord-est du joueur (monde plat conseillé).
+ *
+ *  x (est) : 0 → 131 la ville (4 × 4 îlots de 24, rues de 7), 131 → 153 la Vltava, 153 → 166 l'autre rive.
+ *  z (sud) : 0 → 131.
+ *  - Îlots de maisons bourgeoises : façades pastel ou en sgraffite, pignon sur rue, toit de tuiles rouges,
+ *    lanternes à potence, enseignes, cours (puits, linge, gouttières).
+ *  - La place de la Vieille-Ville (îlots 1,1 et 2,1) : marché, fontaine, et la tour de l'horloge
+ *    astronomique (gargouilles = points de vue), où se tiennent Tycho Brahe et Johannes Kepler.
+ *  - L'église de Týn (îlot 3,1) : nef et deux tours à flèches ; l'alchimiste de la Confrérie dans la tour nord.
+ *  - La Vltava et le pont Charles (statues), entre la tour du pont (le grand maître de la Confrérie,
+ *    au sommet) et la tour de l'autre rive, où attend l'empereur Rodolphe II.
+ *  - Au nord, le rabbin Loew et son Golem. Une foule, des hallebardiers, des arbalétriers sur les toits.
+ */
+public final class CartePrague {
+    private static final int ILOT = 24, RUE = 7, PAS = ILOT + RUE, N = 4, VILLE = N * PAS + RUE;   // 131
+    private static final int FLEUVE = 22, RIVE = 13, LARGEUR = VILLE + FLEUVE + RIVE, PROFONDEUR = VILLE;
+    private static final int HAUT_MAX = 30;
+
+    private final ServerWorld w;
+    private final int ox, oy, oz;
+    private final Random r = new Random(1600);
+    private final int[][] hauteur = new int[LARGEUR][PROFONDEUR];
+
+    private CartePrague(ServerWorld w, int ox, int oy, int oz) { this.w = w; this.ox = ox; this.oy = oy; this.oz = oz; }
+
+    public static int construire(ServerCommandSource src) {
+        BlockPos p = BlockPos.ofFloored(src.getPosition());
+        CartePrague c = new CartePrague(src.getWorld(), p.getX() - 3, p.getY(), p.getZ() - (PROFONDEUR - 3));
+        c.batir();
+        if (src.getEntity() instanceof ServerPlayerEntity j) {
+            BlockPos d = new BlockPos(c.ox + 3, c.oy, c.oz + PROFONDEUR - 3);
+            j.teleport(src.getWorld(), d.getX() + 0.5, d.getY(), d.getZ() + 0.5, 180f, 0f);
+            j.setSpawnPoint(src.getWorld().getRegistryKey(), d, 180f, true, false);
+            Kit.donner(j);
+        }
+        src.sendFeedback(() -> Text.literal("§6Prague, 1600.§r La Vieille-Ville s'élève au nord-est, la Vltava coule à l'est.\n"
+                + "§eMission§r : parle à §6Tycho Brahe§r et à §6Johannes Kepler§r, au pied de l'horloge astronomique (clic droit).\n"
+                + "§eCibles§r (dorées avec l'Instinct) : Ottokar von Rabenstein au sommet de la tour du pont, et l'alchimiste Melchior Kragl dans la tour nord de Týn.\n"
+                + "§7Fonds-toi dans la foule, grimpe par les gouttières, synchronise aux gargouilles, plonge dans la Vltava. Touche H : toutes les commandes."), true);
+        return 1;
+    }
+
+    // ───────────────────────── outils ─────────────────────────
+
+    private static Block b(String nom) { return Registries.BLOCK.get(Identifier.of(Ombre.MOD_ID, nom)); }
+    private void set(int x, int y, int z, BlockState s) { w.setBlockState(new BlockPos(ox + x, oy + y, oz + z), s, Block.NOTIFY_LISTENERS); }
+    private void set(int x, int y, int z, Block bl) { set(x, y, z, bl.getDefaultState()); }
+    private boolean vide(int x, int y, int z) { return w.getBlockState(new BlockPos(ox + x, oy + y, oz + z)).isAir(); }
+    private void boite(int x0, int y0, int z0, int x1, int y1, int z1, BlockState s) {
+        for (int x = Math.min(x0, x1); x <= Math.max(x0, x1); x++)
+            for (int y = Math.min(y0, y1); y <= Math.max(y0, y1); y++)
+                for (int z = Math.min(z0, z1); z <= Math.max(z0, z1); z++) set(x, y, z, s);
+    }
+    private void boite(int x0, int y0, int z0, int x1, int y1, int z1, Block bl) { boite(x0, y0, z0, x1, y1, z1, bl.getDefaultState()); }
+    private static BlockState vers(Block bl, Direction d) {
+        BlockState s = bl.getDefaultState();
+        return s.contains(Properties.HORIZONTAL_FACING) ? s.with(Properties.HORIZONTAL_FACING, d) : s;
+    }
+    private static BlockState marche(Block bl, Direction d) { return bl.getDefaultState().with(StairsBlock.FACING, d); }
+    private <T> T hasard(T[] t) { return t[r.nextInt(t.length)]; }
+
+    // ───────────────────────── l'ensemble ─────────────────────────
+
+    private void batir() {
+        aplanir();
+        rues();
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++) {
+                int bx = RUE + i * PAS, bz = RUE + j * PAS;
+                if (j == 1 && (i == 1 || i == 2)) continue;          // la place
+                if (i == 3 && j == 1) tyn(bx, bz);
+                else ilot(bx, bz);
+            }
+        place();
+        fleuve();
+        poutresEtLinge();
+        mobilierDeRue();
+        tyroliennes();
+        gens();
+    }
+
+    private void aplanir() {
+        for (int x = 0; x < LARGEUR; x++)
+            for (int z = 0; z < PROFONDEUR; z++) {
+                for (int y = 0; y <= HAUT_MAX; y++) if (!vide(x, y, z)) set(x, y, z, Blocks.AIR);
+                for (int y = -3; y <= -2; y++) set(x, y, z, Blocks.DIRT);
+            }
+    }
+
+    private void rues() {
+        BlockState pave = b("pave").getDefaultState(), dalles = b("dalles_de_pierre").getDefaultState();
+        for (int x = 0; x < VILLE; x++)
+            for (int z = 0; z < PROFONDEUR; z++) {
+                boolean rue = x % PAS < RUE || z % PAS < RUE;
+                set(x, -1, z, rue ? ((x + z) % 9 == 0 ? dalles : pave) : pave);
+            }
+    }
+
+    // ───────────────────────── les maisons bourgeoises ─────────────────────────
+
+    private void ilot(int bx, int bz) {
+        rangee(bx, bz, ILOT, Direction.NORTH);
+        rangee(bx, bz + ILOT - 8, ILOT, Direction.SOUTH);
+        rangee(bx, bz + 8, ILOT - 16, Direction.WEST);
+        rangee(bx + ILOT - 8, bz + 8, ILOT - 16, Direction.EAST);
+        cour(bx + 8, bz + 8);
+    }
+
+    private void rangee(int x0, int z0, int longueur, Direction facade) {
+        boolean ns = facade.getAxis() == Direction.Axis.Z;
+        int u = 0;
+        while (u < longueur) {
+            int l = Math.min(longueur - u, 5 + r.nextInt(3));
+            if (longueur - u - l < 5 && longueur - u - l > 0) l = longueur - u;
+            int etages = 3 + r.nextInt(2);
+            if (ns) maison(x0 + u, z0, x0 + u + l - 1, z0 + 7, facade, etages);
+            else maison(x0, z0 + u, x0 + 7, z0 + u + l - 1, facade, etages);
+            u += l;
+        }
+    }
+
+    private static final String[] FACADES = {"crepi_jaune", "crepi_rose", "crepi_bleu", "crepi_vert", "crepi_ocre", "crepi", "sgraffite", "pierre_de_taille", "crepi_jaune", "crepi_rose"};
+    private static final String[] VOLETS = {"volets", "volets_vert", "volets_rouge", "volets_brun", "volets_blanc", "volets_jaune"};
+    private static final String[] AUVENTS = {"auvent", "auvent_raye_rouge_blanc", "auvent_raye_vert_blanc", "auvent_green", "auvent_brown",
+            "auvent_raye_rouge_jaune", "auvent_raye_bleu_jaune", "auvent_yellow"};
+    private static final String[] ENSEIGNES = {"enseigne_boulangerie", "enseigne_brasseur", "enseigne_apothicaire", "enseigne_horloger", "enseigne_imprimeur",
+            "enseigne_boucherie", "enseigne_chapelier", "enseigne_barbier", "enseigne_cordonnier", "enseigne_alchimiste", "enseigne_tailleur", "enseigne_marchand_vin"};
+    private static final String[] AFFICHES = {"affiche_proclamation", "affiche_recherche", "affiche_comediens", "affiche_foire", "affiche_almanach",
+            "affiche_comete", "affiche_remede", "affiche_carte_du_ciel", "affiche_taverne", "affiche_joute", "affiche_bal_masque", "affiche_gazette"};
+
+    /** Une maison étroite, sa façade côté « facade », pignon sur rue, toit de tuiles en bâtière. */
+    private void maison(int x0, int z0, int x1, int z1, Direction facade, int etages) {
+        int h = 4 + etages * 3;
+        Block mur = b(hasard(FACADES));
+        boite(x0, 0, z0, x1, h - 1, z1, mur);
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) hauteur[x][z] = h;
+        boolean ns = facade.getAxis() == Direction.Axis.Z;
+        int debut = ns ? x0 : z0, fin = ns ? x1 : z1;
+        int bord = switch (facade) { case NORTH -> z0; case SOUTH -> z1; case WEST -> x0; default -> x1; };
+        int dx = facade.getOffsetX(), dz = facade.getOffsetZ();
+        Direction versMur = facade.getOpposite();
+        Block volets = b(hasard(VOLETS)), auvent = b(hasard(AUVENTS)), enseigne = b(hasard(ENSEIGNES));
+        boolean boutique = r.nextInt(3) > 0;
+        int porte = debut + 1 + r.nextInt(Math.max(1, fin - debut - 1)), posEnseigne = debut + 1 + r.nextInt(Math.max(1, fin - debut - 1));
+        for (int u = debut; u <= fin; u++) {
+            int x = ns ? u : bord, z = ns ? bord : u, xo = x + dx, zo = z + dz;
+            // Rez-de-chaussée : pierre, porte, vitrines ou arcades
+            for (int y = 0; y <= 3; y++) set(x, y, z, b(y == 3 ? "pierre_sculptee" : "pierre_de_taille"));
+            if (u == porte) { set(x, 0, z, Blocks.AIR); set(x, 1, z, Blocks.AIR); }
+            else if (boutique && (u - debut) % 2 == 1) { set(x, 1, z, Blocks.GLASS_PANE); set(x, 2, z, Blocks.GLASS_PANE); }
+            if (u == debut) {                                             // une gouttière à chaque mitoyen
+                for (int y = 0; y < h; y++) set(xo, y, zo, vers(OmbreBlocs.GOUTTIERE, versMur));
+                continue;
+            }
+            if (boutique && u == posEnseigne) set(xo, 3, zo, vers(enseigne, versMur));
+            else if (boutique && u != porte && r.nextInt(3) > 0) set(xo, 3, zo, vers(auvent, versMur));
+            else if (r.nextInt(4) == 0) set(xo, 2, zo, vers(OmbreBlocs.REVERBERE, versMur));
+            else if (r.nextInt(5) == 0) set(xo, 1, zo, vers(b(hasard(AFFICHES)), versMur));
+            for (int k = 0; k < etages; k++) {
+                int yb = 4 + k * 3;
+                boolean fenetre = (u - debut) % 2 == 1;
+                if (fenetre) { set(x, yb + 1, z, Blocks.GLASS_PANE); set(x, yb + 2, z, Blocks.GLASS_PANE); }
+                if (k == 0 && r.nextInt(3) == 0) set(xo, yb, zo, vers(OmbreBlocs.BALCON, versMur));
+                else if (fenetre && r.nextBoolean()) { set(xo, yb + 1, zo, vers(volets, versMur)); set(xo, yb + 2, zo, vers(volets, versMur)); }
+                else if (k == etages - 1 && !fenetre) set(xo, yb + 1, zo, vers(OmbreBlocs.CORNICHE, versMur));
+            }
+        }
+        toit(x0, z0, x1, z1, h, facade, mur);
+    }
+
+    /** Toit à deux pentes, faîte perpendiculaire à la rue ; le pignon de façade monte en triangle. */
+    private void toit(int x0, int z0, int x1, int z1, int h, Direction facade, Block mur) {
+        Block tuile = b("tuiles"), marcheTuile = b("tuiles_escalier");
+        boolean ns = facade.getAxis() == Direction.Axis.Z;
+        int debut = ns ? x0 : z0, fin = ns ? x1 : z1, l = fin - debut + 1;
+        int prof0 = ns ? z0 : x0, prof1 = ns ? z1 : x1;
+        int pignon = switch (facade) { case NORTH -> z0; case SOUTH -> z1; case WEST -> x0; default -> x1; };
+        Direction monteVersFin = ns ? Direction.EAST : Direction.SOUTH, monteVersDebut = monteVersFin.getOpposite();
+        int haut = 0;
+        for (int k = 0; k <= (l - 1) / 2; k++) {
+            int ua = debut + k, ub = fin - k, y = h + k;
+            haut = y;
+            for (int p = prof0; p <= prof1; p++) {
+                boolean front = p == pignon;
+                int xa = ns ? ua : p, za = ns ? p : ua, xb = ns ? ub : p, zb = ns ? p : ub;
+                if (ua == ub) { set(xa, y, za, front ? mur : tuile); continue; }
+                if (front) {
+                    set(xa, y, za, mur); set(xb, y, zb, mur);
+                    for (int u = ua + 1; u < ub; u++) set(ns ? u : p, y, ns ? p : u, mur);
+                } else {
+                    set(xa, y, za, marche(marcheTuile, monteVersFin));
+                    set(xb, y, zb, marche(marcheTuile, monteVersDebut));
+                    for (int u = ua + 1; u < ub; u++) set(ns ? u : p, y, ns ? p : u, tuile);
+                }
+            }
+        }
+        // Le sommet du pignon, une fenêtre de grenier, une cheminée
+        int milieu = (debut + fin) / 2;
+        set(ns ? milieu : pignon, haut + 1, ns ? pignon : milieu, b("pierre_sculptee"));
+        set(ns ? milieu : pignon, h + 1, ns ? pignon : milieu, Blocks.GLASS_PANE);
+        int cp = (prof0 + prof1) / 2 + 2;
+        set(ns ? debut + 1 : cp, h + 2, ns ? cp : debut + 1, b("brique_ancienne"));
+        set(ns ? debut + 1 : cp, h + 3, ns ? cp : debut + 1, r.nextBoolean() ? OmbreBlocs.CHEMINEE : b("cheminee_terre_cuite"));
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) hauteur[x][z] = h;
+    }
+
+    private void cour(int cx, int cz) {
+        set(cx + 3, 0, cz + 3, OmbreBlocs.PUITS);
+        arbre(cx + 6, cz + 6);
+        for (int x = cx; x <= cx + 7; x++) set(x, 7, cz + 1, vers(OmbreBlocs.CORDE_LINGE, Direction.NORTH));
+        for (int y = 0; y < 13; y++) set(cx, y, cz + 5, vers(OmbreBlocs.GOUTTIERE, Direction.WEST));
+        if (r.nextBoolean()) set(cx + 1, 0, cz + 7, vers(OmbreBlocs.TONNEAU, Direction.NORTH));
+        if (r.nextBoolean()) boite(cx + 5, 0, cz + 1, cx + 6, 1, cz + 2, OmbreBlocs.MEULE);
+    }
+
+    private void arbre(int x, int z) {
+        boite(x, 0, z, x, 4, z, Blocks.OAK_LOG);
+        BlockState f = Blocks.OAK_LEAVES.getDefaultState().with(LeavesBlock.PERSISTENT, true);
+        for (int a = -2; a <= 2; a++) for (int c = -2; c <= 2; c++) for (int y = 3; y <= 6; y++) {
+            if (Math.abs(a) + Math.abs(c) > (y == 6 ? 1 : 3) || (a == 0 && c == 0 && y <= 4)) continue;
+            if (vide(x + a, y, z + c)) set(x + a, y, z + c, f);
+        }
+    }
+
+    // ───────────────────────── la place et l'horloge astronomique ─────────────────────────
+
+    private static final String[] ETALS = {"etal", "etal_fruits", "etal_poisson", "etal_fleurs", "etal_pain", "etal_etoffes", "etal_legumes"};
+    private int orlojX, orlojZ, orlojH, tychoX, tychoZ;
+
+    private void place() {
+        int x0 = RUE + PAS, x1 = RUE + 2 * PAS + ILOT - 1, z0 = RUE + PAS, z1 = z0 + ILOT - 1;
+        boite(x0, -1, z0, x1, -1, z1, b("pave"));
+        // La tour de l'horloge, à l'ouest de la place (l'hôtel de ville)
+        int tx0 = x0, tx1 = x0 + 6, tz0 = z0 + 6, tz1 = z0 + 12, h = 32;
+        boite(tx0, 0, tz0, tx1, h - 1, tz1, b("pierre_noircie"));
+        for (int y = 6; y < h; y += 7) boite(tx0, y, tz0, tx1, y, tz1, b("pierre_sculptee"));
+        boite(tx0 - 3, 0, tz0 - 2, tx0 - 1, 9, tz1 + 2, b("crepi_ocre"));                    // un bout d'hôtel de ville
+        // Le cadran (3 × 3), côté place
+        for (int a = 0; a < 3; a++) for (int c = 0; c < 3; c++) set(tx1 + 1, 10 + c, tz0 + 2 + a, vers(OmbreBlocs.HORLOGE, Direction.WEST));
+        set(tx1 + 1, 14, tz0 + 3, vers(b("statue"), Direction.WEST));
+        // Galerie et flèche
+        for (int x = tx0 - 1; x <= tx1 + 1; x++) for (int z = tz0 - 1; z <= tz1 + 1; z++)
+            if (x == tx0 - 1 || x == tx1 + 1 || z == tz0 - 1 || z == tz1 + 1) set(x, h - 1, z, Blocks.STONE_BRICK_SLAB.getDefaultState()
+                    .with(net.minecraft.block.SlabBlock.TYPE, net.minecraft.block.enums.SlabType.TOP));
+        Block ardoise = b("ardoise"), marcheArdoise = b("ardoise_escalier");
+        for (int k = 0; k < 4; k++) {
+            int y = h + k, a0 = tx0 + k, a1 = tx1 - k, c0 = tz0 + k, c1 = tz1 - k;
+            if (a0 > a1) break;
+            boite(a0, y, c0, a1, y, c1, ardoise);
+            for (int x = a0; x <= a1; x++) { set(x, y, c0, marche(marcheArdoise, Direction.SOUTH)); set(x, y, c1, marche(marcheArdoise, Direction.NORTH)); }
+            for (int z = c0; z <= c1; z++) { set(a0, y, z, marche(marcheArdoise, Direction.EAST)); set(a1, y, z, marche(marcheArdoise, Direction.WEST)); }
+        }
+        set((tx0 + tx1) / 2, h + 4, (tz0 + tz1) / 2, OmbreBlocs.DRAPEAU);
+        // Gargouilles aux quatre angles de la galerie : points de vue
+        set(tx1 + 2, h - 2, tz0, vers(OmbreBlocs.GARGOUILLE, Direction.WEST));
+        set(tx1 + 2, h - 2, tz1, vers(OmbreBlocs.GARGOUILLE, Direction.WEST));
+        set(tx0 - 2, h - 2, tz0, vers(OmbreBlocs.GARGOUILLE, Direction.EAST));
+        for (int y = 0; y < h - 1; y++) set(tx1 + 1, y, tz1, vers(OmbreBlocs.GOUTTIERE, Direction.WEST));
+        orlojX = (tx0 + tx1) / 2; orlojZ = tz0 - 1; orlojH = h;
+        // Les astronomes et leurs instruments, au pied de l'horloge
+        set(tx1 + 3, 0, tz0 - 2, OmbreBlocs.SPHERE);
+        set(tx1 + 3, 0, tz1 + 2, vers(OmbreBlocs.PUPITRE, Direction.EAST));
+        tychoX = tx1 + 4; tychoZ = tz0 + 4;
+        // Le marché, la fontaine, les arbres, les bancs
+        int cx = (x0 + x1) / 2 + 4, cz = (z0 + z1) / 2;
+        set(cx, 0, cz, OmbreBlocs.FONTAINE);
+        for (int k = 0; k < 16; k++) {
+            double a = k * Math.PI * 2 / 16;
+            int x = cx + (int) Math.round(Math.cos(a) * 12), z = cz + (int) Math.round(Math.sin(a) * 8);
+            Direction d = Math.abs(Math.cos(a)) > Math.abs(Math.sin(a)) ? (Math.cos(a) > 0 ? Direction.WEST : Direction.EAST) : (Math.sin(a) > 0 ? Direction.NORTH : Direction.SOUTH);
+            if (vide(x, 0, z)) set(x, 0, z, vers(b(ETALS[k % ETALS.length]), d));
+        }
+        for (int[] p : new int[][]{{x1 - 2, z0 + 2}, {x1 - 2, z1 - 2}, {cx - 4, z0 + 1}}) arbre(p[0], p[1]);
+        set(cx - 3, 0, z1 - 1, vers(OmbreBlocs.BANC, Direction.SOUTH));
+        set(cx + 3, 0, z1 - 1, vers(b("banc_dark_oak"), Direction.SOUTH));
+        set(cx, 0, z0 + 1, vers(b("banc_spruce"), Direction.NORTH));
+        set(x0 + 10, 0, z1 - 2, vers(b("cabine_red"), Direction.NORTH));
+        set(x1 - 6, 0, z0 + 1, OmbreBlocs.COLONNE);
+        set(cx + 7, 0, cz + 3, vers(OmbreBlocs.CHARRETTE, Direction.NORTH));
+        set(cx + 6, 0, cz - 4, vers(OmbreBlocs.TONNEAU, Direction.WEST));
+        boite(tx1 + 2, 0, tz1 + 4, tx1 + 4, 1, tz1 + 6, OmbreBlocs.MEULE);                    // sous les gargouilles
+    }
+
+    // ───────────────────────── l'église de Týn ─────────────────────────
+
+    private int tynX, tynZ, tynH, laboX, laboZ, laboY;
+
+    private void tyn(int bx, int bz) {
+        boite(bx, -1, bz, bx + ILOT - 1, -1, bz + ILOT - 1, b("pave"));
+        Block pierre = b("pierre_noircie"), ardoise = b("ardoise"), marcheArdoise = b("ardoise_escalier");
+        // La nef : 12 de large (z), de x = bx+6 à bx+22, 16 de haut, toit très pentu
+        int n0 = bx + 6, n1 = bx + 22, z0 = bz + 6, z1 = bz + 17, hn = 16;
+        boite(n0, 0, z0, n1, hn - 1, z1, pierre);
+        for (int x = n0 + 2; x < n1; x += 3) for (int y = 3; y < 12; y++) { set(x, y, z0, Blocks.GLASS_PANE); set(x, y, z1, Blocks.GLASS_PANE); }
+        for (int k = 0; k <= 5; k++) {
+            int y = hn + k * 2;
+            for (int x = n0; x <= n1; x++) {
+                for (int dy = 0; dy < 2; dy++) {
+                    set(x, y + dy, z0 + k, marche(marcheArdoise, Direction.SOUTH));
+                    set(x, y + dy, z1 - k, marche(marcheArdoise, Direction.NORTH));
+                }
+                for (int z = z0 + k + 1; z < z1 - k; z++) { set(x, y, z, ardoise); set(x, y + 1, z, ardoise); }
+            }
+        }
+        // Les deux tours, côté place (ouest), et leurs flèches
+        int ht = 30;
+        for (int[] t : new int[][]{{bx + 1, bz + 3}, {bx + 1, bz + 15}}) {
+            int a0 = t[0], c0 = t[1], a1 = a0 + 5, c1 = c0 + 5;
+            boite(a0, 0, c0, a1, ht - 1, c1, pierre);
+            for (int y = 8; y < ht; y += 7) boite(a0, y, c0, a1, y, c1, b("pierre_sculptee"));
+            for (int k = 0; k < 9; k++) {
+                int y = ht + k * 2, e0 = a0 + k / 2, e1 = a1 - k / 2, f0 = c0 + k / 2, f1 = c1 - k / 2;
+                if (e0 > e1 || f0 > f1) break;
+                for (int dy = 0; dy < 2; dy++) boite(e0, y + dy, f0, e1, y + dy, f1, ardoise);
+            }
+            int sx = (a0 + a1) / 2, sz = (c0 + c1) / 2;
+            set(sx, ht + 12, sz, OmbreBlocs.CHARPENTE);
+            set(sx, ht + 13, sz, OmbreBlocs.PERCHOIR);
+            for (int[] coin : new int[][]{{a0, c0}, {a1, c0}, {a0, c1}, {a1, c1}}) {   // les clochetons
+                boite(coin[0], ht, coin[1], coin[0], ht + 4, coin[1], ardoise);
+                set(coin[0], ht + 5, coin[1], OmbreBlocs.CHARPENTE);
+            }
+            set(a0 - 1, ht - 2, c0 + 1, vers(OmbreBlocs.GARGOUILLE, Direction.EAST));
+            set(a0 - 1, ht - 2, c1 - 1, vers(OmbreBlocs.GARGOUILLE, Direction.EAST));
+            for (int y = 0; y < ht; y++) set(a0 - 1, y, (c0 + c1) / 2, vers(OmbreBlocs.GOUTTIERE, Direction.EAST));
+            tynX = a0; tynZ = (c0 + c1) / 2; tynH = ht;
+        }
+        // Le laboratoire de l'alchimiste, dans la tour nord : une salle creuse, une fenêtre sur la place
+        int a0 = bx + 1, c0 = bz + 3;
+        laboX = a0 + 2; laboZ = c0 + 2; laboY = 22;
+        boite(a0 + 1, laboY, c0 + 1, a0 + 4, laboY + 3, c0 + 4, Blocks.AIR);
+        boite(a0, laboY + 1, c0 + 2, a0, laboY + 2, c0 + 3, Blocks.AIR);
+        set(a0 + 4, laboY, c0 + 1, OmbreBlocs.ALAMBIC);
+        set(a0 + 4, laboY, c0 + 4, vers(OmbreBlocs.ETAGERE, Direction.EAST));
+        set(a0 + 1, laboY, c0 + 4, vers(OmbreBlocs.PUPITRE, Direction.WEST));
+        set(a0 + 2, laboY + 3, c0 + 2, OmbreBlocs.TETE_LAMPADAIRE);
+        // Le saut de la foi depuis les gargouilles
+        boite(bx - 4, 0, bz + 9, bx - 2, 1, bz + 12, OmbreBlocs.MEULE);
+        for (int x = n0; x <= n1; x++) for (int z = z0; z <= z1; z++) hauteur[x][z] = hn;
+    }
+
+    // ───────────────────────── la Vltava et le pont Charles ─────────────────────────
+
+    private int tourPontX, tourPontZ, tourPontH, tourPontA0, tourPontC0, rodolpheX, rodolpheZ, rivePontX;
+
+    private void fleuve() {
+        int f0 = VILLE, f1 = VILLE + FLEUVE - 1;
+        for (int x = f0; x <= f1; x++) for (int z = 0; z < PROFONDEUR; z++) {
+            boite(x, -3, z, x, -1, z, Blocks.WATER);
+        }
+        for (int z = 0; z < PROFONDEUR; z++) {                      // les quais
+            set(f0 - 1, -1, z, Blocks.STONE_BRICKS); set(f1 + 1, -1, z, Blocks.STONE_BRICKS);
+            if (z % 2 == 0) { set(f0 - 1, 0, z, Blocks.STONE_BRICK_WALL); set(f1 + 1, 0, z, Blocks.STONE_BRICK_WALL); }
+        }
+        // L'autre rive : herbe, quelques maisons, une petite tour de pont
+        for (int x = f1 + 2; x < LARGEUR; x++) for (int z = 0; z < PROFONDEUR; z++) set(x, -1, z, (x + z) % 7 == 0 ? Blocks.COARSE_DIRT : Blocks.GRASS_BLOCK);
+        for (int z = 6; z < PROFONDEUR - 6; z += 9) {
+            if (Math.abs(z - (2 * PAS + 3)) < 8) continue;
+            maison(f1 + 4, z, f1 + 11, z + 5 + r.nextInt(2), Direction.WEST, 2 + r.nextInt(2));
+        }
+        // Le pont : dans l'axe de la rue entre les rangées 1 et 2
+        int zp0 = 2 * PAS, zp1 = zp0 + RUE - 1;
+        for (int x = f0 - 1; x <= f1 + 1; x++) {
+            boite(x, -1, zp0, x, -1, zp1, b("dalles_de_pierre"));
+            set(x, 0, zp0, Blocks.STONE_BRICK_WALL); set(x, 0, zp1, Blocks.STONE_BRICK_WALL);
+            if ((x - f0) % 5 == 2) {
+                set(x, 1, zp0, b("statue")); set(x, 1, zp1, b("statue"));
+                set(x, 0, zp0, Blocks.STONE_BRICKS); set(x, 0, zp1, Blocks.STONE_BRICKS);
+            }
+            if ((x - f0) % 5 == 0) { set(x, 1, zp0, OmbreBlocs.TETE_LAMPADAIRE); set(x, 1, zp1, OmbreBlocs.TETE_LAMPADAIRE); }
+        }
+        // La tour du pont (rive de la Vieille-Ville), avec sa porte voûtée
+        int a0 = f0 - 8, a1 = f0 - 1, c0 = zp0 - 1, c1 = zp1 + 1, h = 26;
+        boite(a0, 0, c0, a1, h - 1, c1, b("pierre_noircie"));
+        boite(a0, 0, zp0 + 1, a1, 4, zp1 - 1, Blocks.AIR);
+        for (int y = 7; y < h; y += 6) boite(a0, y, c0, a1, y, c1, b("pierre_sculptee"));
+        // Le sommet : une plate-forme crénelée, et une petite flèche d'ardoise au milieu
+        for (int x = a0; x <= a1; x++) for (int z = c0; z <= c1; z++)
+            if ((x == a0 || x == a1 || z == c0 || z == c1) && (x + z) % 2 == 0) set(x, h, z, Blocks.STONE_BRICK_WALL);
+        int mx = (a0 + a1) / 2, mz = (c0 + c1) / 2;
+        boite(mx - 1, h, mz - 1, mx + 1, h + 2, mz + 1, b("ardoise"));
+        set(mx, h + 3, mz, b("ardoise"));
+        set(mx, h + 4, mz, OmbreBlocs.DRAPEAU);
+        set(a1 + 2, h - 2, c0, vers(OmbreBlocs.GARGOUILLE, Direction.WEST));
+        for (int y = 0; y < h; y++) set(a0 - 1, y, c0 + 2, vers(OmbreBlocs.GOUTTIERE, Direction.EAST));
+        set(a0, 0, c0 - 1, vers(OmbreBlocs.MONTE_CHARGE, Direction.SOUTH));
+        tourPontX = a1 + 1; tourPontZ = (c0 + c1) / 2; tourPontH = h; tourPontA0 = a0; tourPontC0 = c0;
+        // La petite tour de l'autre rive
+        int b0 = f1 + 2, b1 = f1 + 7;
+        boite(b0, 0, c0, b1, 17, c1, b("pierre_noircie"));
+        boite(b0, 0, zp0 + 1, b1, 4, zp1 - 1, Blocks.AIR);
+        boite(b0, 18, c0, b1, 18, c1, b("ardoise"));
+        rivePontX = b0; rodolpheX = b1 + 3; rodolpheZ = zp1 + 3;
+        set(b1 + 4, 0, zp1 + 5, vers(OmbreBlocs.CARROSSE, Direction.WEST));
+        set(b1 + 2, 0, zp0 - 3, vers(b("banc_birch"), Direction.NORTH));
+    }
+
+    // ───────────────────────── liaisons ─────────────────────────
+
+    private void tyroliennes() {
+        relier(orlojX, orlojH, orlojZ, false, tynX - 2, tynH - 1, tynZ - 1, true);             // de la galerie de l'horloge vers Týn
+        relier(tourPontX - 2, tourPontH, tourPontZ, false, rivePontX + 1, 19, tourPontZ, false); // du sommet de la tour du pont vers l'autre rive
+    }
+
+    private void relier(int x1, int y1, int z1, boolean socle1, int x2, int y2, int z2, boolean socle2) {
+        BlockPos a = new BlockPos(ox + x1, oy + y1, oz + z1), c = new BlockPos(ox + x2, oy + y2, oz + z2);
+        if (socle1) set(x1, y1 - 1, z1, b("pierre_noircie"));
+        if (socle2) set(x2, y2 - 1, z2, b("pierre_noircie"));
+        w.setBlockState(a, OmbreBlocs.POTEAU.getDefaultState(), Block.NOTIFY_ALL);
+        w.setBlockState(c, OmbreBlocs.POTEAU.getDefaultState(), Block.NOTIFY_ALL);
+        PoteauTyrolienne.relier(w, a, c);
+    }
+
+    private void poutresEtLinge() {
+        for (int k = 1; k < N; k++) {
+            int rue = k * PAS;
+            for (int j = 0; j < N; j++) {
+                int z = RUE + j * PAS + 4 + r.nextInt(ILOT - 8);
+                int hg = hauteur[rue - 1][z], hd = hauteur[rue + RUE][z];
+                if (hg > 0 && hd > 0 && r.nextInt(3) > 0) {
+                    int y = Math.min(hg, hd) - 1;
+                    for (int x = rue; x < rue + RUE; x++) set(x, y, z, OmbreBlocs.POUTRE.getDefaultState().with(Properties.HORIZONTAL_AXIS, Direction.Axis.X));
+                }
+                int z2 = RUE + j * PAS + 2 + r.nextInt(ILOT - 4);
+                if (hauteur[rue - 1][z2] > 9 && hauteur[rue + RUE][z2] > 9 && r.nextBoolean())
+                    for (int x = rue; x < rue + RUE; x++) set(x, 8, z2, vers(OmbreBlocs.CORDE_LINGE, Direction.NORTH));
+            }
+            for (int i = 0; i < N; i++) {
+                int x = RUE + i * PAS + 4 + r.nextInt(ILOT - 8);
+                int hn = hauteur[x][k * PAS - 1], hs = hauteur[x][k * PAS + RUE];
+                if (hn > 0 && hs > 0 && r.nextInt(3) > 0) {
+                    int y = Math.min(hn, hs) - 1;
+                    for (int z = k * PAS; z < k * PAS + RUE; z++) set(x, y, z, OmbreBlocs.POUTRE.getDefaultState().with(Properties.HORIZONTAL_AXIS, Direction.Axis.Z));
+                }
+            }
+        }
+    }
+
+    private void mobilierDeRue() {
+        for (int k = 0; k <= N; k++) {
+            int rue = k * PAS;
+            for (int t = 3; t < VILLE - 3; t += 8) {
+                if (t % PAS < RUE) continue;
+                if (r.nextInt(5) == 0 && vide(rue + 3, 0, t + 2)) set(rue + 3, 0, t + 2, vers(OmbreBlocs.CARROSSE, Direction.NORTH));
+                if (r.nextInt(4) == 0 && vide(rue + RUE - 2, 0, t + 5)) set(rue + RUE - 2, 0, t + 5, vers(OmbreBlocs.CHARRETTE, Direction.NORTH));
+                if (r.nextInt(5) == 0 && vide(t + 5, 0, rue + 1)) set(t + 5, 0, rue + 1, vers(b(hasard(new String[]{"etal_pain", "etal_legumes", "etal_fruits"})), Direction.SOUTH));
+                if (r.nextInt(4) == 0 && vide(t + 2, 0, rue + RUE - 2) && vide(t + 2, 3, rue + RUE - 2)) {
+                    boite(t + 2, 0, rue + RUE - 2, t + 2, 2, rue + RUE - 2, OmbreBlocs.LAMPADAIRE);
+                    set(t + 2, 3, rue + RUE - 2, OmbreBlocs.TETE_LAMPADAIRE);
+                }
+            }
+        }
+        for (int i = 0; i <= N; i++) for (int j = 0; j <= N; j++)
+            if (r.nextInt(3) == 0 && vide(i * PAS + 1, 0, j * PAS + 1)) set(i * PAS + 1, 0, j * PAS + 1, OmbreBlocs.COLONNE);
+    }
+
+    // ───────────────────────── les gens ─────────────────────────
+
+    private void gens() {
+        Scoreboard sb = w.getScoreboard();
+        Team rouges = equipe(sb, "ombre_gardes", Formatting.RED), ors = equipe(sb, "ombre_cibles", Formatting.GOLD);
+        // La foule : des groupes dans les rues, beaucoup sur la place, quelques-uns sur le pont
+        for (int g = 0; g < 9; g++) {
+            int k = r.nextInt(N + 1), t = RUE + r.nextInt(VILLE - 2 * RUE);
+            boolean ns = r.nextBoolean();
+            int x = ns ? k * PAS + 2 + r.nextInt(3) : t, z = ns ? t : k * PAS + 2 + r.nextInt(3);
+            for (int i = 0; i < 3 + r.nextInt(2); i++) passant(x + r.nextInt(3) - 1, z + r.nextInt(3) - 1);
+        }
+        int px = RUE + PAS + ILOT + 10, pz = RUE + PAS + 12;
+        for (int i = 0; i < 18; i++) passant(px - 12 + r.nextInt(24), pz - 8 + r.nextInt(16));
+        for (int i = 0; i < 5; i++) passant(VILLE + 2 + r.nextInt(FLEUVE - 4), 2 * PAS + 1 + r.nextInt(RUE - 2));
+        // Les personnages réels
+        figure(Figure.TYCHO, tychoX, tychoZ);
+        figure(Figure.KEPLER, tychoX + 1, tychoZ + 3);
+        figure(Figure.RODOLPHE, rodolpheX, rodolpheZ);
+        int lx = RUE + PAS + 4, lz = 3;                       // au nord, dans la rue du quartier juif
+        figure(Figure.LOEW, lx, lz);
+        IronGolemEntity golem = EntityType.IRON_GOLEM.create(w);
+        if (golem != null) {
+            golem.refreshPositionAndAngles(ox + lx + 3.5, oy, oz + lz + 0.5, 0, 0);
+            golem.setPlayerCreated(true);
+            golem.setPersistent();
+            golem.setCustomName(Text.literal("Golem"));
+            golem.setPositionTarget(new BlockPos(ox + lx + 3, oy, oz + lz), 16);
+            w.spawnEntity(golem);
+        }
+        // La garde : hallebardiers dans les rues, par deux ; arbalétriers sur les toits
+        for (int g = 0; g < 5; g++) {
+            int k = 1 + r.nextInt(N - 1), t = RUE + 4 + r.nextInt(VILLE - 2 * RUE - 8);
+            boolean ns = r.nextBoolean();
+            int x = ns ? k * PAS + 3 : t, z = ns ? t : k * PAS + 3;
+            garde(Entites.HALLEBARDIER, x, 0, z, 10, "Hallebardier", rouges, false);
+            garde(Entites.HALLEBARDIER, x + 1, 0, z + 1, 10, "Hallebardier", rouges, false);
+        }
+        int poses = 0;
+        for (int essai = 0; essai < 300 && poses < 7; essai++) {
+            int x = r.nextInt(VILLE), z = r.nextInt(PROFONDEUR), h = hauteur[x][z];
+            if (h > 0 && !vide(x, h, z) && vide(x, h + 1, z) && vide(x, h + 2, z)) {
+                garde(Entites.ARBALETRIER, x, h + 1, z, 3, "Arbalétrier", rouges, false);
+                poses++;
+            }
+        }
+        garde(Entites.HALLEBARDIER, tychoX + 3, 0, tychoZ - 6, 6, "Hallebardier de l'hôtel de ville", rouges, false);
+        garde(Entites.ARBALETRIER, orlojX - 4, orlojH, orlojZ + 3, 1, "Arbalétrier de l'horloge", rouges, false);
+        // Les cibles (personnages inventés) et leur garde
+        garde(Entites.CAPITAINE, tourPontA0 + 1, tourPontH, tourPontC0 + 1, 2, "Ottokar von Rabenstein, grand maître du Corbeau", ors, true);
+        garde(Entites.ARBALETRIER, tourPontA0 + 1, tourPontH, tourPontC0 + 7, 2, "Arbalétrier du Corbeau", rouges, false);
+        garde(Entites.HALLEBARDIER, tourPontX - 6, 0, tourPontZ - 6, 4, "Hallebardier du pont", rouges, false);
+        garde(Entites.CAPITAINE, laboX, laboY, laboZ, 1, "Melchior Kragl, alchimiste du Corbeau", ors, true);
+    }
+
+    private void passant(int x, int z) {
+        Passant p = Entites.PASSANT.create(w);
+        if (p == null || x < 0 || z < 0 || x >= LARGEUR || z >= PROFONDEUR || !vide(x, 0, z) || !vide(x, 1, z)) return;
+        BlockPos pos = new BlockPos(ox + x, oy, oz + z);
+        p.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360, 0);
+        p.initialize(w, w.getLocalDifficulty(pos), SpawnReason.COMMAND, null);
+        p.setPersistent();
+        p.setPositionTarget(pos, 14);
+        w.spawnEntity(p);
+    }
+
+    private void figure(int qui, int x, int z) {
+        Figure f = Entites.FIGURE.create(w);
+        if (f == null) return;
+        BlockPos pos = new BlockPos(ox + x, oy, oz + z);
+        f.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360, 0);
+        f.devenir(qui);
+        f.setPersistent();
+        f.setPositionTarget(pos, 3);
+        w.spawnEntity(f);
+    }
+
+    private static Team equipe(Scoreboard sb, String nom, Formatting c) {
+        Team t = sb.getTeam(nom);
+        if (t == null) t = sb.addTeam(nom);
+        t.setColor(c);
+        return t;
+    }
+
+    private <T extends PathAwareEntity> void garde(EntityType<T> type, int x, int y, int z, int rayon, String nom, Team equipe, boolean cible) {
+        T g = type.create(w);
+        if (g == null) return;
+        BlockPos pos = new BlockPos(ox + x, oy + y, oz + z);
+        g.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360, 0);
+        g.initialize(w, w.getLocalDifficulty(pos), SpawnReason.COMMAND, null);
+        g.setPersistent();
+        g.setCustomName(Text.literal(nom));
+        g.setPositionTarget(pos, rayon);
+        g.addCommandTag(Gardes.GARDE);
+        if (cible) g.addCommandTag(Gardes.CIBLE);
+        w.spawnEntityAndPassengers(g);
+        w.getScoreboard().addScoreHolderToTeam(g.getNameForScoreboard(), equipe);
+    }
+}

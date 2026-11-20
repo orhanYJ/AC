@@ -1,0 +1,8 @@
+{
+ "parent": "minecraft:block/inner_stairs",
+ "textures": {
+  "bottom": "ombre:block/pave",
+  "top": "ombre:block/pave",
+  "side": "ombre:block/pave"
+ }
+}

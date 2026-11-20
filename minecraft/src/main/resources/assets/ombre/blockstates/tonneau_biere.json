@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/tonneau_biere"
+  },
+  "facing=east": {
+   "model": "ombre:block/tonneau_biere",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/tonneau_biere",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/tonneau_biere",
+   "y": 270
+  }
+ }
+}

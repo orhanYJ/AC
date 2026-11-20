@@ -45,7 +45,7 @@ public final class Effets {
         }
     }
 
-    /** Déguisé : en tenue de gardien, les gardes ne te remarquent qu'à 2 blocs (voir Discretion). */
+    /** Déguisé : en tenue de hallebardier, les gardes ne te remarquent qu'à 2 blocs (voir Discretion). */
     public static class Deguise extends StatusEffect {
         public Deguise() { super(StatusEffectCategory.BENEFICIAL, 0x2B3A67); }
     }

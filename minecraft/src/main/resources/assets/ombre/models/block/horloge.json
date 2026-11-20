@@ -2,8 +2,7 @@
  "parent": "minecraft:block/block",
  "textures": {
   "or": "minecraft:block/gold_block",
-  "cadran": "minecraft:block/white_concrete",
-  "aiguille": "minecraft:block/black_concrete",
+  "cadran": "ombre:block/horloge_astronomique",
   "particle": "minecraft:block/gold_block"
  },
  "elements": [
@@ -41,225 +40,33 @@
   },
   {
    "from": [
-    1,
-    1,
+    0,
+    0,
     1
    ],
    "to": [
-    15,
-    15,
-    1.5
+    16,
+    16,
+    1.4
    ],
    "faces": {
     "north": {
-     "texture": "#cadran"
+     "texture": "#cadran",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
     },
     "south": {
-     "texture": "#cadran"
-    },
-    "east": {
-     "texture": "#cadran"
-    },
-    "west": {
-     "texture": "#cadran"
-    },
-    "up": {
-     "texture": "#cadran"
-    },
-    "down": {
-     "texture": "#cadran"
-    }
-   }
-  },
-  {
-   "from": [
-    7.5,
-    8,
-    1.5
-   ],
-   "to": [
-    8.5,
-    13,
-    1.8
-   ],
-   "faces": {
-    "north": {
-     "texture": "#aiguille"
-    },
-    "south": {
-     "texture": "#aiguille"
-    },
-    "east": {
-     "texture": "#aiguille"
-    },
-    "west": {
-     "texture": "#aiguille"
-    },
-    "up": {
-     "texture": "#aiguille"
-    },
-    "down": {
-     "texture": "#aiguille"
-    }
-   }
-  },
-  {
-   "from": [
-    8,
-    7.5,
-    1.5
-   ],
-   "to": [
-    12,
-    8.5,
-    1.8
-   ],
-   "faces": {
-    "north": {
-     "texture": "#aiguille"
-    },
-    "south": {
-     "texture": "#aiguille"
-    },
-    "east": {
-     "texture": "#aiguille"
-    },
-    "west": {
-     "texture": "#aiguille"
-    },
-    "up": {
-     "texture": "#aiguille"
-    },
-    "down": {
-     "texture": "#aiguille"
-    }
-   }
-  },
-  {
-   "from": [
-    7.5,
-    1.5,
-    1.5
-   ],
-   "to": [
-    8.5,
-    2.5,
-    1.7
-   ],
-   "faces": {
-    "north": {
-     "texture": "#aiguille"
-    },
-    "south": {
-     "texture": "#aiguille"
-    },
-    "east": {
-     "texture": "#aiguille"
-    },
-    "west": {
-     "texture": "#aiguille"
-    },
-    "up": {
-     "texture": "#aiguille"
-    },
-    "down": {
-     "texture": "#aiguille"
-    }
-   }
-  },
-  {
-   "from": [
-    7.5,
-    13.5,
-    1.5
-   ],
-   "to": [
-    8.5,
-    14.5,
-    1.7
-   ],
-   "faces": {
-    "north": {
-     "texture": "#aiguille"
-    },
-    "south": {
-     "texture": "#aiguille"
-    },
-    "east": {
-     "texture": "#aiguille"
-    },
-    "west": {
-     "texture": "#aiguille"
-    },
-    "up": {
-     "texture": "#aiguille"
-    },
-    "down": {
-     "texture": "#aiguille"
-    }
-   }
-  },
-  {
-   "from": [
-    1.5,
-    7.5,
-    1.5
-   ],
-   "to": [
-    2.5,
-    8.5,
-    1.7
-   ],
-   "faces": {
-    "north": {
-     "texture": "#aiguille"
-    },
-    "south": {
-     "texture": "#aiguille"
-    },
-    "east": {
-     "texture": "#aiguille"
-    },
-    "west": {
-     "texture": "#aiguille"
-    },
-    "up": {
-     "texture": "#aiguille"
-    },
-    "down": {
-     "texture": "#aiguille"
-    }
-   }
-  },
-  {
-   "from": [
-    13.5,
-    7.5,
-    1.5
-   ],
-   "to": [
-    14.5,
-    8.5,
-    1.7
-   ],
-   "faces": {
-    "north": {
-     "texture": "#aiguille"
-    },
-    "south": {
-     "texture": "#aiguille"
-    },
-    "east": {
-     "texture": "#aiguille"
-    },
-    "west": {
-     "texture": "#aiguille"
-    },
-    "up": {
-     "texture": "#aiguille"
-    },
-    "down": {
-     "texture": "#aiguille"
+     "texture": "#cadran",
+     "uv": [
+      0,
+      0,
+      16,
+      16
+     ]
     }
    }
   }

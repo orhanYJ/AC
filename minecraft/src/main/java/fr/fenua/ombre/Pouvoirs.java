@@ -30,10 +30,10 @@ public final class Pouvoirs {
         else if (action == ActionPayload.SIFFLER) siffler(p, w, t);
         else if (action == ActionPayload.RATTRAPE && !p.isOnGround()) {
             p.fallDistance = 0;
-            // On grimpe : un gardien ne grimpe pas aux murs, le déguisement tombe
+            // On grimpe : un hallebardier ne grimpe pas aux murs, le déguisement tombe
             if (p.hasStatusEffect(fr.fenua.ombre.objet.Effets.DEGUISE)) {
                 p.removeStatusEffect(fr.fenua.ombre.objet.Effets.DEGUISE);
-                p.sendMessage(net.minecraft.text.Text.literal("§7Déguisement perdu : un gardien ne grimpe pas aux murs."), true);
+                p.sendMessage(net.minecraft.text.Text.literal("§7Déguisement perdu : un hallebardier ne grimpe pas aux murs."), true);
             }
         }
         else if (action == ActionPayload.ASSASSINER) Assassinat.parTouche(p, cible);

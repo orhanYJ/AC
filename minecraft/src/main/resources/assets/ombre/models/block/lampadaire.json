@@ -1,8 +1,8 @@
 {
  "parent": "minecraft:block/block",
  "textures": {
-  "fer": "minecraft:block/polished_blackstone",
-  "particle": "minecraft:block/polished_blackstone"
+  "bois": "minecraft:block/stripped_dark_oak_log",
+  "particle": "minecraft:block/stripped_dark_oak_log"
  },
  "elements": [
   {
@@ -18,22 +18,22 @@
    ],
    "faces": {
     "north": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "south": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "east": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "west": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "up": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "down": {
-     "texture": "#fer"
+     "texture": "#bois"
     }
    }
   },
@@ -50,22 +50,22 @@
    ],
    "faces": {
     "north": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "south": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "east": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "west": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "up": {
-     "texture": "#fer"
+     "texture": "#bois"
     },
     "down": {
-     "texture": "#fer"
+     "texture": "#bois"
     }
    }
   }

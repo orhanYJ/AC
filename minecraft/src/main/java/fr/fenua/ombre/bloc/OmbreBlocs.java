@@ -60,7 +60,7 @@ public final class OmbreBlocs {
             .strength(1f).sounds(BlockSoundGroup.WOOD).nonOpaque());
 
 
-    // ───────────── Paris 1889 ─────────────
+    // ───────────── Prague, 1600 ─────────────
     static AbstractBlock.Settings bois() { return AbstractBlock.Settings.create().strength(1.5f).sounds(BlockSoundGroup.WOOD).nonOpaque(); }
     static AbstractBlock.Settings pierre() { return AbstractBlock.Settings.create().strength(2f).sounds(BlockSoundGroup.STONE).nonOpaque(); }
     static AbstractBlock.Settings metal() { return AbstractBlock.Settings.create().strength(2f).sounds(BlockSoundGroup.METAL).nonOpaque(); }
@@ -117,8 +117,8 @@ public final class OmbreBlocs {
     public static final Decor.Oriente AFFICHE = new Decor.Oriente(
             AbstractBlock.Settings.create().strength(0.2f).sounds(BlockSoundGroup.WOOL).nonOpaque().noCollision()).formes(true,
             Decor.b(1, 1, 0, 15, 15, 1), Decor.VIDE);
-    /** Treillis de fer (la tour) : ajouré, il s'escalade. */
-    public static final Decor.Simple TREILLIS = new Decor.Simple(metal()).formes(Decor.b(0, 0, 0, 16, 16, 16), null);
+    /** Charpente : un treillis de poutres (clochers, chantiers), ajouré ; il s'escalade. */
+    public static final Decor.Simple CHARPENTE = new Decor.Simple(bois()).formes(Decor.b(0, 0, 0, 16, 16, 16), null);
     /** Volets, de part et d'autre d'une fenêtre. */
     public static final Decor.Oriente VOLETS = new Decor.Oriente(bois().noCollision()).formes(true,
             VOLETS_CONTOUR, Decor.VIDE);
@@ -127,14 +127,28 @@ public final class OmbreBlocs {
             Decor.u(Decor.b(0, 0, 0, 16, 6, 2), Decor.b(0, 0, 14, 16, 6, 16), Decor.b(0, 0, 0, 2, 6, 16), Decor.b(14, 0, 0, 16, 6, 16), Decor.b(6, 0, 6, 10, 14, 10)));
     /** Drapeau tricolore sur sa hampe. */
     public static final Decor.Simple DRAPEAU = new Decor.Simple(bois()).formes(Decor.b(7, 0, 7, 9, 16, 9), null);
-    /** Fiacre (voiture de place) : on monte sur son toit. */
-    public static final Decor.Oriente FIACRE = new Decor.Oriente(bois()).formes(false, Decor.b(0, 0, 1, 16, 15, 15), null);
+    /** Carrosse : on monte sur son toit. */
+    public static final Decor.Oriente CARROSSE = new Decor.Oriente(bois()).formes(false, Decor.b(0, 0, 1, 16, 15, 15), null);
 
     public static final Item CORDE = new Item(new Item.Settings().maxCount(16));
 
-    /** Tous les blocs de Paris 1889, dans l'ordre de l'onglet. */
+    /** Statue de pierre sur son socle (le pont), deux blocs de haut. */
+    public static final Decor.Simple STATUE = new Decor.Simple(pierre()).formes(Decor.b(3, 0, 3, 13, 16, 13), Decor.b(3, 0, 3, 13, 24, 13));
+    /** Sphère armillaire : l'instrument des astronomes (Tycho Brahe en avait de grandes). */
+    public static final Decor.Simple SPHERE = new Decor.Simple(metal()).formes(Decor.b(2, 0, 2, 14, 16, 14), null);
+    /** Alambic d'alchimiste. */
+    public static final Decor.Simple ALAMBIC = new Decor.Simple(metal()).formes(Decor.b(2, 0, 2, 14, 15, 14), null);
+    /** Étagère de fioles et de flacons. */
+    public static final Decor.Oriente ETAGERE = new Decor.Oriente(bois()).formes(true, Decor.b(0, 0, 0, 16, 16, 6), null);
+    /** Tonneau de bière couché, avec son robinet. */
+    public static final Decor.Oriente TONNEAU = new Decor.Oriente(bois()).formes(false, Decor.b(1, 0, 1, 15, 14, 15), null);
+    /** Pupitre d'astronome, avec un grand livre ouvert. */
+    public static final Decor.Oriente PUPITRE = new Decor.Oriente(bois()).formes(false, Decor.b(2, 0, 2, 14, 15, 14), null);
+
+    /** Tous les blocs de la Prague de 1600, dans l'ordre de l'onglet. */
     public static final Block[] PARIS = {GOUTTIERE, BALCON, CHEMINEE, LUCARNE, REVERBERE, BANC, CHARRETTE, ETAL, GARGOUILLE,
-            CORDE_LINGE, BARRICADE, COLONNE, HORLOGE, AFFICHE, TREILLIS, VOLETS, FONTAINE, DRAPEAU, FIACRE};
+            CORDE_LINGE, BARRICADE, COLONNE, HORLOGE, AFFICHE, CHARPENTE, VOLETS, FONTAINE, DRAPEAU, CARROSSE,
+            STATUE, SPHERE, ALAMBIC, ETAGERE, TONNEAU, PUPITRE};
 
     public static BlockEntityType<PoteauTyrolienne.Entite> POTEAU_ENTITE;
     public static BlockEntityType<MonteCharge.Entite> MONTE_CHARGE_ENTITE;
@@ -168,11 +182,17 @@ public final class OmbreBlocs {
         bloc("colonne", COLONNE);
         bloc("horloge", HORLOGE);
         bloc("affiche", AFFICHE);
-        bloc("treillis", TREILLIS);
+        bloc("charpente", CHARPENTE);
         bloc("volets", VOLETS);
         bloc("fontaine", FONTAINE);
         bloc("drapeau", DRAPEAU);
-        bloc("fiacre", FIACRE);
+        bloc("carrosse", CARROSSE);
+        bloc("statue", STATUE);
+        bloc("sphere_armillaire", SPHERE);
+        bloc("alambic", ALAMBIC);
+        bloc("etagere_fioles", ETAGERE);
+        bloc("tonneau_biere", TONNEAU);
+        bloc("pupitre", PUPITRE);
 
         Registry.register(Registries.ITEM, id("corde_tyrolienne"), CORDE);
 
@@ -193,21 +213,21 @@ public final class OmbreBlocs {
                     e.add(OmbreItems.COUTEAUX);
                     for (Block b : new Block[]{POTEAU, MONTE_CHARGE, PERCHE, PERCHOIR, MEULE, PUITS, CABINE, POUTRE, CORNICHE,
                             ENSEIGNE, AUVENT, ECHAFAUDAGE, LAMPADAIRE, TETE_LAMPADAIRE, GOUTTIERE, BALCON, REVERBERE, BANC,
-                            CHARRETTE, GARGOUILLE, TREILLIS}) e.add(b);
+                            CHARRETTE, GARGOUILLE, CHARPENTE}) e.add(b);
                     e.add(CORDE);
                     for (Block b : Variantes.PARKOUR) e.add(b);
                 })
                 .build());
-        Registry.register(Registries.ITEM_GROUP, id("onglet_paris"), FabricItemGroup.builder()
+        Registry.register(Registries.ITEM_GROUP, id("onglet_prague"), FabricItemGroup.builder()
                 .icon(() -> new ItemStack(LUCARNE))
-                .displayName(Text.translatable("itemGroup.ombre.paris"))
+                .displayName(Text.translatable("itemGroup.ombre.prague"))
                 .entries((ctx, e) -> {
                     for (Block b : PARIS) e.add(b);
                     for (Block b : Variantes.DECOR) e.add(b);
                 })
                 .build());
         Registry.register(Registries.ITEM_GROUP, id("onglet_objets"), FabricItemGroup.builder()
-                .icon(() -> new ItemStack(fr.fenua.ombre.objet.Objets.BAGUETTE))
+                .icon(() -> new ItemStack(fr.fenua.ombre.objet.Objets.PAIN_SEIGLE))
                 .displayName(Text.translatable("itemGroup.ombre.objets"))
                 .entries((ctx, e) -> {
                     for (Item i : fr.fenua.ombre.objet.Objets.TOUS) e.add(i);

@@ -28,27 +28,28 @@ public final class Variantes {
     public static final String[] COULEURS = {"white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
             "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"};
     public static final String[] RAYURES = {"rouge_blanc", "vert_blanc", "bleu_blanc", "jaune_blanc", "noir_blanc", "rouge_jaune", "bleu_jaune", "vert_jaune"};
-    public static final String[] BOUTIQUES = {"boulangerie", "cafe", "pharmacie", "horloger", "librairie", "boucherie",
-            "chapelier", "barbier", "cordonnier", "fleuriste", "tailleur", "marchand_vin"};
+    public static final String[] BOUTIQUES = {"boulangerie", "brasseur", "apothicaire", "horloger", "imprimeur", "boucherie",
+            "chapelier", "barbier", "cordonnier", "alchimiste", "tailleur", "marchand_vin"};
     public static final String[] TEINTES_VOLETS = {"vert", "bleu", "rouge", "gris", "blanc", "brun", "jaune", "noir"};
     public static final String[] BOIS = {"spruce", "birch", "dark_oak", "acacia", "cherry", "mangrove"};
     public static final String[] MARCHANDISES = {"fruits", "poisson", "fleurs", "pain", "etoffes", "legumes"};
     public static final String[] PIERRES = {"sandstone", "quartz", "calcite", "bricks", "deepslate", "andesite"};
     public static final String[] FERS = {"vert_de_gris", "dore", "blanc"};
     public static final String[] CHEMINEES = {"pierre", "terre_cuite", "ardoise"};
-    public static final String[] AFFICHES = {"theatre", "cirque", "exposition", "bal", "chemin_de_fer", "ballon",
-            "recherche", "chocolat", "opera", "savon", "velocipede", "proclamation"};
+    public static final String[] AFFICHES = {"proclamation", "recherche", "comediens", "foire", "almanach", "comete",
+            "remede", "carte_du_ciel", "taverne", "joute", "bal_masque", "gazette"};
     public static final String[] FANIONS = {"rouge", "bleu", "vert", "jaune", "blanc", "noir", "violet", "orange"};
     public static final String[] REVERBERES = {"vert", "dore"};
-    /** Blocs de construction parisiens, avec leurs propres textures. */
-    public static final String[] CONSTRUCTION = {"pierre_de_paris", "pierre_de_paris_lisse", "pierre_de_paris_sculptee",
-            "zinc", "ardoise", "pave_parisien", "trottoir", "parquet", "carrelage", "papier_peint_rouge", "papier_peint_vert",
-            "papier_peint_bleu", "papier_peint_jaune", "papier_peint_raye", "papier_peint_fleuri", "marbre_blanc",
-            "marbre_noir", "brique_parisienne", "crepi", "devanture", "devanture_rouge", "boiserie"};
-    /** Ceux-là ont aussi leurs escaliers et leurs dalles (toits, corniches, trottoirs). */
-    public static final String[] AVEC_ESCALIERS = {"zinc", "ardoise", "pierre_de_paris", "pave_parisien"};
+    /** Blocs de construction de la Prague de 1600, avec leurs propres textures. */
+    public static final String[] CONSTRUCTION = {"pierre_de_taille", "pierre_lisse", "pierre_sculptee", "pierre_noircie",
+            "tuiles", "ardoise", "pave", "dalles_de_pierre", "parquet", "carrelage", "tapisserie_rouge", "tapisserie_verte",
+            "tapisserie_bleue", "tapisserie_jaune", "tapisserie_rayee", "tapisserie_fleurie", "marbre_blanc",
+            "marbre_noir", "brique_ancienne", "crepi", "crepi_jaune", "crepi_rose", "crepi_bleu", "crepi_vert", "crepi_ocre",
+            "sgraffite", "devanture", "devanture_rouge", "boiserie"};
+    /** Ceux-là ont aussi leurs escaliers et leurs dalles (toits, corniches, rues). */
+    public static final String[] AVEC_ESCALIERS = {"tuiles", "ardoise", "pierre_de_taille", "pave"};
 
-    /** Tous les blocs du décor parisien (pour l'onglet « Paris » et la vitrine). */
+    /** Tous les blocs du décor de Prague (pour l'onglet « Prague » et la vitrine). */
     public static final List<Block> DECOR = new ArrayList<>();
     /** Les variantes de blocs de parkour (pour l'onglet « Parkour »). */
     public static final List<Block> PARKOUR = new ArrayList<>();
@@ -92,7 +93,7 @@ public final class Variantes {
         for (String f : FANIONS) decor("fanion_" + f, new Decor.Simple(OmbreBlocs.bois()).formes(Decor.b(7, 0, 7, 9, 16, 9), null));
 
         for (String c : CONSTRUCTION) {
-            Block b = new Block(AbstractBlock.Settings.copy(c.startsWith("papier") || c.startsWith("parquet") || c.startsWith("devanture")
+            Block b = new Block(AbstractBlock.Settings.copy(c.startsWith("tapisserie") || c.startsWith("parquet") || c.startsWith("devanture")
                     || c.equals("boiserie") ? Blocks.OAK_PLANKS : Blocks.STONE));
             decor(c, b);
         }

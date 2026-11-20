@@ -1,0 +1,167 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "laiton": "minecraft:block/gold_block",
+  "bois": "minecraft:block/dark_oak_planks",
+  "globe": "minecraft:block/lapis_block",
+  "particle": "minecraft:block/gold_block"
+ },
+ "elements": [
+  {
+   "from": [
+    5,
+    0,
+    5
+   ],
+   "to": [
+    11,
+    2,
+    11
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  },
+  {
+   "from": [
+    7.5,
+    2,
+    7.5
+   ],
+   "to": [
+    8.5,
+    5,
+    8.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#laiton"
+    },
+    "south": {
+     "texture": "#laiton"
+    },
+    "east": {
+     "texture": "#laiton"
+    },
+    "west": {
+     "texture": "#laiton"
+    },
+    "up": {
+     "texture": "#laiton"
+    },
+    "down": {
+     "texture": "#laiton"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    9.5,
+    2
+   ],
+   "to": [
+    14,
+    10.5,
+    14
+   ],
+   "faces": {
+    "up": {
+     "texture": "#laiton"
+    },
+    "down": {
+     "texture": "#laiton"
+    }
+   }
+  },
+  {
+   "from": [
+    7.5,
+    4,
+    2
+   ],
+   "to": [
+    8.5,
+    16,
+    14
+   ],
+   "faces": {
+    "east": {
+     "texture": "#laiton"
+    },
+    "west": {
+     "texture": "#laiton"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    4,
+    7.5
+   ],
+   "to": [
+    14,
+    16,
+    8.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#laiton"
+    },
+    "south": {
+     "texture": "#laiton"
+    }
+   }
+  },
+  {
+   "from": [
+    6.5,
+    8.5,
+    6.5
+   ],
+   "to": [
+    9.5,
+    11.5,
+    9.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#globe"
+    },
+    "south": {
+     "texture": "#globe"
+    },
+    "east": {
+     "texture": "#globe"
+    },
+    "west": {
+     "texture": "#globe"
+    },
+    "up": {
+     "texture": "#globe"
+    },
+    "down": {
+     "texture": "#globe"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:stone_bricks"
+  },
+  {
+   "item": "minecraft:stone_bricks"
+  },
+  {
+   "item": "minecraft:polished_andesite"
+  }
+ ],
+ "result": {
+  "id": "ombre:statue",
+  "count": 1
+ }
+}

@@ -1,0 +1,13 @@
+{
+ "variants": {
+  "type=bottom": {
+   "model": "ombre:block/pave_dalle"
+  },
+  "type=top": {
+   "model": "ombre:block/pave_dalle_top"
+  },
+  "type=double": {
+   "model": "ombre:block/pave"
+  }
+ }
+}

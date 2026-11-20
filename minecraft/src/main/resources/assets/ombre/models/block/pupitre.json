@@ -1,0 +1,168 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "bois": "minecraft:block/dark_oak_planks",
+  "page": "minecraft:block/white_wool",
+  "cuir": "minecraft:block/red_terracotta",
+  "particle": "minecraft:block/dark_oak_planks"
+ },
+ "elements": [
+  {
+   "from": [
+    5,
+    0,
+    5
+   ],
+   "to": [
+    11,
+    2,
+    11
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  },
+  {
+   "from": [
+    7,
+    2,
+    7
+   ],
+   "to": [
+    9,
+    11,
+    9
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    11,
+    3
+   ],
+   "to": [
+    14,
+    13,
+    13
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   },
+   "rotation": {
+    "origin": [
+     8,
+     12,
+     8
+    ],
+    "axis": "x",
+    "angle": -22.5
+   }
+  },
+  {
+   "from": [
+    2.5,
+    13,
+    3.5
+   ],
+   "to": [
+    13.5,
+    13.5,
+    12.5
+   ],
+   "faces": {
+    "up": {
+     "texture": "#page"
+    }
+   },
+   "rotation": {
+    "origin": [
+     8,
+     12,
+     8
+    ],
+    "axis": "x",
+    "angle": -22.5
+   }
+  },
+  {
+   "from": [
+    7.75,
+    13,
+    3.5
+   ],
+   "to": [
+    8.25,
+    13.6,
+    12.5
+   ],
+   "faces": {
+    "up": {
+     "texture": "#cuir"
+    }
+   },
+   "rotation": {
+    "origin": [
+     8,
+     12,
+     8
+    ],
+    "axis": "x",
+    "angle": -22.5
+   }
+  }
+ ]
+}

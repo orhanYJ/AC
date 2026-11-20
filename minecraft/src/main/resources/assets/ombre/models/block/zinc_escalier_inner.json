@@ -1,8 +1,0 @@
-{
- "parent": "minecraft:block/inner_stairs",
- "textures": {
-  "bottom": "ombre:block/zinc",
-  "top": "ombre:block/zinc",
-  "side": "ombre:block/zinc"
- }
-}
