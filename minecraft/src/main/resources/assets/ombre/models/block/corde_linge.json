@@ -1,0 +1,140 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "corde": "minecraft:block/brown_wool",
+  "drap": "minecraft:block/white_wool",
+  "bleu": "minecraft:block/light_blue_wool",
+  "rouge": "minecraft:block/red_wool",
+  "particle": "minecraft:block/brown_wool"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    14.5,
+    7.75
+   ],
+   "to": [
+    16,
+    15,
+    8.25
+   ],
+   "faces": {
+    "north": {
+     "texture": "#corde"
+    },
+    "south": {
+     "texture": "#corde"
+    },
+    "east": {
+     "texture": "#corde"
+    },
+    "west": {
+     "texture": "#corde"
+    },
+    "up": {
+     "texture": "#corde"
+    },
+    "down": {
+     "texture": "#corde"
+    }
+   }
+  },
+  {
+   "from": [
+    1,
+    6,
+    7.8
+   ],
+   "to": [
+    6,
+    14.5,
+    8.2
+   ],
+   "faces": {
+    "north": {
+     "texture": "#drap"
+    },
+    "south": {
+     "texture": "#drap"
+    },
+    "east": {
+     "texture": "#drap"
+    },
+    "west": {
+     "texture": "#drap"
+    },
+    "up": {
+     "texture": "#drap"
+    },
+    "down": {
+     "texture": "#drap"
+    }
+   }
+  },
+  {
+   "from": [
+    7,
+    9,
+    7.8
+   ],
+   "to": [
+    10,
+    14.5,
+    8.2
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bleu"
+    },
+    "south": {
+     "texture": "#bleu"
+    },
+    "east": {
+     "texture": "#bleu"
+    },
+    "west": {
+     "texture": "#bleu"
+    },
+    "up": {
+     "texture": "#bleu"
+    },
+    "down": {
+     "texture": "#bleu"
+    }
+   }
+  },
+  {
+   "from": [
+    11,
+    5,
+    7.8
+   ],
+   "to": [
+    15,
+    14.5,
+    8.2
+   ],
+   "faces": {
+    "north": {
+     "texture": "#rouge"
+    },
+    "south": {
+     "texture": "#rouge"
+    },
+    "east": {
+     "texture": "#rouge"
+    },
+    "west": {
+     "texture": "#rouge"
+    },
+    "up": {
+     "texture": "#rouge"
+    },
+    "down": {
+     "texture": "#rouge"
+    }
+   }
+  }
+ ]
+}

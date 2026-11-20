@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/etal"
+  },
+  "facing=east": {
+   "model": "ombre:block/etal",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/etal",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/etal",
+   "y": 270
+  }
+ }
+}

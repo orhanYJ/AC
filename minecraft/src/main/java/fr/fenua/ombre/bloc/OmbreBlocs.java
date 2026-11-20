@@ -59,7 +59,73 @@ public final class OmbreBlocs {
     public static final Cachettes.Cabine CABINE = new Cachettes.Cabine(AbstractBlock.Settings.create()
             .strength(1f).sounds(BlockSoundGroup.WOOD).nonOpaque());
 
+
+    // ───────────── Paris 1889 ─────────────
+    private static AbstractBlock.Settings bois() { return AbstractBlock.Settings.create().strength(1.5f).sounds(BlockSoundGroup.WOOD).nonOpaque(); }
+    private static AbstractBlock.Settings pierre() { return AbstractBlock.Settings.create().strength(2f).sounds(BlockSoundGroup.STONE).nonOpaque(); }
+    private static AbstractBlock.Settings metal() { return AbstractBlock.Settings.create().strength(2f).sounds(BlockSoundGroup.METAL).nonOpaque(); }
+
+    /** Gouttière : un tuyau de zinc le long d'un mur. On y grimpe deux fois plus vite. */
+    public static final Decor.Oriente GOUTTIERE = new Decor.Oriente(metal()).formes(true,
+            Decor.b(5, 0, 0, 11, 16, 5), null);
+    /** Balcon en fer forgé : un plancher et une grille, devant une façade. */
+    public static final Decor.Oriente BALCON = new Decor.Oriente(metal()).formes(true,
+            Decor.u(Decor.b(0, 0, 0, 16, 2, 16), Decor.b(0, 2, 15, 16, 14, 16)), null);
+    /** Cheminée de toit, avec ses pots et sa fumée. */
+    public static final Decor.Cheminee CHEMINEE = (Decor.Cheminee) new Decor.Cheminee(pierre()).formes(
+            Decor.u(Decor.b(3, 0, 3, 13, 16, 13), Decor.b(2, 14, 2, 14, 16, 14)), null);
+    /** Lucarne : une fenêtre de mansarde, sur laquelle on peut se hisser. */
+    public static final Decor.Oriente LUCARNE = new Decor.Oriente(pierre()).formes(false,
+            Decor.b(1, 0, 3, 15, 16, 16), Decor.b(2, 0, 4, 14, 14, 16));
+    /** Réverbère à potence, accroché à un mur : la potence se saisit au clic droit, comme une perche. */
+    public static final Decor.Oriente REVERBERE = new Decor.Oriente(metal().noCollision().luminance(s -> 15)).formes(true,
+            Decor.u(Decor.b(7, 13, 0, 9, 15, 12), Decor.b(5, 4, 9, 11, 12, 15)), Decor.VIDE);
+    /** Banc public : clic droit pour s'y asseoir, caché aux yeux des gardes. */
+    public static final Decor.Banc BANC = (Decor.Banc) new Decor.Banc(bois()).formes(true,
+            Decor.u(Decor.b(0, 0, 2, 16, 8, 13), Decor.b(0, 8, 2, 16, 16, 4)), null);
+    /** Charrette de foin : saut de la foi, cachette (accroupi). */
+    public static final Decor.Charrette CHARRETTE = (Decor.Charrette) new Decor.Charrette(
+            AbstractBlock.Settings.create().strength(0.8f).sounds(BlockSoundGroup.GRASS).nonOpaque().noCollision())
+            .formes(false, Decor.b(0, 0, 0, 16, 14, 16), Decor.VIDE);
+    /** Étal de marché : on peut tomber sur la toile sans se faire mal. */
+    public static final Decor.Oriente ETAL = new Decor.Oriente(bois()).formes(false,
+            Decor.u(Decor.b(0, 0, 0, 16, 9, 5), Decor.b(0, 15, 0, 16, 16, 16), Decor.b(0, 0, 15, 1, 16, 16), Decor.b(15, 0, 15, 16, 16, 16)), null);
+    /** Gargouille : un point de vue de pierre. S'y tenir révèle les gardes. */
+    public static final Decor.Oriente GARGOUILLE = new Decor.Oriente(pierre()).formes(true,
+            Decor.u(Decor.b(0, 8, 0, 16, 16, 10), Decor.b(4, 8, 8, 12, 16, 16)), null);
+    /** Corde à linge, avec son linge qui sèche. */
+    public static final Decor.Oriente CORDE_LINGE = new Decor.Oriente(
+            AbstractBlock.Settings.create().strength(0.3f).sounds(BlockSoundGroup.WOOL).nonOpaque().noCollision()).formes(false,
+            Decor.b(0, 5, 7, 16, 15, 9), Decor.VIDE);
+    /** Barricade de pavés, de roues et de planches : on s'y abrite, on la franchit. */
+    public static final Decor.Oriente BARRICADE = new Decor.Oriente(pierre()).formes(false,
+            Decor.b(0, 0, 2, 16, 12, 14), Decor.b(0, 0, 2, 16, 10, 14));
+    /** Colonne d'affiches (colonne Morris), deux blocs de haut. */
+    public static final Decor.Simple COLONNE = new Decor.Simple(pierre()).formes(Decor.b(2, 0, 2, 14, 16, 14), Decor.b(2, 0, 2, 14, 24, 14));
+    /** Horloge murale. */
+    public static final Decor.Oriente HORLOGE = new Decor.Oriente(metal().noCollision()).formes(true, Decor.b(0, 0, 0, 16, 16, 2), Decor.VIDE);
+    /** Affiche collée au mur. */
+    public static final Decor.Oriente AFFICHE = new Decor.Oriente(
+            AbstractBlock.Settings.create().strength(0.2f).sounds(BlockSoundGroup.WOOL).nonOpaque().noCollision()).formes(true,
+            Decor.b(1, 1, 0, 15, 15, 1), Decor.VIDE);
+    /** Treillis de fer (la tour) : ajouré, il s'escalade. */
+    public static final Decor.Simple TREILLIS = new Decor.Simple(metal()).formes(Decor.b(0, 0, 0, 16, 16, 16), null);
+    /** Volets, de part et d'autre d'une fenêtre. */
+    public static final Decor.Oriente VOLETS = new Decor.Oriente(bois().noCollision()).formes(true,
+            Decor.u(Decor.b(0, 0, 0, 4, 16, 1), Decor.b(12, 0, 0, 16, 16, 1)), Decor.VIDE);
+    /** Fontaine de pierre. */
+    public static final Decor.Simple FONTAINE = new Decor.Simple(pierre()).formes(Decor.b(0, 0, 0, 16, 14, 16),
+            Decor.u(Decor.b(0, 0, 0, 16, 6, 2), Decor.b(0, 0, 14, 16, 6, 16), Decor.b(0, 0, 0, 2, 6, 16), Decor.b(14, 0, 0, 16, 6, 16), Decor.b(6, 0, 6, 10, 14, 10)));
+    /** Drapeau tricolore sur sa hampe. */
+    public static final Decor.Simple DRAPEAU = new Decor.Simple(bois()).formes(Decor.b(7, 0, 7, 9, 16, 9), null);
+    /** Fiacre (voiture de place) : on monte sur son toit. */
+    public static final Decor.Oriente FIACRE = new Decor.Oriente(bois()).formes(false, Decor.b(0, 0, 1, 16, 15, 15), null);
+
     public static final Item CORDE = new Item(new Item.Settings().maxCount(16));
+
+    /** Tous les blocs de Paris 1889, dans l'ordre de l'onglet. */
+    public static final Block[] PARIS = {GOUTTIERE, BALCON, CHEMINEE, LUCARNE, REVERBERE, BANC, CHARRETTE, ETAL, GARGOUILLE,
+            CORDE_LINGE, BARRICADE, COLONNE, HORLOGE, AFFICHE, TREILLIS, VOLETS, FONTAINE, DRAPEAU, FIACRE};
 
     public static BlockEntityType<PoteauTyrolienne.Entite> POTEAU_ENTITE;
     public static BlockEntityType<MonteCharge.Entite> MONTE_CHARGE_ENTITE;
@@ -79,6 +145,26 @@ public final class OmbreBlocs {
         bloc("meule", MEULE);
         bloc("puits", PUITS);
         bloc("cabine", CABINE);
+        bloc("gouttiere", GOUTTIERE);
+        bloc("balcon", BALCON);
+        bloc("cheminee", CHEMINEE);
+        bloc("lucarne", LUCARNE);
+        bloc("reverbere", REVERBERE);
+        bloc("banc", BANC);
+        bloc("charrette", CHARRETTE);
+        bloc("etal", ETAL);
+        bloc("gargouille", GARGOUILLE);
+        bloc("corde_linge", CORDE_LINGE);
+        bloc("barricade", BARRICADE);
+        bloc("colonne", COLONNE);
+        bloc("horloge", HORLOGE);
+        bloc("affiche", AFFICHE);
+        bloc("treillis", TREILLIS);
+        bloc("volets", VOLETS);
+        bloc("fontaine", FONTAINE);
+        bloc("drapeau", DRAPEAU);
+        bloc("fiacre", FIACRE);
+
         Registry.register(Registries.ITEM, id("corde_tyrolienne"), CORDE);
 
         POTEAU_ENTITE = Registry.register(Registries.BLOCK_ENTITY_TYPE, id("poteau_tyrolienne"),
@@ -96,6 +182,7 @@ public final class OmbreBlocs {
                     e.add(MEULE);
                     e.add(PUITS);
                     e.add(CABINE);
+                    for (Block b : PARIS) e.add(b);
                     e.add(POTEAU);
                     e.add(CORDE);
                     e.add(MONTE_CHARGE);

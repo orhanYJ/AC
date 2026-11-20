@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/gouttiere"
+  },
+  "facing=east": {
+   "model": "ombre:block/gouttiere",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/gouttiere",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/gouttiere",
+   "y": 270
+  }
+ }
+}

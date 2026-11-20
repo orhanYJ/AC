@@ -1,0 +1,41 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "fer": "ombre:block/treillis",
+  "particle": "ombre:block/treillis"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    16,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#fer"
+    },
+    "south": {
+     "texture": "#fer"
+    },
+    "east": {
+     "texture": "#fer"
+    },
+    "west": {
+     "texture": "#fer"
+    },
+    "up": {
+     "texture": "#fer"
+    },
+    "down": {
+     "texture": "#fer"
+    }
+   }
+  }
+ ]
+}

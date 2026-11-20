@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:paper"
+  },
+  {
+   "item": "minecraft:green_terracotta"
+  }
+ ],
+ "result": {
+  "id": "ombre:colonne",
+  "count": 1
+ }
+}

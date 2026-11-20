@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:iron_bars"
+  },
+  {
+   "item": "minecraft:smooth_stone_slab"
+  }
+ ],
+ "result": {
+  "id": "ombre:balcon",
+  "count": 2
+ }
+}

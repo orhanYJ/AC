@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "tag": "planks"
+  },
+  {
+   "tag": "planks"
+  },
+  {
+   "item": "minecraft:iron_nugget"
+  }
+ ],
+ "result": {
+  "id": "ombre:banc",
+  "count": 2
+ }
+}

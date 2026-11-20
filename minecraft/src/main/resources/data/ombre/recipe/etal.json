@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "tag": "planks"
+  },
+  {
+   "item": "minecraft:red_wool"
+  },
+  {
+   "item": "minecraft:melon_slice"
+  }
+ ],
+ "result": {
+  "id": "ombre:etal",
+  "count": 1
+ }
+}

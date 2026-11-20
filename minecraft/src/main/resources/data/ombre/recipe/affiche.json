@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:paper"
+  },
+  {
+   "item": "minecraft:ink_sac"
+  }
+ ],
+ "result": {
+  "id": "ombre:affiche",
+  "count": 4
+ }
+}

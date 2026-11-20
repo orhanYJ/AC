@@ -97,6 +97,8 @@ public final class Gardes {
             for (Entity e : w.iterateEntities()) {
                 if (e instanceof MobEntity m && e.getCommandTags().contains(GARDE) && m.isAlive()) gardes.add(m);
                 else if (e.getType() == EntityType.MARKER && e.getCommandTags().contains(VUE)) vues.add(e);
+                else if (e.getType() == EntityType.ARMOR_STAND && e.getCommandTags().contains(fr.fenua.ombre.bloc.Decor.Banc.SIEGE)
+                        && !e.hasPassengers()) e.discard();   // on s'est relevé du banc
             }
             alarme(w, gardes);
             pointsDeVue(w, vues);
@@ -150,12 +152,16 @@ public final class Gardes {
         for (ServerPlayerEntity p : w.getPlayers()) {
             BlockPos dessous = p.getBlockPos().down();
             if (!p.isOnGround()) continue;
-            if (!w.getBlockState(dessous).isOf(OmbreBlocs.PERCHOIR)) {
+            if (!pointDeVue(w.getBlockState(dessous))) {
                 dessous = BlockPos.ofFloored(p.getX(), p.getY() - 0.1, p.getZ());
-                if (!w.getBlockState(dessous).isOf(OmbreBlocs.PERCHOIR)) continue;
+                if (!pointDeVue(w.getBlockState(dessous))) continue;
             }
             if (SYNCHRO.add(p.getUuidAsString() + "/" + dessous.asLong())) synchroniser(w, p, Vec3d.ofCenter(dessous));
         }
+    }
+
+    private static boolean pointDeVue(net.minecraft.block.BlockState s) {
+        return s.isOf(OmbreBlocs.PERCHOIR) || s.isOf(OmbreBlocs.GARGOUILLE);
     }
 
     private static void synchroniser(ServerWorld w, ServerPlayerEntity p, Vec3d centre) {

@@ -1,0 +1,22 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:stick"
+  },
+  {
+   "item": "minecraft:blue_wool"
+  },
+  {
+   "item": "minecraft:white_wool"
+  },
+  {
+   "item": "minecraft:red_wool"
+  }
+ ],
+ "result": {
+  "id": "ombre:drapeau",
+  "count": 1
+ }
+}

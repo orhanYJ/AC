@@ -54,7 +54,8 @@ public final class Discretion {
     }
 
     /**
-     * Dans une meule de foin, un puits ou une cabine à rideau (même debout), ou accroupi dans les hautes herbes,
+     * Dans une meule de foin, un puits, une cabine à rideau (même debout), assis sur un banc,
+     * accroupi dans une charrette de foin, ou accroupi dans les hautes herbes,
      * une fougère, un buisson, ou la tête sous des feuilles.
      */
     public static boolean dansCachette(PlayerEntity joueur) {
@@ -62,6 +63,10 @@ public final class Discretion {
         BlockPos pieds = joueur.getBlockPos();
         if (w.getBlockState(pieds).isOf(OmbreBlocs.MEULE) && w.getBlockState(pieds.up()).isOf(OmbreBlocs.MEULE)) return true;
         if (w.getBlockState(pieds).isOf(OmbreBlocs.PUITS) || w.getBlockState(pieds).isOf(OmbreBlocs.CABINE)) return true;
+        // Assis sur un banc : on se fond dans le décor
+        if (joueur.getVehicle() != null && joueur.getVehicle().getCommandTags().contains(fr.fenua.ombre.bloc.Decor.Banc.SIEGE)) return true;
+        // Accroupi dans une charrette de foin
+        if (joueur.isSneaking() && w.getBlockState(pieds).isOf(OmbreBlocs.CHARRETTE)) return true;
         if (!joueur.isSneaking()) return false;
         return cache(w.getBlockState(pieds)) || cache(w.getBlockState(pieds.up()));
     }

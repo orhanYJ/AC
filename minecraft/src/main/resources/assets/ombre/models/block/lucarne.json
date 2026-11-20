@@ -1,0 +1,192 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "pierre": "minecraft:block/calcite",
+  "verre": "minecraft:block/glass",
+  "toit": "minecraft:block/deepslate_tiles",
+  "bois": "minecraft:block/dark_oak_planks",
+  "particle": "minecraft:block/calcite"
+ },
+ "elements": [
+  {
+   "from": [
+    2,
+    0,
+    4
+   ],
+   "to": [
+    14,
+    12,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#pierre"
+    },
+    "south": {
+     "texture": "#pierre"
+    },
+    "east": {
+     "texture": "#pierre"
+    },
+    "west": {
+     "texture": "#pierre"
+    },
+    "up": {
+     "texture": "#pierre"
+    },
+    "down": {
+     "texture": "#pierre"
+    }
+   }
+  },
+  {
+   "from": [
+    4,
+    2,
+    3.5
+   ],
+   "to": [
+    12,
+    10,
+    4
+   ],
+   "faces": {
+    "north": {
+     "texture": "#verre"
+    },
+    "south": {
+     "texture": "#verre"
+    }
+   }
+  },
+  {
+   "from": [
+    3.5,
+    1.5,
+    3
+   ],
+   "to": [
+    12.5,
+    2.5,
+    4
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  },
+  {
+   "from": [
+    1,
+    12,
+    3
+   ],
+   "to": [
+    15,
+    14,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#toit"
+    },
+    "south": {
+     "texture": "#toit"
+    },
+    "east": {
+     "texture": "#toit"
+    },
+    "west": {
+     "texture": "#toit"
+    },
+    "up": {
+     "texture": "#toit"
+    },
+    "down": {
+     "texture": "#toit"
+    }
+   }
+  },
+  {
+   "from": [
+    3,
+    14,
+    3
+   ],
+   "to": [
+    13,
+    15.5,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#toit"
+    },
+    "south": {
+     "texture": "#toit"
+    },
+    "east": {
+     "texture": "#toit"
+    },
+    "west": {
+     "texture": "#toit"
+    },
+    "up": {
+     "texture": "#toit"
+    },
+    "down": {
+     "texture": "#toit"
+    }
+   }
+  },
+  {
+   "from": [
+    5,
+    15.5,
+    3
+   ],
+   "to": [
+    11,
+    17,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#toit"
+    },
+    "south": {
+     "texture": "#toit"
+    },
+    "east": {
+     "texture": "#toit"
+    },
+    "west": {
+     "texture": "#toit"
+    },
+    "up": {
+     "texture": "#toit"
+    },
+    "down": {
+     "texture": "#toit"
+    }
+   }
+  }
+ ]
+}

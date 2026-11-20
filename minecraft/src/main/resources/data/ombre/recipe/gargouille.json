@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:stone_bricks"
+  },
+  {
+   "item": "minecraft:mossy_cobblestone"
+  },
+  {
+   "item": "minecraft:feather"
+  }
+ ],
+ "result": {
+  "id": "ombre:gargouille",
+  "count": 1
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/lucarne"
+  },
+  "facing=east": {
+   "model": "ombre:block/lucarne",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/lucarne",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/lucarne",
+   "y": 270
+  }
+ }
+}

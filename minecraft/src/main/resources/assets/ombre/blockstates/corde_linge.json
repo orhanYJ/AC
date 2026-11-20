@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/corde_linge"
+  },
+  "facing=east": {
+   "model": "ombre:block/corde_linge",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/corde_linge",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/corde_linge",
+   "y": 270
+  }
+ }
+}

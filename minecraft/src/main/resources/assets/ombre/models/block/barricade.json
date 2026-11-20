@@ -1,0 +1,182 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "pave": "minecraft:block/cobblestone",
+  "pierre": "minecraft:block/stone",
+  "bois": "minecraft:block/spruce_planks",
+  "roue": "minecraft:block/stripped_dark_oak_log",
+  "tonneau": "minecraft:block/barrel_side",
+  "particle": "minecraft:block/cobblestone"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    2
+   ],
+   "to": [
+    16,
+    6,
+    14
+   ],
+   "faces": {
+    "north": {
+     "texture": "#pave"
+    },
+    "south": {
+     "texture": "#pave"
+    },
+    "east": {
+     "texture": "#pave"
+    },
+    "west": {
+     "texture": "#pave"
+    },
+    "up": {
+     "texture": "#pave"
+    },
+    "down": {
+     "texture": "#pave"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    6,
+    4
+   ],
+   "to": [
+    14,
+    10,
+    12
+   ],
+   "faces": {
+    "north": {
+     "texture": "#pierre"
+    },
+    "south": {
+     "texture": "#pierre"
+    },
+    "east": {
+     "texture": "#pierre"
+    },
+    "west": {
+     "texture": "#pierre"
+    },
+    "up": {
+     "texture": "#pierre"
+    },
+    "down": {
+     "texture": "#pierre"
+    }
+   }
+  },
+  {
+   "from": [
+    1,
+    6,
+    13
+   ],
+   "to": [
+    7,
+    13,
+    14
+   ],
+   "faces": {
+    "north": {
+     "texture": "#roue"
+    },
+    "south": {
+     "texture": "#roue"
+    },
+    "east": {
+     "texture": "#roue"
+    },
+    "west": {
+     "texture": "#roue"
+    },
+    "up": {
+     "texture": "#roue"
+    },
+    "down": {
+     "texture": "#roue"
+    }
+   }
+  },
+  {
+   "from": [
+    9,
+    6,
+    1
+   ],
+   "to": [
+    15,
+    13,
+    7
+   ],
+   "faces": {
+    "north": {
+     "texture": "#tonneau"
+    },
+    "south": {
+     "texture": "#tonneau"
+    },
+    "east": {
+     "texture": "#tonneau"
+    },
+    "west": {
+     "texture": "#tonneau"
+    },
+    "up": {
+     "texture": "#tonneau"
+    },
+    "down": {
+     "texture": "#tonneau"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    9,
+    2
+   ],
+   "to": [
+    14,
+    10.5,
+    3.5
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   },
+   "rotation": {
+    "origin": [
+     8,
+     9,
+     2
+    ],
+    "axis": "z",
+    "angle": 22.5
+   }
+  }
+ ]
+}

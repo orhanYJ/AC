@@ -7,6 +7,8 @@ import net.minecraft.client.MinecraftClient;
 import fr.fenua.ombre.bloc.CoteClient;
 import fr.fenua.ombre.bloc.OmbreBlocs;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.minecraft.client.render.RenderLayer;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -51,8 +53,11 @@ public class OmbreClient implements ClientModInitializer {
             @Override public void monteCharge(BlockPos pos, Direction mur, int sommet) { Parcours.demarrerMonteCharge(pos, mur, sommet); }
         };
 
-        // L'eau du puits prend la couleur de l'eau
-        ColorProviderRegistry.BLOCK.register((etat, monde, pos, i) -> 0x3F76E4, OmbreBlocs.PUITS);
+        // L'eau du puits et de la fontaine prend la couleur de l'eau
+        ColorProviderRegistry.BLOCK.register((etat, monde, pos, i) -> 0x3F76E4, OmbreBlocs.PUITS, OmbreBlocs.FONTAINE);
+        // Les blocs ajourés (grilles, treillis, verre) : les trous restent transparents
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), OmbreBlocs.BALCON, OmbreBlocs.TREILLIS,
+                OmbreBlocs.REVERBERE, OmbreBlocs.LUCARNE, OmbreBlocs.COLONNE, OmbreBlocs.AFFICHE);
 
         BlockEntityRendererFactories.register(OmbreBlocs.POTEAU_ENTITE, ctx -> new RenduCordes.Poteau());
         BlockEntityRendererFactories.register(OmbreBlocs.MONTE_CHARGE_ENTITE, ctx -> new RenduCordes.Lift());

@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/horloge"
+  },
+  "facing=east": {
+   "model": "ombre:block/horloge",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/horloge",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/horloge",
+   "y": 270
+  }
+ }
+}

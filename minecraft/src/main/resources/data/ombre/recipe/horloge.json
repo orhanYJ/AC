@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:clock"
+  },
+  {
+   "item": "minecraft:gold_nugget"
+  }
+ ],
+ "result": {
+  "id": "ombre:horloge",
+  "count": 1
+ }
+}

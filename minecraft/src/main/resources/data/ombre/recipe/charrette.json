@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:hay_block"
+  },
+  {
+   "tag": "planks"
+  },
+  {
+   "item": "minecraft:stick"
+  }
+ ],
+ "result": {
+  "id": "ombre:charrette",
+  "count": 1
+ }
+}
