@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "ombre:pierre_de_paris"
+ },
+ "result": {
+  "id": "ombre:pierre_de_paris_dalle",
+  "count": 2
+ }
+}

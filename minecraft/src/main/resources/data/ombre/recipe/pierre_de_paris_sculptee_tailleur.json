@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "minecraft:smooth_sandstone"
+ },
+ "result": {
+  "id": "ombre:pierre_de_paris_sculptee",
+  "count": 1
+ }
+}

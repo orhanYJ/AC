@@ -1,0 +1,139 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "brique": "minecraft:block/orange_terracotta",
+  "pierre": "minecraft:block/smooth_stone",
+  "pot": "minecraft:block/terracotta",
+  "particle": "minecraft:block/orange_terracotta"
+ },
+ "elements": [
+  {
+   "from": [
+    3,
+    0,
+    3
+   ],
+   "to": [
+    13,
+    14,
+    13
+   ],
+   "faces": {
+    "north": {
+     "texture": "#brique"
+    },
+    "south": {
+     "texture": "#brique"
+    },
+    "east": {
+     "texture": "#brique"
+    },
+    "west": {
+     "texture": "#brique"
+    },
+    "up": {
+     "texture": "#brique"
+    },
+    "down": {
+     "texture": "#brique"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    14,
+    2
+   ],
+   "to": [
+    14,
+    16,
+    14
+   ],
+   "faces": {
+    "north": {
+     "texture": "#pierre"
+    },
+    "south": {
+     "texture": "#pierre"
+    },
+    "east": {
+     "texture": "#pierre"
+    },
+    "west": {
+     "texture": "#pierre"
+    },
+    "up": {
+     "texture": "#pierre"
+    },
+    "down": {
+     "texture": "#pierre"
+    }
+   }
+  },
+  {
+   "from": [
+    4,
+    16,
+    5
+   ],
+   "to": [
+    7,
+    21,
+    8
+   ],
+   "faces": {
+    "north": {
+     "texture": "#pot"
+    },
+    "south": {
+     "texture": "#pot"
+    },
+    "east": {
+     "texture": "#pot"
+    },
+    "west": {
+     "texture": "#pot"
+    },
+    "up": {
+     "texture": "#pot"
+    },
+    "down": {
+     "texture": "#pot"
+    }
+   }
+  },
+  {
+   "from": [
+    9,
+    16,
+    8
+   ],
+   "to": [
+    12,
+    20,
+    11
+   ],
+   "faces": {
+    "north": {
+     "texture": "#pot"
+    },
+    "south": {
+     "texture": "#pot"
+    },
+    "east": {
+     "texture": "#pot"
+    },
+    "west": {
+     "texture": "#pot"
+    },
+    "up": {
+     "texture": "#pot"
+    },
+    "down": {
+     "texture": "#pot"
+    }
+   }
+  }
+ ]
+}

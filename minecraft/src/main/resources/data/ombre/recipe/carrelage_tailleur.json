@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "minecraft:smooth_stone"
+ },
+ "result": {
+  "id": "ombre:carrelage",
+  "count": 1
+ }
+}

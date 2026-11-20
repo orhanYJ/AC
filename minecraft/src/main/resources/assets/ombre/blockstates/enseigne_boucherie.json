@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/enseigne_boucherie"
+  },
+  "facing=east": {
+   "model": "ombre:block/enseigne_boucherie",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/enseigne_boucherie",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/enseigne_boucherie",
+   "y": 270
+  }
+ }
+}

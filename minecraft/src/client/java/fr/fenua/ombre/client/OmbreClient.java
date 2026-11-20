@@ -7,6 +7,8 @@ import net.minecraft.client.MinecraftClient;
 import fr.fenua.ombre.bloc.CoteClient;
 import fr.fenua.ombre.bloc.OmbreBlocs;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.client.render.RenderLayer;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
@@ -58,6 +60,16 @@ public class OmbreClient implements ClientModInitializer {
         // Les blocs ajourés (grilles, treillis, verre) : les trous restent transparents
         BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), OmbreBlocs.BALCON, OmbreBlocs.TREILLIS,
                 OmbreBlocs.REVERBERE, OmbreBlocs.LUCARNE, OmbreBlocs.COLONNE, OmbreBlocs.AFFICHE);
+
+        // Les variantes ajourées (grilles de balcon, fleurs des étals, verre des réverbères)
+        BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), fr.fenua.ombre.bloc.Variantes.AJOURES.toArray(new net.minecraft.block.Block[0]));
+
+        // Les personnages et ce qu'on lance
+        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.PASSANT, ctx -> new RenduHumain<>(ctx, RenduHumain::passant));
+        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.GARDIEN, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("gardien")));
+        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.GENDARME, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("gendarme")));
+        EntityRendererRegistry.register(fr.fenua.ombre.entite.Entites.OFFICIER, ctx -> new RenduHumain<>(ctx, e -> RenduHumain.tex("officier")));
+        EntityRendererRegistry.register(fr.fenua.ombre.objet.Objets.PROJECTILE, FlyingItemEntityRenderer::new);
 
         BlockEntityRendererFactories.register(OmbreBlocs.POTEAU_ENTITE, ctx -> new RenduCordes.Poteau());
         BlockEntityRendererFactories.register(OmbreBlocs.MONTE_CHARGE_ENTITE, ctx -> new RenduCordes.Lift());

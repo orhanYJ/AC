@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "ombre:pave_parisien"
+ },
+ "result": {
+  "id": "ombre:pave_parisien_escalier",
+  "count": 1
+ }
+}

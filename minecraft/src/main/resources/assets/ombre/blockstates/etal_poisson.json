@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/etal_poisson"
+  },
+  "facing=east": {
+   "model": "ombre:block/etal_poisson",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/etal_poisson",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/etal_poisson",
+   "y": 270
+  }
+ }
+}

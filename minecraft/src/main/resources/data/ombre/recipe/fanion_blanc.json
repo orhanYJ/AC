@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:stick"
+  },
+  {
+   "item": "minecraft:white_wool"
+  }
+ ],
+ "result": {
+  "id": "ombre:fanion_blanc",
+  "count": 1
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/affiche_chemin_de_fer"
+  },
+  "facing=east": {
+   "model": "ombre:block/affiche_chemin_de_fer",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/affiche_chemin_de_fer",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/affiche_chemin_de_fer",
+   "y": 270
+  }
+ }
+}

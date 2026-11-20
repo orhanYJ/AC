@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:stick"
+  },
+  {
+   "item": "minecraft:orange_wool"
+  }
+ ],
+ "result": {
+  "id": "ombre:fanion_orange",
+  "count": 1
+ }
+}

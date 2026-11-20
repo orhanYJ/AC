@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "tag": "minecraft:planks"
+  },
+  {
+   "item": "minecraft:black_dye"
+  }
+ ],
+ "result": {
+  "id": "ombre:volets_noir",
+  "count": 2
+ }
+}

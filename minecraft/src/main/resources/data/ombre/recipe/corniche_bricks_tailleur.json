@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "minecraft:bricks"
+ },
+ "result": {
+  "id": "ombre:corniche_bricks",
+  "count": 2
+ }
+}

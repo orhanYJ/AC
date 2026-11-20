@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "minecraft:oak_planks"
+ },
+ "result": {
+  "id": "ombre:devanture_rouge",
+  "count": 1
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/balcon_blanc"
+  },
+  "facing=east": {
+   "model": "ombre:block/balcon_blanc",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/balcon_blanc",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/balcon_blanc",
+   "y": 270
+  }
+ }
+}

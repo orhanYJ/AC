@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:cabine"
+  },
+  {
+   "item": "minecraft:light_blue_dye"
+  }
+ ],
+ "result": {
+  "id": "ombre:cabine_light_blue",
+  "count": 1
+ }
+}

@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "ombre:zinc"
+ },
+ "result": {
+  "id": "ombre:zinc_dalle",
+  "count": 2
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/corniche_calcite"
+  },
+  "facing=east": {
+   "model": "ombre:block/corniche_calcite",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/corniche_calcite",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/corniche_calcite",
+   "y": 270
+  }
+ }
+}

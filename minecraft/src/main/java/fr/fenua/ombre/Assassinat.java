@@ -134,5 +134,9 @@ public final class Assassinat {
         sw.spawnParticles(ParticleTypes.CRIT, v.getX(), v.getBodyY(0.5), v.getZ(), 8, 0.2, 0.3, 0.2, 0.1);
         // Un bruit sourd et bas : on ne l'entend pas de loin
         sw.playSound(null, v.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, SoundCategory.PLAYERS, 0.35f, 0.6f);
+        // La foule alentour s'enfuit ; le déguisement ne tient pas à un meurtre
+        for (fr.fenua.ombre.entite.Passant pa : sw.getEntitiesByClass(fr.fenua.ombre.entite.Passant.class,
+                v.getBoundingBox().expand(12), e -> e.isAlive())) pa.fuir(v.getPos());
+        joueur.removeStatusEffect(fr.fenua.ombre.objet.Effets.DEGUISE);
     }
 }

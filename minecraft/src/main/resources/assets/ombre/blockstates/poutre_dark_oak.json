@@ -1,0 +1,11 @@
+{
+ "variants": {
+  "axis=z": {
+   "model": "ombre:block/poutre_dark_oak"
+  },
+  "axis=x": {
+   "model": "ombre:block/poutre_dark_oak",
+   "y": 90
+  }
+ }
+}

@@ -1,0 +1,83 @@
+{
+ "parent": "minecraft:block/block",
+ "textures": {
+  "toile": "minecraft:block/light_blue_wool",
+  "bois": "minecraft:block/stripped_oak_log",
+  "particle": "minecraft:block/light_blue_wool"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    9,
+    0
+   ],
+   "to": [
+    16,
+    11,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#toile"
+    },
+    "south": {
+     "texture": "#toile"
+    },
+    "east": {
+     "texture": "#toile"
+    },
+    "west": {
+     "texture": "#toile"
+    },
+    "up": {
+     "texture": "#toile"
+    },
+    "down": {
+     "texture": "#toile"
+    }
+   },
+   "rotation": {
+    "origin": [
+     8,
+     10,
+     0
+    ],
+    "axis": "x",
+    "angle": 22.5
+   }
+  },
+  {
+   "from": [
+    0,
+    10,
+    0
+   ],
+   "to": [
+    16,
+    12,
+    1
+   ],
+   "faces": {
+    "north": {
+     "texture": "#bois"
+    },
+    "south": {
+     "texture": "#bois"
+    },
+    "east": {
+     "texture": "#bois"
+    },
+    "west": {
+     "texture": "#bois"
+    },
+    "up": {
+     "texture": "#bois"
+    },
+    "down": {
+     "texture": "#bois"
+    }
+   }
+  }
+ ]
+}

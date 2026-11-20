@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "minecraft:stone"
+ },
+ "result": {
+  "id": "ombre:trottoir",
+  "count": 1
+ }
+}

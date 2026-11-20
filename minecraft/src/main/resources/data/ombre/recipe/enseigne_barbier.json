@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:enseigne"
+  },
+  {
+   "item": "minecraft:shears"
+  }
+ ],
+ "result": {
+  "id": "ombre:enseigne_barbier",
+  "count": 1
+ }
+}

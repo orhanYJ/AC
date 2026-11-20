@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:stick"
+  },
+  {
+   "item": "minecraft:red_wool"
+  }
+ ],
+ "result": {
+  "id": "ombre:fanion_rouge",
+  "count": 1
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/auvent_raye_bleu_jaune"
+  },
+  "facing=east": {
+   "model": "ombre:block/auvent_raye_bleu_jaune",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/auvent_raye_bleu_jaune",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/auvent_raye_bleu_jaune",
+   "y": 270
+  }
+ }
+}

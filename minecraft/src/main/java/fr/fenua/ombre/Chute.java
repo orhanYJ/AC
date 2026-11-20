@@ -35,8 +35,8 @@ public final class Chute {
             joueur.sendMessage(Text.literal("§7✦ Saut de la foi"), true);
             return false;
         }
-        if (bloc.isOf(Blocks.HAY_BLOCK) || bloc.isIn(BlockTags.LEAVES) || bloc.isOf(fr.fenua.ombre.bloc.OmbreBlocs.AUVENT)
-                || bloc.isOf(fr.fenua.ombre.bloc.OmbreBlocs.ETAL)) {
+        if (bloc.isOf(Blocks.HAY_BLOCK) || bloc.isIn(BlockTags.LEAVES) || bloc.getBlock() instanceof fr.fenua.ombre.bloc.Mobilier.Auvent
+                || bloc.getBlock() instanceof fr.fenua.ombre.bloc.Decor.Etal) {
             sw.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, bloc),
                     joueur.getX(), joueur.getY() + 0.3, joueur.getZ(), 40, 0.6, 0.4, 0.6, 0.1);
             sw.playSound(null, dessous, SoundEvents.BLOCK_GRASS_BREAK, SoundCategory.PLAYERS, 1f, 0.7f);

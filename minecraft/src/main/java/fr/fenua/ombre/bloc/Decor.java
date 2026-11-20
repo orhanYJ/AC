@@ -102,6 +102,12 @@ public final class Decor {
         }
     }
 
+    /** Familles de blocs : toutes leurs variantes (couleurs, bois…) partagent le même effet. */
+    public static class Etal extends Oriente { public Etal(Settings s) { super(s); } }
+    public static class Reverbere extends Oriente { public Reverbere(Settings s) { super(s); } }
+    public static class Gouttiere extends Oriente { public Gouttiere(Settings s) { super(s); } }
+    public static class Balcon extends Oriente { public Balcon(Settings s) { super(s); } }
+
     /** Cheminée : de la fumée sort des pots. */
     public static class Cheminee extends Simple {
         public Cheminee(Settings s) { super(s); }

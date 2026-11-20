@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:etal"
+  },
+  {
+   "item": "minecraft:carrot"
+  }
+ ],
+ "result": {
+  "id": "ombre:etal_legumes",
+  "count": 1
+ }
+}

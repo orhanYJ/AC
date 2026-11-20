@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:dark_oak_planks"
+  },
+  {
+   "item": "minecraft:dark_oak_planks"
+  },
+  {
+   "item": "minecraft:iron_nugget"
+  }
+ ],
+ "result": {
+  "id": "ombre:banc_dark_oak",
+  "count": 2
+ }
+}

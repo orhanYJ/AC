@@ -1,0 +1,11 @@
+{
+ "variants": {
+  "axis=z": {
+   "model": "ombre:block/poutre_birch"
+  },
+  "axis=x": {
+   "model": "ombre:block/poutre_birch",
+   "y": 90
+  }
+ }
+}

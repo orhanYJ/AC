@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:auvent"
+  },
+  {
+   "item": "minecraft:light_blue_dye"
+  }
+ ],
+ "result": {
+  "id": "ombre:auvent_light_blue",
+  "count": 1
+ }
+}

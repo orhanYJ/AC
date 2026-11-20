@@ -1,0 +1,10 @@
+{
+ "type": "minecraft:stonecutting",
+ "ingredient": {
+  "item": "ombre:ardoise"
+ },
+ "result": {
+  "id": "ombre:ardoise_escalier",
+  "count": 1
+ }
+}

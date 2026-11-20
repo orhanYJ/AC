@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "LLL"
+ ],
+ "key": {
+  "L": {
+   "item": "minecraft:stripped_mangrove_log"
+  }
+ },
+ "result": {
+  "id": "ombre:poutre_mangrove",
+  "count": 6
+ }
+}

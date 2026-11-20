@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:balcon"
+  },
+  {
+   "item": "minecraft:copper_ingot"
+  }
+ ],
+ "result": {
+  "id": "ombre:balcon_vert_de_gris",
+  "count": 1
+ }
+}

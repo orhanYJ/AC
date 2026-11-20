@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/enseigne_marchand_vin"
+  },
+  "facing=east": {
+   "model": "ombre:block/enseigne_marchand_vin",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/enseigne_marchand_vin",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/enseigne_marchand_vin",
+   "y": 270
+  }
+ }
+}

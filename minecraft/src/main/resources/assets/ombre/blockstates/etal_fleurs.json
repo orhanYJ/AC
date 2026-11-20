@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/etal_fleurs"
+  },
+  "facing=east": {
+   "model": "ombre:block/etal_fleurs",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/etal_fleurs",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/etal_fleurs",
+   "y": 270
+  }
+ }
+}

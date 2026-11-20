@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:cheminee"
+  },
+  {
+   "item": "minecraft:stone_bricks"
+  }
+ ],
+ "result": {
+  "id": "ombre:cheminee_pierre",
+  "count": 1
+ }
+}

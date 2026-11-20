@@ -476,8 +476,8 @@ public final class Parcours {
                     Direction.Axis axe;
                     double cy;
                     if (s.isOf(OmbreBlocs.PERCHE)) { axe = s.get(Properties.HORIZONTAL_AXIS); cy = by + 0.5; }
-                    else if (s.isOf(OmbreBlocs.ENSEIGNE)) { axe = s.get(Properties.HORIZONTAL_FACING).getAxis(); cy = by + 13 / 16.0; }
-                    else if (s.isOf(OmbreBlocs.REVERBERE)) { axe = s.get(Properties.HORIZONTAL_FACING).getAxis(); cy = by + 14 / 16.0; }
+                    else if (s.getBlock() instanceof fr.fenua.ombre.bloc.Mobilier.Enseigne) { axe = s.get(Properties.HORIZONTAL_FACING).getAxis(); cy = by + 13 / 16.0; }
+                    else if (s.getBlock() instanceof fr.fenua.ombre.bloc.Decor.Reverbere) { axe = s.get(Properties.HORIZONTAL_FACING).getAxis(); cy = by + 14 / 16.0; }
                     else continue;
                     if (Math.abs(mains - cy) > 0.9) continue;
                     // Le balancement se fait en travers de la barre
@@ -563,7 +563,7 @@ public final class Parcours {
         World w = p.getWorld();
         for (BlockPos b : BlockPos.iterate(BlockPos.ofFloored(p.getX() - 0.8, p.getY(), p.getZ() - 0.8),
                 BlockPos.ofFloored(p.getX() + 0.8, p.getY() + 1.8, p.getZ() + 0.8)))
-            if (w.getBlockState(b).isOf(OmbreBlocs.GOUTTIERE)) return true;
+            if (w.getBlockState(b).getBlock() instanceof fr.fenua.ombre.bloc.Decor.Gouttiere) return true;
         return false;
     }
 
@@ -572,7 +572,8 @@ public final class Parcours {
         for (BlockPos b : BlockPos.iterate(BlockPos.ofFloored(p.getX() - 1, p.getY() + 1, p.getZ() - 1),
                 BlockPos.ofFloored(p.getX() + 1, p.getY() + 3, p.getZ() + 1))) {
             BlockState s = w.getBlockState(b);
-            if (s.isOf(OmbreBlocs.PERCHE) || s.isOf(OmbreBlocs.ENSEIGNE) || s.isOf(OmbreBlocs.REVERBERE)) return true;
+            if (s.isOf(OmbreBlocs.PERCHE) || s.getBlock() instanceof fr.fenua.ombre.bloc.Mobilier.Enseigne
+                    || s.getBlock() instanceof fr.fenua.ombre.bloc.Decor.Reverbere) return true;
         }
         return false;
     }

@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/volets_brun"
+  },
+  "facing=east": {
+   "model": "ombre:block/volets_brun",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/volets_brun",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/volets_brun",
+   "y": 270
+  }
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:auvent"
+  },
+  {
+   "item": "minecraft:red_dye"
+  },
+  {
+   "item": "minecraft:white_dye"
+  }
+ ],
+ "result": {
+  "id": "ombre:auvent_raye_rouge_blanc",
+  "count": 1
+ }
+}

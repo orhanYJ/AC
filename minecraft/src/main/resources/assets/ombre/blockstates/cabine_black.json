@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/cabine_black"
+  },
+  "facing=east": {
+   "model": "ombre:block/cabine_black",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/cabine_black",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/cabine_black",
+   "y": 270
+  }
+ }
+}

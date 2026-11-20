@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/etal_etoffes"
+  },
+  "facing=east": {
+   "model": "ombre:block/etal_etoffes",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/etal_etoffes",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/etal_etoffes",
+   "y": 270
+  }
+ }
+}

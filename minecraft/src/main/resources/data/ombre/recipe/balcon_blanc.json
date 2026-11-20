@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:balcon"
+  },
+  {
+   "item": "minecraft:white_dye"
+  }
+ ],
+ "result": {
+  "id": "ombre:balcon_blanc",
+  "count": 1
+ }
+}

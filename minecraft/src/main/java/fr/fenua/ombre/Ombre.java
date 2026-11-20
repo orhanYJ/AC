@@ -24,6 +24,8 @@ public class Ombre implements ModInitializer {
     public void onInitialize() {
         OmbreItems.enregistrer();
         fr.fenua.ombre.bloc.OmbreBlocs.enregistrer();
+        fr.fenua.ombre.objet.Objets.enregistrer();
+        fr.fenua.ombre.entite.Entites.enregistrer();
 
         // Assassinats à la lame de nacre (clic gauche sur une créature)
         AttackEntityCallback.EVENT.register(Assassinat::auCoup);
@@ -52,6 +54,9 @@ public class Ombre implements ModInitializer {
                         .then(CommandManager.literal("parcours")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> CarteParcours.construire(ctx.getSource())))
+                        .then(CommandManager.literal("vitrine")
+                                .requires(src -> src.hasPermissionLevel(2))
+                                .executes(ctx -> Vitrine.construire(ctx.getSource())))
                         .then(CommandManager.literal("arene")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> Arene.construire(ctx.getSource())))));

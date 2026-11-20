@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/affiche_ballon"
+  },
+  "facing=east": {
+   "model": "ombre:block/affiche_ballon",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/affiche_ballon",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/affiche_ballon",
+   "y": 270
+  }
+ }
+}

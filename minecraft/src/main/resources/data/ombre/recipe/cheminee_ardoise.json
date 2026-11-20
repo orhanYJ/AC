@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "ombre:cheminee"
+  },
+  {
+   "item": "minecraft:deepslate_tiles"
+  }
+ ],
+ "result": {
+  "id": "ombre:cheminee_ardoise",
+  "count": 1
+ }
+}

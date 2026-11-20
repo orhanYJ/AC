@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "building",
+ "ingredients": [
+  {
+   "item": "minecraft:stick"
+  },
+  {
+   "item": "minecraft:yellow_wool"
+  }
+ ],
+ "result": {
+  "id": "ombre:fanion_jaune",
+  "count": 1
+ }
+}

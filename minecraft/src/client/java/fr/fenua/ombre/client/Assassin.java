@@ -76,9 +76,12 @@ public final class Assassin {
             BlockPos yeux = BlockPos.ofFloored(client.player.getEyePos()), pieds = client.player.getBlockPos();
             String cache = null;
             if (monde.getBlockState(yeux).isOf(OmbreBlocs.MEULE)) { ctx.fill(0, 0, w, h, 0x99B8902C); cache = "§6Caché dans la meule"; }
-            else if (monde.getBlockState(pieds).isOf(OmbreBlocs.CABINE)) { ctx.fill(0, 0, w, h, 0x88701818); cache = "§cCaché derrière le rideau"; }
+            else if (monde.getBlockState(pieds).getBlock() instanceof fr.fenua.ombre.bloc.Cachettes.Cabine) { ctx.fill(0, 0, w, h, 0x88701818); cache = "§cCaché derrière le rideau"; }
             else if (monde.getBlockState(pieds).isOf(OmbreBlocs.PUITS)) { ctx.fill(0, h * 2 / 3, w, h, 0x66204060); cache = "§bCaché dans le puits"; }
             else if (Discretion.dansCachette(client.player)) cache = "§aCaché";
+            else if (Discretion.dansLaFoule(client.player)) cache = "§aDans la foule";
+            if (client.player.hasStatusEffect(fr.fenua.ombre.objet.Effets.DEGUISE))
+                ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal("§9Déguisé en gardien"), w / 2, h - 72, 0xFFFFFF);
             if (cache != null) ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal(cache), w / 2, h - 60, 0xFFFFFF);
         }
         if (cible == null || type == null || client.options.hudHidden) return;

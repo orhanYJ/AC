@@ -1,0 +1,19 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "ombre:block/banc_cherry"
+  },
+  "facing=east": {
+   "model": "ombre:block/banc_cherry",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "ombre:block/banc_cherry",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "ombre:block/banc_cherry",
+   "y": 270
+  }
+ }
+}
