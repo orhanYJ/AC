@@ -111,13 +111,15 @@ Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 
 Dès qu'un garde peut être tué, il est **entouré de rouge** et l'invite **« [R] … »** s'affiche. Appuie sur **R** : la caméra passe en vue extérieure, et le coup se joue.
 
-| Assassinat | Quand | Le geste |
+Chaque famille d'assassinat a **plusieurs scènes**, tirées au hasard (jamais deux fois de suite la même). Le nom du geste s'affiche après le coup. Pour revoir une scène précise : `/ombre scene <numéro>` (le prochain assassinat de la bonne famille la jouera).
+
+| Famille | Quand | Les scènes (numéro pour `/ombre scene`) |
 |---|---|---|
-| **Dans le dos** | Il ne t'a pas repéré, devant toi, à 3 blocs | Une main le saisit par l'épaule et le cambre, la lame frappe ; il s'effondre face contre terre et tu poses un genou au sol |
-| **Projection** | Au sol, une fois sur deux (et toujours en enchaînement), s'il y a la place derrière toi | Tu l'empoignes, le soulèves par-dessus ton épaule et le plaques au sol derrière toi, puis tu achèves |
-| **Aérien** | Il est sous toi (toit, rebord, chute), même s'il t'a vu | Tu bondis en arc, retombes sur lui et le plaques au sol |
-| **Depuis la cachette** | Tu es caché, il passe tout près | Tu le saisis, l'attires contre toi et l'entraînes au fond de la cachette, où il disparaît |
-| **Depuis le rebord** | Tu es suspendu, il marche au bord au-dessus | Tu l'attrapes par la cheville et le fais basculer par-dessus le bord ; il tombe dans le vide |
+| **Au sol** | Il ne t'a pas repéré, devant toi, à 3 blocs | **1** la lame dans le dos (saisi, cambré, face contre terre) · **5** la projection (soulevé par-dessus l'épaule et plaqué derrière toi) · **6** la main sur la bouche (tiré en arrière, couché sur le dos) · **7** le coup au jarret (à genoux, puis la lame) · **8** le face-à-face (retourné, frappé de face, repoussé) |
+| **En course** (nouveau) | Tu cours (**Ctrl**), il est à 1,2 – 4,6 blocs | **15** le plaquage (vous roulez à terre, il est dessous) · **16** la lame au passage (tu frappes sans t'arrêter, il tournoie et tombe) · **17** le bond (tu lui sautes sur le dos) |
+| **Aérien** | Il est sous toi (toit, poutre, chute), même s'il t'a vu | **2** le plongeon (sur la poitrine) · **9** sur les épaules (tu atterris dessus et le couches) · **10** le coup de foudre (tu tombes derrière lui, la lame en avant) |
+| **Depuis la cachette** | Tu es caché, il passe tout près | **3** attiré dans la cachette · **11** la lame dans les herbes (il se retourne, tu sors frapper et tu le ramènes) · **12** tiré par les pieds (il tombe, tu le traînes dedans) |
+| **Depuis le rebord** | Tu es suspendu, il marche au bord au-dessus | **4** basculé du rebord (par la cheville) · **13** la lame d'en bas (il s'effondre sur le toit) · **14** par-dessus la tête (lancé dans le vide) |
 | **Double** | Une lame dans chaque main (F) | Un 2ᵉ garde distrait tombe aussi |
 
 ### Discrétion
@@ -173,6 +175,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 |---|---|
 | `/ombre initiation` | **Commence ici** : la Ruelle d'Or, 30 leçons pas à pas (`/ombre initiation <n>` pour reprendre à l'étape n) |
 | `/ombre prague` | La Vieille-Ville de 1600, avec sa mission |
+| `/ombre scene <1-17>` | Impose la scène du prochain assassinat (voir le tableau des assassinats) |
 | `/ombre kit` | Tout l'équipement de l'assassin |
 | `/ombre vitrine` | Les 189 blocs du mod exposés en rangées |
 | `/ombre parcours` | Grande carte d'entraînement au parkour, sans gardes |

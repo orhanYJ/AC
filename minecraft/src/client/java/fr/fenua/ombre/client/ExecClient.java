@@ -66,7 +66,7 @@ public final class ExecClient {
 
     /** Où dessiner la victime ; après la chute libre du rebord, là où elle est vraiment. */
     public static Vec3d posVictime(double k, Vec3d reelle) {
-        if (scene == Choregraphie.REBORD && k >= Choregraphie.CHUTE_LIBRE) return reelle;
+        if (Choregraphie.CHUTE[scene] >= 0 && k >= Choregraphie.CHUTE[scene]) return reelle;
         double[] q = Choregraphie.victime(scene, Math.min(1, k), pf, py);
         return monde(q[0], q[1], q[2]);
     }
@@ -79,6 +79,25 @@ public final class ExecClient {
     private static void zero(ModelPart p) { p.pitch = 0; p.yaw = 0; p.roll = 0; }
     private static float l(double a, double b, double k) { return (float) Choregraphie.lisse(a, b, k); }
     private static float mix(float a, float b, float u) { return a + (b - a) * u; }
+
+    /** Couché : les bras s'ouvrent sur le sol. */
+    private static void bras(BipedEntityModel<?> m, float u) {
+        if (u <= 0) return;
+        m.rightArm.roll = mix(m.rightArm.roll, 1.25f, u); m.leftArm.roll = mix(m.leftArm.roll, -1.25f, u);
+        m.rightLeg.roll = mix(m.rightLeg.roll, 0.12f, u); m.leftLeg.roll = mix(m.leftLeg.roll, -0.12f, u);
+    }
+
+    /** À genoux : les jambes repliées en arrière (le corps est abaissé par la chorégraphie). */
+    private static void genoux(BipedEntityModel<?> m, float u) {
+        m.rightLeg.pitch = 0.9f * u; m.leftLeg.pitch = 0.95f * u;
+    }
+
+    /** Les foulées de la course d'approche. */
+    private static void course(BipedEntityModel<?> m, double k) {
+        float w = (float) Math.sin(k * 55) * 0.9f;
+        m.rightLeg.pitch = w; m.leftLeg.pitch = -w;
+        m.rightArm.pitch = -w * 0.7f; m.leftArm.pitch = w * 0.7f;
+    }
 
     /** Les bras, les jambes et la tête de la victime. */
     public static void poseVictime(BipedEntityModel<?> m) {
@@ -121,6 +140,78 @@ public final class ExecClient {
                 m.rightArm.pitch = (-2.8f + agite) * chute; m.leftArm.pitch = (-2.8f - agite) * chute;
                 m.rightLeg.pitch = agite * chute; m.leftLeg.pitch = -agite * chute;
             }
+            case Choregraphie.BAILLON -> {
+                float saisi = l(0.22, 0.34, k), couche = l(0.62, 0.9, k);
+                m.rightArm.pitch = mix(-1.9f * saisi, 0, couche); m.leftArm.pitch = mix(-1.7f * saisi, 0, couche);
+                m.rightArm.yaw = -0.5f * saisi * (1 - couche); m.leftArm.yaw = 0.5f * saisi * (1 - couche);
+                bras(m, couche);
+                m.head.pitch = -0.5f * saisi * (1 - mort);
+                m.rightLeg.pitch = agite * 0.5f * saisi * (1 - mort); m.leftLeg.pitch = -agite * 0.5f * saisi * (1 - mort);
+            }
+            case Choregraphie.JARRET -> {
+                float g = l(0.3, 0.4, k), h = l(0.64, 0.86, k);
+                genoux(m, g * (1 - h));
+                m.rightArm.pitch = -0.8f * g * (1 - h); m.leftArm.pitch = -0.6f * g * (1 - h);
+                m.head.pitch = mix(-0.3f * g, 0.5f, mort) * (1 - h);
+                bras(m, h);
+            }
+            case Choregraphie.FACE -> {
+                float r = l(0.22, 0.4, k), h = l(0.6, 0.85, k);
+                m.rightArm.pitch = mix(-0.7f * r, -1.3f, mort) * (1 - h); m.leftArm.pitch = mix(-0.6f * r, -1.2f, mort) * (1 - h);
+                m.rightArm.yaw = -0.4f * mort * (1 - h); m.leftArm.yaw = 0.4f * mort * (1 - h);
+                m.head.pitch = mix(-0.2f * r, 0.6f, mort);
+                bras(m, h);
+            }
+            case Choregraphie.EPAULES, Choregraphie.BOND -> {
+                double debut = scene == Choregraphie.EPAULES ? 0.42 : 0.4;
+                float leve = l(debut - 0.16, debut - 0.04, k) * (1 - l(debut, debut + 0.08, k)), sol = l(debut, debut + 0.25, k);
+                m.head.pitch = -0.8f * leve;
+                m.rightArm.pitch = (-2.4f + agite) * leve + (-2.6f * sol) * (1 - mort); m.leftArm.pitch = (-2.2f - agite) * leve + (-2.6f * sol) * (1 - mort);
+                bras(m, mort);
+            }
+            case Choregraphie.FOUDRE -> {
+                float g = l(0.45, 0.58, k), h = l(0.66, 0.9, k);
+                genoux(m, g * (1 - h));
+                m.head.pitch = 0.5f * g * (1 - h);
+                m.rightArm.pitch = -0.4f * g * (1 - h); m.leftArm.pitch = -0.3f * g * (1 - h);
+                bras(m, h);
+            }
+            case Choregraphie.HERBES -> {
+                float r = l(0.2, 0.34, k), g = l(0.52, 0.62, k), h = l(0.62, 0.88, k);
+                genoux(m, g * (1 - h));
+                m.rightArm.pitch = mix(-1.0f * r, -2.6f, h) * (1 - l(0.88, 1, k)); m.leftArm.pitch = mix(-0.8f * r, -2.6f, h) * (1 - l(0.88, 1, k));
+                m.head.pitch = mix(-0.3f * r, 0.5f, mort);
+            }
+            case Choregraphie.CROC -> {
+                float t = l(0.22, 0.38, k), d = l(0.4, 0.72, k);
+                m.rightArm.pitch = mix(-2.6f * t, -3.0f + agite * (1 - mort), d); m.leftArm.pitch = mix(-2.6f * t, -3.0f - agite * (1 - mort), d);
+                m.head.pitch = -0.5f * t * (1 - mort);
+            }
+            case Choregraphie.REBORD_LAME -> {
+                float g = l(0.42, 0.56, k), h = l(0.56, 0.85, k);
+                genoux(m, g * (1 - h));
+                m.head.pitch = 0.6f * l(0.2, 0.32, k) * (1 - h);
+                m.rightArm.pitch = -1.2f * mort * (1 - h); m.leftArm.pitch = -1.0f * mort * (1 - h);
+                bras(m, h);
+            }
+            case Choregraphie.REBORD_VOL -> {
+                float vol = l(0.28, 0.36, k);
+                m.head.pitch = 0.6f * l(0.16, 0.28, k) * (1 - vol);
+                m.rightArm.pitch = (-2.8f + agite) * vol; m.leftArm.pitch = (-2.8f - agite) * vol;
+                m.rightLeg.pitch = agite * vol; m.leftLeg.pitch = -agite * vol;
+            }
+            case Choregraphie.TACLE -> {
+                float choc = l(0.25, 0.4, k);
+                m.rightArm.pitch = -2.8f * choc * (1 - mort); m.leftArm.pitch = -2.8f * choc * (1 - mort);
+                m.head.pitch = -0.6f * choc * (1 - mort);
+                bras(m, mort);
+            }
+            case Choregraphie.PASSAGE -> {
+                float r = l(0.4, 0.6, k), h = l(0.55, 0.85, k);
+                m.rightArm.roll = 1.1f * r * (1 - h); m.leftArm.roll = -1.1f * r * (1 - h);
+                m.head.pitch = -0.5f * r * (1 - h);
+                bras(m, h);
+            }
             default -> {}
         }
     }
@@ -161,6 +252,79 @@ public final class ExecClient {
                 m.rightArm.pitch = mix(-3.1f * monte, -1.1f, tire); m.rightArm.roll = 0.3f;
                 float b = (float) Math.sin(k * 20) * 0.15f;
                 m.rightLeg.pitch = b; m.leftLeg.pitch = -b;
+            }
+            case Choregraphie.BAILLON -> {
+                float main = l(0.16, 0.28, k), couche = l(0.62, 0.9, k);
+                m.leftArm.pitch = mix(-1.9f * main, -1.0f, couche); m.leftArm.yaw = 0.6f * main * (1 - couche);
+                m.rightArm.pitch = mix(-0.5f * main, -1.3f, coup) * (1 - couche) - 0.8f * couche; m.rightArm.yaw = 0.5f * coup * (1 - couche);
+                m.rightLeg.pitch = -1.5f * couche; m.leftLeg.pitch = -0.15f * couche;
+                if (k < 0.2) course(m, k);
+            }
+            case Choregraphie.JARRET -> {
+                float coupPied = l(0.22, 0.28, k) * (1 - l(0.32, 0.4, k)), leve = l(0.4, 0.5, k);
+                m.rightLeg.pitch = -1.3f * coupPied;
+                m.leftArm.pitch = -1.6f * l(0.3, 0.4, k);
+                m.rightArm.pitch = mix(-3.0f * leve, -0.9f, coup);
+                if (k < 0.22) course(m, k);
+            }
+            case Choregraphie.FACE -> {
+                float prise = l(0.16, 0.26, k), pousse = l(0.56, 0.64, k) * (1 - l(0.75, 0.9, k));
+                m.leftArm.pitch = mix(-1.5f * prise, -1.6f, pousse);
+                m.rightArm.pitch = mix(-0.6f * prise, -1.5f, coup) * (1 - pousse) - 1.6f * pousse;
+                if (k < 0.2) course(m, k);
+            }
+            case Choregraphie.EPAULES, Choregraphie.BOND -> {
+                double pose = scene == Choregraphie.EPAULES ? 0.42 : 0.45;
+                float vol = 1 - l(pose - 0.04, pose + 0.04, k), genou = l(pose + 0.03, pose + 0.25, k);
+                m.rightArm.pitch = mix(-2.8f, mix(-2.9f, -0.6f, coup), genou); m.leftArm.pitch = mix(-2.5f, -1.0f, genou);
+                m.rightLeg.pitch = -0.9f * vol - 1.4f * genou; m.leftLeg.pitch = -0.5f * vol - 0.2f * genou;
+                if (scene == Choregraphie.BOND && k < 0.12) course(m, k);
+            }
+            case Choregraphie.FOUDRE -> {
+                float vol = 1 - l(0.4, 0.46, k), frappe = l(0.44, 0.52, k);
+                m.rightArm.pitch = mix(-3.0f, -0.8f, frappe); m.leftArm.pitch = mix(-3.0f, -0.9f, frappe);
+                m.rightArm.yaw = 0.3f * frappe; m.leftArm.yaw = -0.3f * frappe;
+                m.rightLeg.pitch = -0.8f * vol - 1.0f * (1 - vol); m.leftLeg.pitch = -0.4f * vol - 0.4f * (1 - vol);
+            }
+            case Choregraphie.HERBES -> {
+                float sort = l(0.1, 0.3, k) * (1 - l(0.6, 0.85, k)), prise = l(0.3, 0.42, k);
+                m.leftArm.pitch = -1.4f * prise * (1 - l(0.85, 1, k));
+                m.rightArm.pitch = mix(-0.8f * sort, -1.5f, coup) * (1 - l(0.85, 1, k));
+                m.rightLeg.pitch = -0.9f * (1 - sort) - 0.5f * sort; m.leftLeg.pitch = -0.5f * (1 - sort) + 0.3f * sort;
+            }
+            case Choregraphie.CROC -> {
+                float tend = l(0.12, 0.22, k), tire = l(0.4, 0.72, k), leve = l(0.72, 0.78, k);
+                float bras = mix(-1.4f * tend, -0.6f, tire);
+                m.leftArm.pitch = bras; m.rightArm.pitch = mix(bras, mix(-2.8f, -0.9f, coup), leve);
+                m.rightLeg.pitch = -0.9f; m.leftLeg.pitch = -0.5f;
+            }
+            case Choregraphie.REBORD_LAME -> {
+                float monte = l(0.2, 0.3, k), frappe = l(0.3, 0.42, k);
+                m.leftArm.pitch = -3.0f; m.leftArm.roll = -0.2f;
+                m.rightArm.pitch = mix(-2.2f * monte, -3.1f, frappe) + 0.6f * l(0.5, 0.7, k); m.rightArm.roll = 0.15f;
+                float b = (float) Math.sin(k * 20) * 0.12f;
+                m.rightLeg.pitch = b; m.leftLeg.pitch = -b;
+            }
+            case Choregraphie.REBORD_VOL -> {
+                float prise = l(0.16, 0.28, k), jet = l(0.3, 0.58, k);
+                m.leftArm.pitch = -3.0f; m.leftArm.roll = -0.2f;
+                m.rightArm.pitch = mix(-3.1f * prise, -0.4f, jet); m.rightArm.roll = 0.3f * (1 - jet);
+                float b = (float) Math.sin(k * 20) * 0.15f;
+                m.rightLeg.pitch = b + 0.4f * jet; m.leftLeg.pitch = -b + 0.2f * jet;
+            }
+            case Choregraphie.TACLE -> {
+                float plonge = l(0.22, 0.3, k) * (1 - l(0.5, 0.58, k)), genou = l(0.52, 0.62, k);
+                if (k < 0.25) course(m, k);
+                else {
+                    m.rightArm.pitch = mix(-2.6f * plonge, mix(-2.9f, -0.7f, coup), genou); m.leftArm.pitch = mix(-2.6f * plonge, -1.0f, genou);
+                    m.rightLeg.pitch = 0.5f * plonge - 1.5f * genou; m.leftLeg.pitch = 0.3f * plonge - 0.15f * genou;
+                }
+            }
+            case Choregraphie.PASSAGE -> {
+                course(m, k);
+                float lame = l(0.34, 0.46, k);
+                m.rightArm.pitch = -1.4f; m.rightArm.yaw = mix(0.9f, -0.9f, lame); m.rightArm.roll = 0;
+                m.leftArm.pitch = -0.4f; m.leftArm.yaw = -0.3f * lame;
             }
             default -> {}
         }

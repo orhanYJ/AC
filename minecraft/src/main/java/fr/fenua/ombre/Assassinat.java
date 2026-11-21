@@ -62,6 +62,8 @@ public final class Assassinat {
     public static final double AIR_H = 3.2, AIR_MIN = 1.4, AIR_MAX = 9;   // aérien : le garde est en dessous
     public static final double CACHE_H = 3.6;                         // depuis une cachette : tout autour
     public static final String CACHETTE = "Assassinat depuis la cachette";
+    public static final double COURSE_H = 4.6;                        // en course : on fond sur lui de plus loin
+    public static final String COURSE = "Assassinat en course";
     public static final double REBORD_H = 2.8, REBORD_MIN = 0.8, REBORD_MAX = 3.2; // depuis un rebord : il est au-dessus
 
     /** Quel assassinat est possible sur cette créature, ou null. Le même calcul sert des deux côtés. */
@@ -74,6 +76,7 @@ public final class Assassinat {
         if (repere) return null;
         if (-dy >= REBORD_MIN && -dy <= REBORD_MAX && h <= REBORD_H) return "Assassinat depuis le rebord";
         if (cachette && Math.abs(dy) <= SOL_V && h <= CACHE_H) return CACHETTE;
+        if (joueur.isSprinting() && Math.abs(dy) <= SOL_V && h <= COURSE_H && h >= 1.2) return COURSE;
         if (Math.abs(dy) <= SOL_V && h <= SOL_H) return "Assassinat";
         return null;
     }
@@ -113,17 +116,14 @@ public final class Assassinat {
         if (nom == null || !joueur.canSee(v)) return;
         if (chaine && nom.equals("Assassinat")) nom = ENCHAINEMENT;
 
-        // L'assassinat est mis en scène (voir Choregraphie) : chaque scène a ses gestes, pour l'Ombre comme pour la victime
-        int type = nom.equals("Assassinat aérien") ? ExecutionPayload.AERIEN : nom.equals(CACHETTE) ? ExecutionPayload.CACHETTE
-                : nom.startsWith("Assassinat depuis le rebord") ? ExecutionPayload.REBORD : ExecutionPayload.SOL;
+        // L'assassinat est mis en scène (voir Choregraphie) : chaque famille a plusieurs scènes, tirées au hasard
+        int famille = nom.equals("Assassinat aérien") ? Choregraphie.F_AERIEN : nom.equals(CACHETTE) ? Choregraphie.F_CACHETTE
+                : nom.startsWith("Assassinat depuis le rebord") ? Choregraphie.F_REBORD
+                : nom.equals(COURSE) ? Choregraphie.F_COURSE : Choregraphie.F_SOL;
         for (Execution x : EN_COURS) if (x.victime == v || x.joueur == joueur) return;   // déjà en cours
-        Execution x = new Execution(joueur, v, type, nom);
-        // Au sol, une fois sur deux (et toujours pour un enchaînement) : la projection par-dessus l'épaule,
-        // s'il y a la place de le jeter derrière soi
-        if (type == ExecutionPayload.SOL && (nom.equals(ENCHAINEMENT) || sw.random.nextBoolean())) {
-            net.minecraft.util.math.Vec3d sol = x.monde(x.pf - 1.9, 0, 0);
-            if (sw.isSpaceEmpty(v, v.getBoundingBox().offset(sol.subtract(v.getPos())))) { x.scene = ExecutionPayload.PROJECTION; x.nom = nom.equals(ENCHAINEMENT) ? nom : "Projection"; }
-        }
+        Execution x = new Execution(joueur, v, Choregraphie.SCENES[famille][0], nom);
+        x.scene = choisirScene(sw, x, famille, nom.equals(ENCHAINEMENT));
+        DERNIERE.put(joueur.getUuid(), x.scene);
         joueur.fallDistance = 0;
         if (v instanceof MobEntity m) { m.setTarget(null); m.getNavigation().stop(); }
         v.setNoGravity(true);
@@ -132,6 +132,61 @@ public final class Assassinat {
             net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(joueur,
                     new ExecutionPayload(x.scene, v.getId(), v.getX(), v.getY(), v.getZ(), x.lacet));
         sw.playSound(null, joueur.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 0.4f, 1.4f);
+    }
+
+    /** La scène imposée au prochain assassinat (commande /ombre scene). */
+    private static final java.util.Map<java.util.UUID, Integer> IMPOSEE = new java.util.HashMap<>();
+
+    /** /ombre scene n : le prochain assassinat jouera cette scène, s'il est de la bonne famille. */
+    public static int imposerScene(net.minecraft.server.command.ServerCommandSource src, int scene)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        IMPOSEE.put(src.getPlayerOrThrow().getUuid(), scene);
+        String[] familles = {"au sol", "aérien", "depuis une cachette", "depuis un rebord", "en course"};
+        src.sendFeedback(() -> Text.literal("Prochain assassinat " + familles[Choregraphie.FAMILLE[scene]] + " : §6"
+                + Choregraphie.NOM[scene]), false);
+        return 1;
+    }
+
+    /** La dernière scène jouée par chaque joueur : on ne rejoue pas la même deux fois de suite. */
+    private static final java.util.Map<java.util.UUID, Integer> DERNIERE = new java.util.HashMap<>();
+
+    /**
+     * Tire une scène de la famille, au hasard, sauf la dernière jouée, et seulement si la place le permet
+     * (on ne projette pas un garde dans un mur). Un enchaînement préfère la projection.
+     */
+    private static int choisirScene(ServerWorld sw, Execution x, int famille, boolean enchainement) {
+        Integer voulue = IMPOSEE.remove(x.joueur.getUuid());
+        if (voulue != null) {
+            int fv = Choregraphie.FAMILLE[voulue];
+            boolean auSol = (fv == Choregraphie.F_SOL || fv == Choregraphie.F_COURSE) && (famille == Choregraphie.F_SOL || famille == Choregraphie.F_COURSE);
+            if (fv == famille || auSol) return voulue;
+        }
+        int[] scenes = Choregraphie.SCENES[famille];
+        int derniere = DERNIERE.getOrDefault(x.joueur.getUuid(), -1);
+        if (enchainement && derniere != Choregraphie.PROJECTION && place(sw, x, Choregraphie.PROJECTION)) return Choregraphie.PROJECTION;
+        java.util.List<Integer> possibles = new java.util.ArrayList<>();
+        for (int s : scenes) if (s != derniere && place(sw, x, s)) possibles.add(s);
+        if (possibles.isEmpty()) return scenes[0];                       // la première scène va partout
+        return possibles.get(sw.random.nextInt(possibles.size()));
+    }
+
+    /** Y a-t-il la place de jouer cette scène ici ? */
+    private static boolean place(ServerWorld sw, Execution x, int scene) {
+        LivingEntity v = x.victime;
+        return switch (scene) {
+            case Choregraphie.PROJECTION -> libre(sw, v, x.monde(x.pf - 1.9, 0, 0)) && libre(sw, v, x.monde(x.pf - 1.0, 0, 1.2));
+            case Choregraphie.TACLE -> libre(sw, v, x.monde(1.4, 0, 0)) && libre(sw, v, x.monde(2.6, 0, 0));
+            case Choregraphie.BOND, Choregraphie.EPAULES -> libre(sw, v, x.monde(0.9, 0, 0)) && libre(sw, v, x.monde(0, 0, 1.6));
+            case Choregraphie.PASSAGE -> libre(sw, x.joueur, x.monde(2.6, 0.5, 0)) && libre(sw, x.joueur, x.monde(1.3, 0.8, 0));
+            case Choregraphie.BAILLON -> libre(sw, x.joueur, x.monde(-0.9, 0.8, 0));
+            case Choregraphie.FACE, Choregraphie.FOUDRE -> libre(sw, v, x.monde(0.6, 0, 0));
+            case Choregraphie.REBORD_LAME -> libre(sw, v, x.monde(1.4, 0, 0.1));   // la place de tomber sur le toit
+            default -> true;
+        };
+    }
+
+    private static boolean libre(ServerWorld sw, Entity e, net.minecraft.util.math.Vec3d ou) {
+        return sw.isSpaceEmpty(e, e.getBoundingBox().offset(ou.subtract(e.getPos())).contract(0.05));
     }
 
     /** Un assassinat en train de se jouer, dans le repère de la chorégraphie. */
@@ -176,7 +231,7 @@ public final class Assassinat {
             double k = Math.min(1, x.t / (double) duree);
             if (v instanceof MobEntity m && v.isAlive()) { m.setTarget(null); m.getNavigation().stop(); }
             ServerWorld sw = (ServerWorld) v.getWorld();
-            boolean libre = x.scene == Choregraphie.REBORD && k >= Choregraphie.CHUTE_LIBRE;
+            boolean libre = Choregraphie.CHUTE[x.scene] >= 0 && k >= Choregraphie.CHUTE[x.scene];
             if (!libre) {
                 double[] q = Choregraphie.victime(x.scene, k, x.pf, x.py);
                 net.minecraft.util.math.Vec3d p = x.monde(q[0], q[1], q[2]);
@@ -190,13 +245,14 @@ public final class Assassinat {
                 // Il tombe : on le lâche, avec l'élan vers l'extérieur
                 x.lachee = true;
                 v.setNoGravity(false);
-                v.setVelocity(-x.fx * 0.22, -0.2, -x.fz * 0.22);
+                double elan = x.scene == Choregraphie.REBORD_VOL ? 0.32 : 0.22;
+                v.setVelocity(-x.fx * elan, -0.2, -x.fz * elan);
                 v.velocityModified = true;
             }
             // Bruits : le choc de la projection, la saisie de la cachette
-            if (x.scene == Choregraphie.PROJECTION && x.t == (int) (0.56 * duree))
+            if (Choregraphie.CHOC[x.scene] >= 0 && x.t == (int) (Choregraphie.CHOC[x.scene] * duree))
                 sw.playSound(null, v.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, SoundCategory.PLAYERS, 0.9f, 0.6f);
-            if (x.scene == Choregraphie.CACHETTE && x.t == (int) (0.3 * duree))
+            if (Choregraphie.FAMILLE[x.scene] == Choregraphie.F_CACHETTE && x.t == (int) (0.3 * duree))
                 sw.playSound(null, v.getBlockPos(), SoundEvents.BLOCK_GRASS_BREAK, SoundCategory.PLAYERS, 0.8f, 0.8f);
             if (!x.tue && k >= Choregraphie.COUP[x.scene]) {
                 x.tue = true;
@@ -213,7 +269,7 @@ public final class Assassinat {
                         break;
                     }
                 }
-                x.joueur.sendMessage(Text.literal("§7✦ " + nom), true);
+                x.joueur.sendMessage(Text.literal("§7✦ " + nom + " §8— §7" + Choregraphie.NOM[x.scene]), true);
             }
             if (x.t >= duree) {
                 it.remove();

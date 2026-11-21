@@ -81,6 +81,11 @@ public class Ombre implements ModInitializer {
                         .then(CommandManager.literal("prague")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> CartePrague.construire(ctx.getSource())))
+                        .then(CommandManager.literal("scene")
+                                .requires(src -> src.hasPermissionLevel(2))
+                                .then(CommandManager.argument("numero", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, Choregraphie.NB))
+                                        .executes(ctx -> Assassinat.imposerScene(ctx.getSource(),
+                                                com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "numero") - 1))))
                         .then(CommandManager.literal("kit")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> { Kit.donner(ctx.getSource().getPlayerOrThrow());

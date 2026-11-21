@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
  * chorégraphie. « yaw » est l'axe du joueur vers la victime (voir Choregraphie).
  */
 public record ExecutionPayload(int type, int victime, double x, double y, double z, float yaw) implements CustomPayload {
-    /** Les scènes (voir Choregraphie) : dans le dos, aérien, cachette, rebord, projection. */
+    /** Quelques scènes (toutes sont dans Choregraphie). */
     public static final int SOL = Choregraphie.DOS, AERIEN = Choregraphie.AERIEN, CACHETTE = Choregraphie.CACHETTE,
             REBORD = Choregraphie.REBORD, PROJECTION = Choregraphie.PROJECTION;
     /** Durée du geste, en ticks (20 par seconde). */

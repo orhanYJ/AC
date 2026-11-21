@@ -73,18 +73,23 @@ public final class Cinema {
         cible = victime;
         double dx = victime.x - p.getX(), dz = victime.z - p.getZ();
         float axe = dx * dx + dz * dz > 0.01 ? (float) Math.toDegrees(Math.atan2(-dx, dz)) : p.getYaw();
-        centre = p.getPos().add(victime).multiply(0.5).add(0, 1.1, 0);
+        // Le milieu de la scène, à hauteur d'homme au-dessus du plus bas des deux (un assassinat aérien finit au sol)
+        Vec3d milieu = p.getPos().add(victime).multiply(0.5);
+        centre = new Vec3d(milieu.x, Math.min(p.getY(), victime.y) + 1.1, milieu.z);
         // On choisit le côté d'où l'on voit le mieux toute la scène, jusqu'aux pieds (la victime finit au sol) :
         // de profil à droite ou à gauche d'abord, puis de trois quarts.
+        // On veut voir le joueur et la victime, des pieds à la tête
+        Vec3d[] vus = {centre, centre.add(0, -0.9, 0), p.getPos().add(0, 0.3, 0), p.getPos().add(0, 1.5, 0),
+                victime.add(0, 0.3, 0), victime.add(0, 1.5, 0)};
         float mieux = axe + 90f; double score = -1;
         for (float essai : new float[]{90f, -130f, 140f, -90f, 50f, -50f}) {
             double s = 0;
             for (double u = 0; u <= 1.01; u += 0.5) {
                 double a = Math.toRadians(axe + essai + 40 * u);
                 Vec3d oeil = centre.add(Math.sin(a) * 4.6, 0.9 + 0.6 * u, -Math.cos(a) * 4.6);
-                s += libre(p, centre, oeil) + libre(p, centre.add(0, -0.9, 0), oeil);
+                for (Vec3d cible : vus) s += libre(p, cible, oeil);
             }
-            if (s > score + 0.5) { score = s; mieux = axe + essai; }
+            if (s > score + 1.0) { score = s; mieux = axe + essai; }
         }
         yaw0 = mieux;
     }

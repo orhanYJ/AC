@@ -98,10 +98,10 @@ public final class Parcours {
             case TYRO -> Pose.TYRO;
             case LIFT -> Pose.LIFT;
             case PERCHE -> Pose.PERCHE;
-            case EXEC -> switch (execType) {
-                case fr.fenua.ombre.ExecutionPayload.AERIEN -> Pose.EXEC_AERIEN;
-                case fr.fenua.ombre.ExecutionPayload.CACHETTE -> Pose.EXEC_CACHETTE;
-                case fr.fenua.ombre.ExecutionPayload.REBORD -> Pose.EXEC_REBORD;
+            case EXEC -> switch (fr.fenua.ombre.Choregraphie.FAMILLE[execType]) {
+                case fr.fenua.ombre.Choregraphie.F_AERIEN -> Pose.EXEC_AERIEN;
+                case fr.fenua.ombre.Choregraphie.F_CACHETTE -> Pose.EXEC_CACHETTE;
+                case fr.fenua.ombre.Choregraphie.F_REBORD -> Pose.EXEC_REBORD;
                 default -> Pose.EXEC_SOL;
             };
             case GRAPPIN -> Pose.GRAPPIN;
@@ -988,17 +988,16 @@ public final class Parcours {
     private static void execution(MinecraftClient client, ClientPlayerEntity p) {
         // Le joueur suit la chorégraphie : sa place, et son orientation (la projection le fait pivoter)
         double k = ExecClient.k(0) + 1.0 / execDuree;
-        if (execType == fr.fenua.ombre.ExecutionPayload.REBORD) p.setVelocity(0, 0, 0);
+        if (fr.fenua.ombre.Choregraphie.suspendu(execType)) p.setVelocity(0, 0, 0);
         else {
             Vec3d but = ExecClient.posJoueur(k), v = but.subtract(p.getPos());
-            boolean sol = execType != fr.fenua.ombre.ExecutionPayload.AERIEN || k > 0.6;
-            p.setVelocity(v.x * 0.7, sol && execType != fr.fenua.ombre.ExecutionPayload.CACHETTE ? Math.min(0, v.y) * 0.7 + (v.y > 0 ? v.y : 0) * 0.7 : v.y * 0.7, v.z * 0.7);
+            p.setVelocity(v.x * 0.7, v.y * 0.7, v.z * 0.7);
         }
         p.setBodyYaw(ExecClient.lacet() + fr.fenua.ombre.Choregraphie.lacetJoueur(execType, Math.min(1, k)));
         p.setHeadYaw(p.getBodyYaw());
         if (duree % 5 == 0) rattrape();
         if (duree >= execDuree + 4) {
-            changer(etatAvantExec == Etat.REBORD && execType == fr.fenua.ombre.ExecutionPayload.REBORD ? Etat.REBORD : Etat.LIBRE);
+            changer(etatAvantExec == Etat.REBORD && fr.fenua.ombre.Choregraphie.suspendu(execType) ? Etat.REBORD : Etat.LIBRE);
         }
     }
 
