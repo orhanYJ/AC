@@ -27,6 +27,7 @@ public class RoueOutils extends Screen {
             new Outil(OmbreItems.COUTEAUX, "Couteaux de lancer", "Tuer à distance, sans bruit"),
             new Outil(Objets.FLECHETTE_SOPORIFIQUE, "Fléchette soporifique", "Le garde s'endort 30 s"),
             new Outil(Objets.FLECHETTE_EMPOISONNEE, "Fléchette empoisonnée", "Il s'effondre 4 s plus tard"),
+            new Outil(Objets.FLECHETTE_FOLIE, "Fléchette de folie", "Le garde attaque ses camarades 15 s"),
             new Outil(OmbreItems.BOMBE_FUMEE, "Bombe de fumée", "Aveugle les gardes, efface les soupçons"),
             new Outil(Objets.PETARD, "Pétard", "Bruit et fumée : la foule s'enfuit"),
             new Outil(Objets.THALERS, "Thalers", "Jetés au sol : la foule accourt"),

@@ -25,10 +25,11 @@ public final class Ctx {
     public final ServerWorld w;
     final BlockPos o;        // le coin de la cour
     final int cour;
+    final Cours cours;
 
-    Ctx(ServerPlayerEntity p, ServerWorld w, BlockPos origine, int cour) {
-        this.p = p; this.w = w; this.cour = cour;
-        this.o = origine.add(Initiation.S[cour], 0, 0);
+    Ctx(ServerPlayerEntity p, ServerWorld w, BlockPos origine, Cours cours, int cour) {
+        this.p = p; this.w = w; this.cour = cour; this.cours = cours;
+        this.o = origine.add(cours.debuts[cour], 0, 0);
     }
 
     public double x() { return p.getX() - o.getX(); }
@@ -41,11 +42,27 @@ public final class Ctx {
 
     /** Tout ce qui porte cette étiquette, vivant, dans la cour. */
     public List<MobEntity> vivants(String tag) {
-        Box b = new Box(o.getX() - 2, o.getY() - 6, o.getZ() - 3, o.getX() + Initiation.LEN[cour] + 2, o.getY() + 30, o.getZ() + 18);
+        Box b = new Box(o.getX() - 2, o.getY() - 6, o.getZ() - 3, o.getX() + cours.len[cour] + 2, o.getY() + 30, o.getZ() + 18);
         return w.getEntitiesByClass(MobEntity.class, b, m -> m.isAlive() && m.getCommandTags().contains(tag));
     }
 
     public boolean morts(String tag) { return vivants(tag).isEmpty(); }
+
+    /** Suspendu par les mains à un bord de hauteur « haut » (en l'air, pas dans l'eau), entre x0 et x1. */
+    public boolean suspendu(double haut, double x0, double x1) {
+        return !p.isOnGround() && !p.isTouchingWater() && y() >= haut - 2.4 && y() <= haut - 1.2 && x() >= x0 && x() <= x1;
+    }
+
+    /** Accroché à un mur (en l'air, pas dans l'eau, au moins à cette hauteur). */
+    public boolean enHauteur(double y) { return !p.isOnGround() && !p.isTouchingWater() && y() >= y; }
+
+    /** Les plumes d'entraînement de la cour ont-elles toutes été ramassées ? */
+    public boolean plumesRamassees() {
+        Box b = new Box(o.getX() - 1, o.getY() - 2, o.getZ() - 1, o.getX() + cours.len[cour] + 1, o.getY() + 30, o.getZ() + 16);
+        for (var m : w.getEntitiesByType(net.minecraft.entity.EntityType.MARKER, b, e -> e.getCommandTags().contains(fr.fenua.ombre.ac.Defis.ECOLE)))
+            if (!p.getCommandTags().contains(fr.fenua.ombre.ac.Defis.ECOLE_TAG + m.getBlockPos().asLong())) return false;
+        return true;
+    }
 
     /** Un garde de la cour l'a-t-il repéré ? */
     public boolean repere() {

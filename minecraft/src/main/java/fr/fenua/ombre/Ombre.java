@@ -40,7 +40,10 @@ public class Ombre implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(Gardes::tick);
 
         // L'initiation (la Ruelle d'Or) : on vérifie deux fois par seconde si l'étape est réussie
-        ServerTickEvents.END_SERVER_TICK.register(fr.fenua.ombre.initiation.Initiation::tick);
+        ServerTickEvents.END_SERVER_TICK.register(fr.fenua.ombre.initiation.Cours::tick);
+
+        // Les plumes de corbeau et la course des toits
+        ServerTickEvents.END_SERVER_TICK.register(fr.fenua.ombre.ac.Defis::tick);
 
         // Touches spéciales envoyées par le client (instinct, siffler, assassiner)
         PayloadTypeRegistry.playC2S().register(ActionPayload.ID, ActionPayload.CODEC);
@@ -67,7 +70,13 @@ public class Ombre implements ModInitializer {
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> fr.fenua.ombre.initiation.RuelleDOr.construire(ctx.getSource()))
                                 .then(CommandManager.argument("etape", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 99))
-                                        .executes(ctx -> fr.fenua.ombre.initiation.Initiation.aller(ctx.getSource().getPlayerOrThrow(),
+                                        .executes(ctx -> fr.fenua.ombre.initiation.Initiation.COURS.aller(ctx.getSource().getPlayerOrThrow(),
+                                                com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "etape")))))
+                        .then(CommandManager.literal("rappel")
+                                .requires(src -> src.hasPermissionLevel(2))
+                                .executes(ctx -> fr.fenua.ombre.initiation.JardinRoyal.construire(ctx.getSource()))
+                                .then(CommandManager.argument("etape", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 99))
+                                        .executes(ctx -> fr.fenua.ombre.initiation.Rappel.COURS.aller(ctx.getSource().getPlayerOrThrow(),
                                                 com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "etape")))))
                         .then(CommandManager.literal("prague")
                                 .requires(src -> src.hasPermissionLevel(2))

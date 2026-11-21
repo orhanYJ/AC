@@ -56,6 +56,14 @@ public final class Discretion {
                 || e instanceof fr.fenua.ombre.entite.Gardes.Capitaine || e.getCommandTags().contains(Gardes.GARDE);
     }
 
+    /** Côté joueur, les étiquettes ne sont pas connues : un garde se reconnaît à sa classe, ou à son équipe rouge ou or. */
+    public static boolean estGardeClient(Entity e) {
+        if (e instanceof fr.fenua.ombre.entite.Gardes.Hallebardier || e instanceof fr.fenua.ombre.entite.Gardes.Arbaletrier
+                || e instanceof fr.fenua.ombre.entite.Gardes.Capitaine) return true;
+        var equipe = e.getScoreboardTeam();
+        return equipe != null && (equipe.getName().equals("ombre_gardes") || equipe.getName().equals("ombre_cibles"));
+    }
+
     /** Dans la foule : au moins deux passants à moins de 2,5 blocs, et on marche (on ne court pas, on ne saute pas). */
     public static boolean dansLaFoule(PlayerEntity joueur) {
         if (joueur.isSprinting() || !joueur.isOnGround()) return false;

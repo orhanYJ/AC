@@ -49,7 +49,7 @@ public final class Parcours {
     enum Etat { LIBRE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, EXEC, GRAPPIN }
 
     /** Poses reprises par les animations (Animations). */
-    public enum Pose { AUCUNE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, BOND, PLONGEON, GRAPPIN, EXEC_SOL, EXEC_AERIEN, EXEC_CACHETTE, EXEC_REBORD }
+    public enum Pose { AUCUNE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, BOND, FRANCHIR, PLONGEON, GRAPPIN, EXEC_SOL, EXEC_AERIEN, EXEC_CACHETTE, EXEC_REBORD }
 
     private static Etat etat = Etat.LIBRE;
     private static double murX, murZ;          // direction du mur (vers lui), vecteur unité
@@ -58,6 +58,8 @@ public final class Parcours {
     private static int chercheMur;             // ticks où l'on s'accroche au premier mur touché (après un saut)
     private static int bondMur;                // ticks d'un bond vers le haut le long du mur
     private static int poseBond;               // ticks de la pose de bond
+    private static int poseFranchir;           // ticks de la pose de franchissement
+    private static int auBord;                 // ticks passés accroupi au bord, à pousser vers le vide
     private static double cible;               // hauteur visée (rétablissement, monte-charge)
     private static double hisseX0, hisseZ0, hisseAvance;   // rétablissement : d'où l'on part, de combien on avance
     private static boolean zTenu;
@@ -103,7 +105,7 @@ public final class Parcours {
                 default -> Pose.EXEC_SOL;
             };
             case GRAPPIN -> Pose.GRAPPIN;
-            default -> poseBond > 0 ? Pose.BOND : plongeon ? Pose.PLONGEON : Pose.AUCUNE;
+            default -> poseFranchir > 0 ? Pose.FRANCHIR : poseBond > 0 ? Pose.BOND : plongeon ? Pose.PLONGEON : Pose.AUCUNE;
         };
     }
 
@@ -137,6 +139,7 @@ public final class Parcours {
             if (sansPrise > 0) sansPrise--;
             if (chercheMur > 0) chercheMur--;
             if (poseBond > 0) poseBond--;
+            if (poseFranchir > 0) poseFranchir--;
             duree++;
             switch (etat) {
                 case LIBRE -> libre(client, p, in, nouveauSaut, sol);
@@ -190,17 +193,24 @@ public final class Parcours {
             return;
         }
 
-        // Depuis le sol : Espace en poussant contre un mur haut = on s'y accroche
+        // Depuis le sol : Espace en poussant contre un mur haut = on s'y accroche.
+        // En sprint, c'est une course verticale : on monte le mur en courant, bien plus haut.
         if (sol && nouveauSaut) {
             double[] d = murAutour(p, norme(e) > 0.1 ? e : f);
             if (d != null && dot(e, d) > 0.5 && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)) {
+                boolean course = p.isSprinting() || client.options.sprintKey.isPressed();
                 accrocher(p, d);
-                bondMur = 5;
-                p.setVelocity(d[0] * 0.04, 0.42, d[1] * 0.04);
+                bondMur = course ? 11 : 5;
+                p.setVelocity(d[0] * 0.04, course ? 0.8 : 0.42, d[1] * 0.04);
+                if (course) p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, 0.3f, 1.6f);
             }
             return;
         }
-        if (sol) return;
+        if (sol) {
+            if (franchir(p, in, f) || bondAssiste(p, in, f) || descendreAuBord(p, in, e)) return;
+            auBord = 0;
+            return;
+        }
 
         // Clic droit maintenu : saisir une perche, une enseigne ou un câble de tyrolienne
         if (prise && sansPrise == 0) {
@@ -247,6 +257,118 @@ public final class Parcours {
                 p.setVelocity(0, Math.max(v.y, -0.1), 0);
             }
         }
+    }
+
+    // ───────────────────────── gestes de course libre (au sol) ─────────────────────────
+
+    /** Le haut de ce qui se dresse en (x, z) entre les pieds et 2 blocs au-dessus, relatif aux pieds, ou NaN. */
+    private static double hautObstacle(ClientPlayerEntity p, double x, double z) {
+        World w = p.getWorld();
+        double haut = Double.NaN;
+        for (int y = (int) Math.floor(p.getY()); y <= (int) Math.floor(p.getY() + 2); y++) {
+            BlockPos b = BlockPos.ofFloored(x, y, z);
+            var forme = w.getBlockState(b).getCollisionShape(w, b);
+            if (forme.isEmpty()) continue;
+            double top = y + forme.getMax(Direction.Axis.Y) - p.getY();
+            if (top > 0.05) haut = Double.isNaN(haut) ? top : Math.max(haut, top);
+        }
+        return haut;
+    }
+
+    /** La boîte du joueur, déplacée de (dx, dy, dz), est-elle libre ? */
+    private static boolean libreEn(ClientPlayerEntity p, double dx, double dy, double dz) {
+        return p.getWorld().isSpaceEmpty(p, p.getBoundingBox().offset(dx, dy, dz));
+    }
+
+    /**
+     * Franchissement : en sprint, un muret, une barrière, un étal ou une charrette (de 0,6 à 1,6 de haut)
+     * se passe d'un appui de main, s'il y a la place de retomber de l'autre côté.
+     */
+    private static boolean franchir(ClientPlayerEntity p, Input in, double[] f) {
+        if (!p.isSprinting() || in.movementForward <= 0 || in.sneaking) return false;
+        double h = hautObstacle(p, p.getX() + f[0] * 0.7, p.getZ() + f[1] * 0.7);
+        if (Double.isNaN(h) || h < 0.6 || h > 1.6) return false;
+        if (!libreEn(p, f[0] * 0.7, h + 0.05, f[1] * 0.7)) return false;        // de la place par-dessus
+        boolean retombe = false;
+        for (double d = 1.4; d <= 2.6; d += 0.4)
+            if (libreEn(p, f[0] * d, 0, f[1] * d)) { retombe = true; break; }   // un obstacle mince, pas une marche
+        if (!retombe) return false;
+        p.setVelocity(f[0] * 0.36, 0.32 + h * 0.22, f[1] * 0.36);
+        poseFranchir = 9;
+        sansPrise = 10;
+        p.playSound(SoundEvents.BLOCK_WOOD_STEP, 0.6f, 1.3f);
+        rattrape();
+        return true;
+    }
+
+    /**
+     * Bond assisté : en sprint au bord d'un toit, si un appui attend en face (de 2 à 5 blocs, pas plus d'un bloc
+     * au-dessus ni plus de 4 en dessous), on s'élance tout seul, juste assez fort pour l'atteindre.
+     */
+    private static boolean bondAssiste(ClientPlayerEntity p, Input in, double[] f) {
+        if (!p.isSprinting() || in.movementForward <= 0 || in.sneaking) return false;
+        World w = p.getWorld();
+        // Le bord : plus rien sous les pieds juste devant, sur au moins 3 blocs
+        double ax = p.getX() + f[0] * 0.75, az = p.getZ() + f[1] * 0.75;
+        for (int k = 1; k <= 3; k++) {
+            BlockPos b = BlockPos.ofFloored(ax, p.getY() - k + 0.5, az);
+            if (!w.getBlockState(b).getCollisionShape(w, b).isEmpty()) return false;
+        }
+        if (!libreEn(p, f[0] * 0.75, 0, f[1] * 0.75)) return false;
+        for (double d = 2.0; d <= 5.0; d += 0.5) {
+            double x = p.getX() + f[0] * d, z = p.getZ() + f[1] * d;
+            for (int dy = 1; dy >= -4; dy--) {
+                BlockPos b = BlockPos.ofFloored(x, p.getY() + dy - 0.5, z);
+                var forme = w.getBlockState(b).getCollisionShape(w, b);
+                if (forme.isEmpty()) continue;
+                double top = b.getY() + forme.getMax(Direction.Axis.Y);
+                if (top - p.getY() > 1.05 || top - p.getY() < -4.2) break;
+                if (!libreEn(p, f[0] * d, top - p.getY() + 0.01, f[1] * d)) break;
+                double vh = MathHelper.clamp(d / 7.2 + 0.08, 0.38, 0.78);
+                p.setVelocity(f[0] * vh, top - p.getY() > 0.3 ? 0.5 : 0.42, f[1] * vh);
+                poseBond = 12;
+                p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.1f);
+                rattrape();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Descente au rebord : accroupi au bord d'un toit, on pousse vers le vide un instant et l'on se laisse glisser
+     * jusqu'à se suspendre par les mains au bord (de là : assassinat depuis le rebord, ou on lâche plus bas).
+     */
+    private static boolean descendreAuBord(ClientPlayerEntity p, Input in, double[] e) {
+        if (!in.sneaking || norme(e) < 0.5) { auBord = 0; return false; }
+        World w = p.getWorld();
+        // La direction du vide : la plus proche de l'entrée, parmi les quatre
+        Direction vers = Direction.getFacing(e[0], 0, e[1]);
+        double dx = vers.getOffsetX(), dz = vers.getOffsetZ();
+        // Le bord : la case devant est vide sur 2 blocs de profondeur, et l'on est tout contre elle
+        double bordX = dx != 0 ? Math.floor(p.getX()) + (dx > 0 ? 1 : 0) : p.getX();
+        double bordZ = dz != 0 ? Math.floor(p.getZ()) + (dz > 0 ? 1 : 0) : p.getZ();
+        double ecart = dx != 0 ? Math.abs(bordX - p.getX()) : Math.abs(bordZ - p.getZ());
+        if (ecart > 0.45) { auBord = 0; return false; }
+        for (int k = 1; k <= 2; k++) {
+            BlockPos b = BlockPos.ofFloored(bordX + dx * 0.5, p.getY() - k + 0.5, bordZ + dz * 0.5);
+            if (!w.getBlockState(b).getCollisionShape(w, b).isEmpty()) { auBord = 0; return false; }
+        }
+        if (++auBord < 5) return false;
+        // On passe par-dessus le bord, les mains sur l'arête, face au mur
+        double nx = dx != 0 ? bordX + dx * 0.31 : p.getX(), nz = dz != 0 ? bordZ + dz * 0.31 : p.getZ();
+        double ny = Math.floor(p.getY() + 0.01) - MAINS + 0.05;
+        if (!w.isSpaceEmpty(p, p.getBoundingBox().offset(nx - p.getX(), ny - p.getY(), nz - p.getZ()))) { auBord = 0; return false; }
+        p.setPosition(nx, ny, nz);
+        p.setVelocity(0, 0, 0);
+        p.setYaw(capDe(-dx, -dz));
+        murX = -dx; murZ = -dz;
+        changer(Etat.REBORD);
+        zTenu = true;
+        auBord = 0;
+        p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.6f, 0.9f);
+        rattrape();
+        return true;
     }
 
     private static void accrocher(ClientPlayerEntity p, double[] d) {

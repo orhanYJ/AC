@@ -30,6 +30,9 @@ public final class Mission {
     public static List<String> lignes(ServerPlayerEntity p) {
         List<String> l = new ArrayList<>();
         for (String[] o : OBJECTIFS) l.add((p.getCommandTags().contains(o[0]) ? "1" : "0") + o[1]);
+        int n = Defis.plumes(p, true);
+        l.add((n >= Defis.PLUMES ? "1" : "0") + "Facultatif : plumes de corbeau (" + n + "/" + Defis.PLUMES + ")");
+        l.add((p.getCommandTags().contains("ombre_course_finie") ? "1" : "0") + "Facultatif : la course des toits");
         return l;
     }
 

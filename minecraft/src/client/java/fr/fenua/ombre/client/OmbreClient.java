@@ -24,7 +24,7 @@ import org.lwjgl.glfw.GLFW;
 
 /** Côté joueur : les touches (modifiables dans Options › Commandes), le parkour, la cible d'assassinat, le dessin des cordes. */
 public class OmbreClient implements ClientModInitializer {
-    private static KeyBinding instinct, siffler, aide, assassiner, roue, voyage;
+    private static KeyBinding instinct, siffler, aide, assassiner, roue, voyage, aigle;
 
     /** Le nom de la touche d'assassinat (R par défaut, modifiable). */
     static String toucheAssassiner() { return assassiner.getBoundKeyLocalizedText().getString().toUpperCase(); }
@@ -36,7 +36,8 @@ public class OmbreClient implements ClientModInitializer {
         aide = touche("key.ombre.aide", GLFW.GLFW_KEY_H);
         assassiner = touche("key.ombre.assassiner", GLFW.GLFW_KEY_R);
         roue = touche("key.ombre.roue", GLFW.GLFW_KEY_G);       // (X est déjà pris par Minecraft)
-        voyage = touche("key.ombre.voyage", GLFW.GLFW_KEY_J);   // J : même place en AZERTY et en QWERTY
+        voyage = touche("key.ombre.voyage", GLFW.GLFW_KEY_J);
+        aigle = touche("key.ombre.aigle", GLFW.GLFW_KEY_N);     // N : même place en AZERTY et en QWERTY   // J : même place en AZERTY et en QWERTY
 
         // Ce que pensent les gardes, la zone, la notoriété ; le journal et les points de vue
         ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.EtatPayload.ID, (payload, ctx) -> EtatAC.recevoir(payload));
@@ -73,6 +74,7 @@ public class OmbreClient implements ClientModInitializer {
             while (siffler.wasPressed()) ClientPlayNetworking.send(new ActionPayload(ActionPayload.SIFFLER));
             while (aide.wasPressed()) client.setScreen(new EcranAide());
             while (roue.wasPressed()) if (client.currentScreen == null) client.setScreen(new RoueOutils(roue));
+            while (aigle.wasPressed()) if (client.currentScreen == null) Cinema.aigle(client.player);
             while (voyage.wasPressed()) if (client.currentScreen == null) client.setScreen(new EcranVoyage());
         });
 

@@ -37,6 +37,17 @@ public final class Pouvoirs {
             }
         }
         else if (action == ActionPayload.ASSASSINER) Assassinat.parTouche(p, cible);
+        else if (action == ActionPayload.CARTE) p.addCommandTag("ombre_carte");
+        else if (action == ActionPayload.AIGLE) p.addCommandTag("ombre_aigle");
+        else if (action == ActionPayload.MARQUER) {
+            // L'aigle a repéré ce garde : il reste marqué (contour visible à travers les murs) une minute
+            var e = w.getEntityById(cible);
+            if (e instanceof MobEntity m && m.isAlive() && Discretion.estGarde(m) && m.squaredDistanceTo(p) < 160 * 160) {
+                m.addStatusEffect(new StatusEffectInstance(StatusEffects.GLOWING, 1200, 0, false, false));
+                m.addCommandTag("ombre_marque");
+                w.playSound(null, p.getBlockPos(), SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value(), SoundCategory.PLAYERS, 0.5f, 1.6f);
+            }
+        }
         else if (action == ActionPayload.OUTIL && cible >= 0 && cible < 36) {
             // Roue des outils : l'objet choisi passe dans la main (échangé avec ce qu'on tenait)
             var inv = p.getInventory();

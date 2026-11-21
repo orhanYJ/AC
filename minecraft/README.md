@@ -32,6 +32,10 @@ Crée un monde **Plat** (commandes autorisées), puis tape **`/ombre initiation`
 - **`/ombre initiation 14`** reprend à l'étape 14 (de 1 à 30).
 - Une fois l'initiation finie : `/ombre prague`.
 
+## Le cours de rappel
+
+**`/ombre rappel`** construit le **Jardin royal** du château : 14 cours, 19 leçons, pour tout ce qui a changé depuis l'initiation — la carte, la poutre, l'arrêt au bord, les angles, les façades à fenêtres (grand saut latéral, bond en diagonale, glissade), le franchissement, le bond assisté, la descente au rebord, la cachette debout dans les buissons, la synchronisation et le saut de la foi filmés, la vue de l'aigle, la fléchette de folie, les plumes et la course des toits. `/ombre rappel 7` reprend à la leçon 7.
+
 ## Jouer
 
 1. Crée un monde **Plat**, avec **« Autoriser les commandes : OUI »**, difficulté **Normale**.
@@ -47,8 +51,9 @@ Les deux tours des cibles sont des **zones interdites** (étendards rouges) : la
 
 ### La carte `/ombre prague`
 
-- **La Vieille-Ville** (5 × 5 îlots, 162 blocs de côté) : une vingtaine d'îlots de maisons bourgeoises **qu'on peut visiter** (porte, échelle d'étage en étage, boutique du métier de l'enseigne ou cuisine au rez-de-chaussée, chambres et salles meublées aux étages), aux façades ordonnées (fenêtres sur tous les murs, corniche continue, auvent et enseigne pour les boutiques, lanterne et balcon pour les habitations), de vraies charrettes (roues, ridelles, brancards, chargées de foin, de tonneaux ou de pierres), façades pastel ou en sgraffite, pignons sur rue, toits de tuiles rouges, lanternes à potence, enseignes, auvents, balcons, gouttières pour grimper, poutres d'un toit à l'autre, cours avec puits et linge.
+- **La Vieille-Ville** (5 × 5 îlots, 162 blocs de côté) : une vingtaine d'îlots de maisons bourgeoises **qu'on peut visiter** (porte, échelle d'étage en étage, boutique du métier de l'enseigne ou cuisine au rez-de-chaussée, chambres et salles meublées aux étages), aux façades ordonnées (des **arcades** sur la grande place, des **toits-terrasses** derrière un attique crénelé où mène une trappe, des **lucarnes**, des fenêtres sur tous les murs, corniche continue, auvent et enseigne pour les boutiques, lanterne et balcon pour les habitations), de vraies charrettes (roues, ridelles, brancards, chargées de foin, de tonneaux ou de pierres), façades pastel ou en sgraffite, pignons sur rue, toits de tuiles rouges, lanternes à potence, enseignes, auvents, balcons, gouttières pour grimper, poutres d'un toit à l'autre, cours avec puits et linge.
 - **La grande place de la Vieille-Ville** : un vrai **marché** (douze étals de trois blocs, chacun avec son comptoir, ses tonneaux, sa toile rayée aux couleurs du métier et son marchand ; deux tentes), la **grande fontaine** et sa statue, les **tréteaux des comédiens**, des bancs, des charrettes, la foule, et la **tour de l'horloge astronomique** (cadran, galerie, flèche, gargouilles = points de vue). De petits étals aussi le long des rues.
+- **Deux tavernes** à visiter (comptoir, tonneaux, tables, âtre), et des **passerelles** de bois entre les toits de la rangée nord.
 - **Le chantier** : une maison à moitié bâtie, ses échafaudages, des tas de pierres et de bois, des ouvriers, et une **grue à roue** de l'époque — on grimpe au mât, et le bout de la flèche est un point de vue.
 - **Le jardin du couvent** : allées, massifs de fleurs, haies, arbres fruitiers, kiosque, hautes herbes où se cacher, et des moines.
 - **L'église de Týn** : sa nef et ses **deux tours à flèches** (près de 50 blocs), des gargouilles, des perchoirs aux pointes, et le laboratoire de l'alchimiste.
@@ -96,6 +101,10 @@ Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 | **Arbalète à grappin** | Clic droit vers le bord d'un toit (40 blocs) : on est tiré jusqu'en haut |
 | **Saut de la foi** | Dans une **meule**, une **charrette de foin**, du foin, du feuillage, sur un auvent ou un étal, ou dans la **Vltava** : aucun dégât. Pendant la chute, bras en croix |
 | **Roulade** | **Maj** en touchant le sol : jusqu'à 9 blocs sans mal |
+| **Franchissement** | En sprint, une barrière, un muret, un étal ou une charrette se passe d'un appui de main |
+| **Bond assisté** | En sprint au bord d'un toit, s'il y a un toit en face (jusqu'à 5 blocs), on s'élance tout seul |
+| **Descente au rebord** | Accroupi (**Maj**) au bord d'un toit, pousse vers le vide : tu te suspends par les mains |
+| **Course verticale** | En sprint, **Espace** contre un mur : on le monte en courant, bien plus haut |
 | **Point de vue** | Tiens-toi sur une **gargouille** ou un **perchoir** : la caméra fait le tour, tous les gardes sont révélés 30 s, et le lieu s'ajoute à la carte pour le voyage rapide |
 
 ### Assassin
@@ -135,6 +144,9 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Désynchronisation** | Tuer un passant : l'écran se trouble, la notoriété bondit. L'Ombre ne tue pas d'innocents |
 | **Vol à la tire** | Accroupi, dans le dos d'un passant : clic droit pour prendre sa bourse. Vu de face, il crie « Au voleur ! » |
 | **Enchaînement** | Juste après un assassinat, tu as 2,5 s pour en enchaîner un autre au sol, même sur un garde qui t'a vu |
+| **Vue de l'aigle** | Touche **N** : la caméra s'envole au-dessus de toi. Vise un garde un instant : il est marqué une minute, visible à travers les murs. **N** pour revenir |
+| **Plumes de corbeau** | Quinze plumes cachées sur les hauteurs de Prague, signalées par une colonne de lumière ; le journal les compte, et la quinzième rapporte une bourse |
+| **Course des toits** | Au coin nord-ouest de Prague, un anneau de flammes sur un toit : le départ. Franchis les balises dans l'ordre par les toits, les passerelles et les échelles, sans toucher la rue. Chrono et record |
 | **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas. Saute : la caméra te filme de derrière, tu plonges tête la première bras en croix, le foin jaillit à l'arrivée |
 | **Scènes filmées** | Bandes noires de cinéma et caméra libre : à la synchronisation (l'aigle tourne autour du point de vue, jauge « Synchronisation »), au saut de la foi, et à chaque assassinat (plan de côté) |
 
@@ -146,12 +158,13 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Couteaux de lancer** | Clic droit : tue à distance, sans bruit |
 | **Fléchette soporifique** | Le garde s'endort 30 s (il ne voit plus rien) |
 | **Fléchette empoisonnée** | Le garde s'effondre 4 s plus tard, sans un bruit |
+| **Fléchette de folie** | Le garde touché attaque ses camarades pendant 15 s |
 | **Thalers** | Jetés au sol : la foule accourt, les gardes viennent voir |
 | **Pétard** | Bruit et fumée : la foule s'enfuit, les gardes accourent |
 | **Bombe de fumée** | Les gardes autour perdent ta trace, aveuglés 5 s |
 | **Pain de seigle, pain d'épices, fromage, vin, bière** | À manger ; la bière donne de l'élan |
 
-**Instinct** : V. **Siffler** : B. **Roue des outils** : G. **Carte** : J. **Aide** : H. Ces touches se changent dans Options › Commandes › « L'Ombre — Infiltration ».
+**Instinct** : V. **Siffler** : B. **Roue des outils** : G. **Carte** : J. **Vue de l'aigle** : N. **Aide** : H. Ces touches se changent dans Options › Commandes › « L'Ombre — Infiltration ».
 
 ### Commandes du chat
 

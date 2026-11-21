@@ -9,7 +9,8 @@
     "CouleurContourMixin",
     "ClicMixin",
     "CameraMixin",
-    "CorpsMixin"
+    "CorpsMixin",
+    "EntreeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

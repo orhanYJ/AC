@@ -57,6 +57,7 @@ public class EcranVoyage extends Screen {
     @Override
     protected void init() {
         if (texture != null) return;
+        ClientPlayNetworking.send(new fr.fenua.ombre.ActionPayload(fr.fenua.ombre.ActionPayload.CARTE));
         ClientPlayerEntity p = client.player;
         ClientWorld w = client.world;
         ox = (int) Math.floor(p.getX()) - N / 2;

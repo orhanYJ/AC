@@ -40,25 +40,32 @@ import static fr.fenua.ombre.initiation.Initiation.*;
  *
  * Coordonnées locales : x vers l'est (0 = début de la première cour), z de 0 (mur nord) à 14 (mur sud), y = 0 au sol.
  */
-public final class RuelleDOr {
+public class RuelleDOr {
     private static final int HAUT = 27;                       // le plafond invisible des murs (barrière)
     private static final String[] FACADES = {"crepi", "crepi_jaune", "crepi_rose", "crepi_bleu", "crepi_vert", "crepi_ocre", "sgraffite"};
 
-    private final ServerWorld w;
-    private final BlockPos o;
-    private final Random r = new Random(1597);
-    private int bx;                                           // début de la cour en cours de construction
+    protected final ServerWorld w;
+    protected final BlockPos o;
+    protected final Random r = new Random(1597);
+    protected int bx;                                         // début de la cour en cours de construction
+    protected final Cours cours;
+    protected final int[] debuts;
+    protected final String[] noms;
+    protected final int longueur;
 
-    private RuelleDOr(ServerWorld w, BlockPos o) { this.w = w; this.o = o; }
+    protected RuelleDOr(ServerWorld w, BlockPos o, Cours cours) {
+        this.w = w; this.o = o; this.cours = cours;
+        this.debuts = cours.debuts; this.noms = cours.noms; this.longueur = cours.longueur;
+    }
 
     public static int construire(ServerCommandSource src) {
         ServerWorld w = src.getWorld();
         BlockPos p = BlockPos.ofFloored(src.getPosition());
         BlockPos o = p.add(-2, 0, -7);
-        new RuelleDOr(w, o).batir();
-        Initiation.retenir(w, o);
+        new RuelleDOr(w, o, Initiation.COURS).batir();
+        Initiation.COURS.retenir(w, o);
         w.setTimeOfDay(1000);
-        if (src.getEntity() instanceof ServerPlayerEntity j) Initiation.demarrer(j, o);
+        if (src.getEntity() instanceof ServerPlayerEntity j) Initiation.COURS.demarrer(j, o);
         src.sendFeedback(() -> Text.literal("§6La Ruelle d'Or est prête§r : " + NOMS.length + " cours, " + Initiation.nombre()
                 + " étapes. Suis le panneau à gauche de l'écran et le losange doré de la boussole.\n"
                 + "§7Pour reprendre à une étape : /ombre initiation <numéro>. Une fois fini : /ombre prague."), true);
@@ -67,32 +74,32 @@ public final class RuelleDOr {
 
     // ───────────────────────── outils ─────────────────────────
 
-    private static Block b(String nom) { return Registries.BLOCK.get(Identifier.of(Ombre.MOD_ID, nom)); }
-    private void set(int x, int y, int z, BlockState s) { w.setBlockState(o.add(x, y, z), s, Block.NOTIFY_LISTENERS); }
-    private void set(int x, int y, int z, Block bl) { set(x, y, z, bl.getDefaultState()); }
-    private boolean vide(int x, int y, int z) { return w.getBlockState(o.add(x, y, z)).isAir(); }
-    private void boite(int x0, int y0, int z0, int x1, int y1, int z1, BlockState s) {
+    protected static Block b(String nom) { return Registries.BLOCK.get(Identifier.of(Ombre.MOD_ID, nom)); }
+    protected void set(int x, int y, int z, BlockState s) { w.setBlockState(o.add(x, y, z), s, Block.NOTIFY_LISTENERS); }
+    protected void set(int x, int y, int z, Block bl) { set(x, y, z, bl.getDefaultState()); }
+    protected boolean vide(int x, int y, int z) { return w.getBlockState(o.add(x, y, z)).isAir(); }
+    protected void boite(int x0, int y0, int z0, int x1, int y1, int z1, BlockState s) {
         for (int x = Math.min(x0, x1); x <= Math.max(x0, x1); x++)
             for (int y = Math.min(y0, y1); y <= Math.max(y0, y1); y++)
                 for (int z = Math.min(z0, z1); z <= Math.max(z0, z1); z++) set(x, y, z, s);
     }
-    private void boite(int x0, int y0, int z0, int x1, int y1, int z1, Block bl) { boite(x0, y0, z0, x1, y1, z1, bl.getDefaultState()); }
-    private static BlockState vers(Block bl, Direction d) {
+    protected void boite(int x0, int y0, int z0, int x1, int y1, int z1, Block bl) { boite(x0, y0, z0, x1, y1, z1, bl.getDefaultState()); }
+    protected static BlockState vers(Block bl, Direction d) {
         BlockState s = bl.getDefaultState();
         return s.contains(Properties.HORIZONTAL_FACING) ? s.with(Properties.HORIZONTAL_FACING, d) : s;
     }
 
     // Les mêmes, dans la cour en cours (x relatif à son début)
-    private void c(int x, int y, int z, BlockState s) { set(bx + x, y, z, s); }
-    private void c(int x, int y, int z, Block bl) { set(bx + x, y, z, bl); }
-    private void cb(int x0, int y0, int z0, int x1, int y1, int z1, BlockState s) { boite(bx + x0, y0, z0, bx + x1, y1, z1, s); }
-    private void cb(int x0, int y0, int z0, int x1, int y1, int z1, Block bl) { boite(bx + x0, y0, z0, bx + x1, y1, z1, bl); }
-    private void meule(int x0, int z0, int x1, int z1) { cb(x0, 0, z0, x1, 1, z1, OmbreBlocs.MEULE); }
-    private void eau(int x0, int z0, int x1, int z1) {
+    protected void c(int x, int y, int z, BlockState s) { set(bx + x, y, z, s); }
+    protected void c(int x, int y, int z, Block bl) { set(bx + x, y, z, bl); }
+    protected void cb(int x0, int y0, int z0, int x1, int y1, int z1, BlockState s) { boite(bx + x0, y0, z0, bx + x1, y1, z1, s); }
+    protected void cb(int x0, int y0, int z0, int x1, int y1, int z1, Block bl) { boite(bx + x0, y0, z0, bx + x1, y1, z1, bl); }
+    protected void meule(int x0, int z0, int x1, int z1) { cb(x0, 0, z0, x1, 1, z1, OmbreBlocs.MEULE); }
+    protected void eau(int x0, int z0, int x1, int z1) {
         cb(x0, -4, z0, x1, -4, z1, Blocks.STONE_BRICKS);
         cb(x0, -3, z0, x1, -1, z1, Blocks.WATER);
     }
-    private void herbes(int x0, int z0, int x1, int z1) {
+    protected void herbes(int x0, int z0, int x1, int z1) {
         for (int x = x0; x <= x1; x++)
             for (int z = z0; z <= z1; z++) {
                 c(x, -1, z, Blocks.GRASS_BLOCK);
@@ -102,7 +109,7 @@ public final class RuelleDOr {
     }
 
     /** Un panneau tourné vers l'ouest (vers le joueur qui arrive), texte doré lumineux. */
-    private void panneau(int x, int y, int z, String... l) {
+    protected void panneau(int x, int y, int z, String... l) {
         BlockPos p = o.add(bx + x, y, z);
         w.setBlockState(p, Blocks.DARK_OAK_SIGN.getDefaultState().with(SignBlock.ROTATION, RotationPropertyHelper.fromDirection(Direction.WEST)), Block.NOTIFY_ALL);
         if (w.getBlockEntity(p) instanceof SignBlockEntity sbe) {
@@ -114,11 +121,11 @@ public final class RuelleDOr {
 
     // ───────────────────────── l'ensemble ─────────────────────────
 
-    private void batir() {
+    protected void batir() {
         // Place nette : on retire les anciens habitants (sauf les joueurs) et tout ce qui dépasse
-        Box zone = new Box(o.getX() - 4, o.getY() - 6, o.getZ() - 4, o.getX() + LONGUEUR + 4, o.getY() + 32, o.getZ() + 19);
+        Box zone = new Box(o.getX() - 4, o.getY() - 6, o.getZ() - 4, o.getX() + longueur + 4, o.getY() + 32, o.getZ() + 19);
         for (Entity e : w.getEntitiesByClass(Entity.class, zone, e -> !(e instanceof PlayerEntity))) e.discard();
-        for (int x = -3; x <= LONGUEUR + 3; x++)
+        for (int x = -3; x <= longueur + 3; x++)
             for (int z = -3; z <= 17; z++) {
                 for (int y = 0; y <= HAUT + 1; y++) if (!vide(x, y, z)) set(x, y, z, Blocks.AIR);
                 set(x, -1, z, b("pave"));
@@ -126,8 +133,13 @@ public final class RuelleDOr {
             }
         facades(-1, Direction.NORTH);
         facades(15, Direction.SOUTH);
-        for (int i = 0; i <= NOMS.length; i++) muraille(i);
+        for (int i = 0; i <= noms.length; i++) muraille(i);
+        lesCours();
+        panneaux();
+    }
 
+    /** Les épreuves de chaque cour. */
+    protected void lesCours() {
         bx = S[ENTREE]; entree();
         bx = S[ESCALADE]; escalade();
         bx = S[ARRIERE]; arriere();
@@ -148,12 +160,15 @@ public final class RuelleDOr {
         bx = S[VOL]; vol();
         bx = S[GRAPPIN]; grappin();
         bx = S[FIN]; sortie();
+    }
 
-        // Un panneau et deux lanternes à l'entrée de chaque cour
-        for (int i = 0; i < NOMS.length; i++) {
-            bx = S[i];
-            if (vide(bx, 0, 2)) panneau(0, 0, 2, "§l" + (i + 1) + ".", NOMS[i].length() > 15 ? NOMS[i].substring(0, NOMS[i].lastIndexOf(' ', 15)) : NOMS[i],
-                    NOMS[i].length() > 15 ? NOMS[i].substring(NOMS[i].lastIndexOf(' ', 15) + 1) : "", "");
+    /** Un panneau et deux lanternes à l'entrée de chaque cour. */
+    protected void panneaux() {
+        for (int i = 0; i < noms.length; i++) {
+            bx = debuts[i];
+            String n = noms[i];
+            int coupe = n.length() > 15 ? Math.max(1, n.lastIndexOf(' ', 15)) : -1;
+            if (vide(bx, 0, 2)) panneau(0, 0, 2, "§l" + (i + 1) + ".", coupe > 0 ? n.substring(0, coupe) : n, coupe > 0 ? n.substring(coupe + 1) : "", "");
             for (int z : new int[]{0, 14})
                 if (vide(bx, 0, z) && vide(bx, 1, z) && vide(bx, 2, z)) {
                     c(0, 0, z, OmbreBlocs.LAMPADAIRE); c(0, 1, z, OmbreBlocs.LAMPADAIRE); c(0, 2, z, OmbreBlocs.TETE_LAMPADAIRE);
@@ -162,11 +177,11 @@ public final class RuelleDOr {
     }
 
     /** Une rangée de petites maisons de couleur contre le mur nord (z = -1) ou sud (z = 15). */
-    private void facades(int zm, Direction cote) {
+    protected void facades(int zm, Direction cote) {
         int zi = zm == -1 ? 0 : 14;                              // la case devant la façade, côté ruelle
         int x = -1;
-        while (x <= LONGUEUR + 1) {
-            int x1 = Math.min(LONGUEUR + 1, x + 3 + r.nextInt(3));
+        while (x <= longueur + 1) {
+            int x1 = Math.min(longueur + 1, x + 3 + r.nextInt(3));
             int h = 6 + r.nextInt(3);
             Block mur = b(FACADES[r.nextInt(FACADES.length)]);
             boite(x, 0, zm, x1, h - 1, zm, mur);
@@ -187,12 +202,12 @@ public final class RuelleDOr {
     }
 
     /** Le mur qui ferme la cour i à l'ouest, avec sa grille (fermée) ; i = NOMS.length : le mur du bout. */
-    private void muraille(int i) {
-        int x = i < NOMS.length ? S[i] - 1 : LONGUEUR + 1;
+    protected void muraille(int i) {
+        int x = i < noms.length ? debuts[i] - 1 : longueur + 1;
         boite(x, 0, -1, x, 8, 15, b("pierre_de_taille"));
         boite(x, 5, -1, x, 5, 15, b("pierre_sculptee"));
         boite(x, 9, -1, x, HAUT, 15, Blocks.BARRIER);
-        if (i == 0 || i == NOMS.length) return;
+        if (i == 0 || i == noms.length) return;
         boite(x, 0, 5, x, 4, 9, b("pierre_sculptee"));
         boite(x, 0, 6, x, 3, 8, Blocks.IRON_BARS);
         set(x, 5, 7, b("pierre_noircie"));

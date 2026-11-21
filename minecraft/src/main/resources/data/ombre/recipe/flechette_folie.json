@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "misc",
+ "ingredients": [
+  {
+   "item": "minecraft:arrow"
+  },
+  {
+   "item": "minecraft:fermented_spider_eye"
+  }
+ ],
+ "result": {
+  "id": "ombre:flechette_folie",
+  "count": 2
+ }
+}

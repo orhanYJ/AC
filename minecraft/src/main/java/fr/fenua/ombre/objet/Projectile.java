@@ -24,6 +24,7 @@ import net.minecraft.world.World;
  *  - Pétard : une détonation et de la fumée ; la foule s'enfuit, les gardes accourent voir.
  *  - Fléchette soporifique : le garde touché s'endort 30 s.
  *  - Fléchette empoisonnée : le garde touché s'effondre 4 s plus tard, sans un bruit.
+ *  - Fléchette de folie : le garde touché s'en prend à ses camarades pendant 15 s.
  */
 public class Projectile extends ThrownItemEntity {
     public Projectile(EntityType<? extends Projectile> type, World w) { super(type, w); }
@@ -38,6 +39,7 @@ public class Projectile extends ThrownItemEntity {
         ItemStack s = getStack();
         if (s.isOf(Objets.FLECHETTE_SOPORIFIQUE)) v.addStatusEffect(new StatusEffectInstance(Effets.ENDORMI, 600, 0));
         else if (s.isOf(Objets.FLECHETTE_EMPOISONNEE)) v.addStatusEffect(new StatusEffectInstance(Effets.AGONIE, 80, 0));
+        else if (s.isOf(Objets.FLECHETTE_FOLIE)) v.addStatusEffect(new StatusEffectInstance(Effets.FOLIE, 300, 0));
     }
 
     @Override

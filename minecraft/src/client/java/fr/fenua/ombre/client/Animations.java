@@ -78,6 +78,15 @@ public final class Animations {
                 m.rightLeg.pitch = -1.0f;
                 m.leftLeg.pitch = 0.6f;
             }
+            case FRANCHIR -> {                  // une main sur l'obstacle, les jambes passent de côté
+                m.rightArm.pitch = -1.2f;
+                m.leftArm.pitch = -0.6f;
+                m.leftArm.roll = -0.5f;
+                m.rightLeg.pitch = -1.3f;
+                m.leftLeg.pitch = -1.0f;
+                m.rightLeg.roll = 0.4f;
+                m.leftLeg.roll = 0.4f;
+            }
             case PLONGEON -> {                  // le saut de la foi, bras en croix
                 m.rightArm.roll = 1.45f;
                 m.leftArm.roll = -1.45f;

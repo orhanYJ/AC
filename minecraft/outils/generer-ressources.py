@@ -368,6 +368,7 @@ def flechette(couleur):
                          d.polygon([(2, 13), (1, 10), (4, 12)], fill=couleur), d.polygon([(2, 13), (5, 14), (3, 11)], fill=couleur))
 icone("flechette_soporifique", flechette((90, 110, 200)))
 icone("flechette_empoisonnee", flechette((70, 160, 50)))
+icone("flechette_folie", flechette((190, 40, 80)))
 icone("tenue_hallebardier", lambda d, t: (d.polygon([(4, 4), (11, 4), (14, 7), (12, 9), (11, 8), (11, 14), (4, 14), (4, 8), (3, 9), (1, 7)], fill=(180, 40, 40)),
                                      [d.line((x, 5, x, 14), fill=(240, 200, 40)) for x in (6, 9)], d.polygon([(5, 1), (10, 1), (12, 3), (3, 3)], fill=(190, 195, 205))))
 icone("lance_grappin", lambda d, t: (d.rectangle((3, 8, 10, 11), fill=(70, 50, 35)), d.rectangle((9, 7, 13, 9), fill=(110, 110, 120)),
@@ -378,19 +379,19 @@ for o in ["passant", "personnage", "hallebardier", "arbaletrier", "capitaine"]:
 NOMS.update({
     "item.ombre.pain_seigle": "Pain de seigle", "item.ombre.pain_epices": "Pain d'épices", "item.ombre.fromage": "Fromage", "item.ombre.vin": "Bouteille de vin",
     "item.ombre.biere": "Chope de bière de Bohême", "item.ombre.thalers": "Thalers (à jeter : la foule accourt)", "item.ombre.petard": "Pétard (bruit et fumée)",
-    "item.ombre.flechette_soporifique": "Fléchette soporifique", "item.ombre.flechette_empoisonnee": "Fléchette empoisonnée",
+    "item.ombre.flechette_soporifique": "Fléchette soporifique", "item.ombre.flechette_empoisonnee": "Fléchette empoisonnée", "item.ombre.flechette_folie": "Fléchette de folie",
     "item.ombre.tenue_hallebardier": "Tenue de hallebardier (déguisement)", "item.ombre.lance_grappin": "Arbalète à grappin",
     "item.ombre.oeuf_passant": "Œuf de passant", "item.ombre.oeuf_personnage": "Œuf de personnage historique",
     "item.ombre.oeuf_hallebardier": "Œuf de hallebardier", "item.ombre.oeuf_arbaletrier": "Œuf d'arbalétrier", "item.ombre.oeuf_capitaine": "Œuf de capitaine",
     "entity.ombre.passant": "Passant", "entity.ombre.personnage": "Personnage historique", "entity.ombre.hallebardier": "Hallebardier",
     "entity.ombre.arbaletrier": "Arbalétrier", "entity.ombre.capitaine": "Capitaine", "entity.ombre.projectile": "Projectile",
-    "effect.ombre.endormi": "Endormi", "effect.ombre.agonie": "Agonie", "effect.ombre.deguise": "Déguisé",
+    "effect.ombre.endormi": "Endormi", "effect.ombre.agonie": "Agonie", "effect.ombre.deguise": "Déguisé", "effect.ombre.folie": "Folie", "key.ombre.aigle": "Vue de l'aigle",
     "itemGroup.ombre": "L'Ombre — Assassin et parkour", "itemGroup.ombre.prague": "L'Ombre — Prague 1600", "itemGroup.ombre.objets": "L'Ombre — Objets et personnages",
 })
 for n, ingr, k in [("pain_seigle", ["wheat", "wheat", "wheat"], 2), ("pain_epices", ["wheat", "honey_bottle", "sugar"], 4), ("fromage", ["milk_bucket", "brown_mushroom"], 3),
                    ("vin", ["glass_bottle", "sweet_berries", "sweet_berries"], 1), ("biere", ["glass_bottle", "wheat", "wheat"], 2),
                    ("thalers", ["iron_nugget", "iron_nugget"], 8), ("petard", ["gunpowder", "paper", "red_dye"], 3),
-                   ("flechette_soporifique", ["arrow", "poppy"], 2), ("flechette_empoisonnee", ["arrow", "spider_eye"], 2),
+                   ("flechette_soporifique", ["arrow", "poppy"], 2), ("flechette_empoisonnee", ["arrow", "spider_eye"], 2), ("flechette_folie", ["arrow", "fermented_spider_eye"], 2),
                    ("tenue_hallebardier", ["red_wool", "yellow_wool", "iron_ingot", "iron_nugget"], 1),
                    ("lance_grappin", ["crossbow", "tripwire_hook", "lead"], 1)]:
     sans_forme(n, ingr, k, "misc")
@@ -400,6 +401,7 @@ def icone_effet(nom, dessin):
     t = Image.new("RGBA", (18, 18), (0, 0, 0, 0)); d = ImageDraw.Draw(t); dessin(d); t.save(f"{A}/textures/mob_effect/{nom}.png")
 icone_effet("endormi", lambda d: (d.text((3, 2), "Z", fill=(180, 190, 255)), d.text((9, 7), "z", fill=(140, 150, 230))))
 icone_effet("agonie", lambda d: (d.ellipse((4, 3, 13, 11), fill=(90, 170, 60)), d.rectangle((6, 11, 11, 15), fill=(90, 170, 60)), d.point((7, 7), fill=(0, 0, 0)), d.point((10, 7), fill=(0, 0, 0))))
+icone_effet("folie", lambda d: (d.ellipse((3, 3, 13, 13), outline=(200, 40, 80)), d.line((5, 5, 11, 11), fill=(200, 40, 80)), d.line((11, 5, 5, 11), fill=(200, 40, 80))))
 icone_effet("deguise", lambda d: (d.rectangle((3, 4, 14, 8), fill=(35, 45, 80)), d.rectangle((2, 8, 15, 10), fill=(25, 30, 50)), d.rectangle((6, 10, 11, 15), fill=(230, 190, 150))))
 
 # ───────────── Les personnages (textures de 64 × 64, au format des joueurs) ─────────────

@@ -226,5 +226,8 @@
   "block.ombre.pupitre": "Pupitre d'astronome",
   "block.ombre.etendard": "Étendard de la garde (zone interdite)",
   "key.ombre.roue": "Roue des outils (maintenir)",
-  "key.ombre.voyage": "Carte et voyage rapide"
+  "key.ombre.voyage": "Carte et voyage rapide",
+  "item.ombre.flechette_folie": "Fléchette de folie",
+  "effect.ombre.folie": "Folie",
+  "key.ombre.aigle": "Vue de l'aigle"
 }

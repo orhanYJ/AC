@@ -69,6 +69,8 @@ public final class Objets {
     public static final Item PETARD = new ALancer(new Item.Settings().maxCount(16), 1.0f, 20);
     public static final Item FLECHETTE_SOPORIFIQUE = new ALancer(new Item.Settings().maxCount(16), 2.6f, 15);
     public static final Item FLECHETTE_EMPOISONNEE = new ALancer(new Item.Settings().maxCount(16), 2.6f, 15);
+    /** Fléchette de folie : le garde touché attaque ses camarades pendant 15 s. */
+    public static final Item FLECHETTE_FOLIE = new ALancer(new Item.Settings().maxCount(16), 2.6f, 15);
 
     /**
      * Tenue de hallebardier : clic droit pour l'enfiler. Déguisé, les gardes ne te remarquent qu'à 2 blocs,
@@ -124,6 +126,7 @@ public final class Objets {
         objet("petard", PETARD);
         objet("flechette_soporifique", FLECHETTE_SOPORIFIQUE);
         objet("flechette_empoisonnee", FLECHETTE_EMPOISONNEE);
+        objet("flechette_folie", FLECHETTE_FOLIE);
         objet("tenue_hallebardier", TENUE);
         objet("lance_grappin", GRAPPIN);
         PROJECTILE = Registry.register(Registries.ENTITY_TYPE, Identifier.of(Ombre.MOD_ID, "projectile"),

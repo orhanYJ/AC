@@ -155,11 +155,13 @@ public final class Gardes {
                     if (e instanceof Figure f && (!mission || p.getCommandTags().contains(f.qui() == Figure.TYCHO ? "ombre_m_tycho" : "ombre_m_kepler"))) continue;
                     cibles.add(e.getBlockPos().asLong());
                 }
-                List<String> tuto = fr.fenua.ombre.initiation.Initiation.lignes(p);
+                BlockPos balise = Defis.prochaineBalise(p);
+                if (balise != null) cibles.add(balise.asLong());
+                List<String> tuto = fr.fenua.ombre.initiation.Cours.lignes(p);
                 if (tuto != null) {
                     // En initiation : le panneau des leçons, et le losange vers le but de l'étape
                     cibles.clear();
-                    BlockPos but = fr.fenua.ombre.initiation.Initiation.but(p);
+                    BlockPos but = fr.fenua.ombre.initiation.Cours.but(p);
                     if (but != null) cibles.add(but.asLong());
                 }
                 ServerPlayNetworking.send(p, new JournalPayload(tuto != null ? tuto : mission ? Mission.lignes(p) : List.of(), vues, noms, cibles));

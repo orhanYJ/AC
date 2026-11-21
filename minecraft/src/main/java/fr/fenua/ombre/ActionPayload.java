@@ -16,6 +16,12 @@ public record ActionPayload(int action, int cible) implements CustomPayload {
     public static final int ASSASSINER = 3;
     /** Roue des outils : mettre en main l'objet de la case n° cible de l'inventaire. */
     public static final int OUTIL = 4;
+    /** La carte a été ouverte (pour le cours de rappel). */
+    public static final int CARTE = 6;
+    /** Vue de l'aigle : marquer la créature n° cible. */
+    public static final int MARQUER = 7;
+    /** Vue de l'aigle : on s'envole (pour le cours de rappel). */
+    public static final int AIGLE = 8;
 
     public ActionPayload(int action) { this(action, -1); }
 

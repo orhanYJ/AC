@@ -22,12 +22,14 @@ import net.minecraft.world.RaycastContext;
  *  - SAUT : le saut de la foi, filmé de derrière et d'au-dessus ; le corps plonge bras en croix ;
  *    à l'arrivée, le foin vole.
  *  - EXEC : un assassinat, filmé de côté, la caméra tourne lentement autour de la scène.
+ *  - AIGLE : la vue de l'aigle (touche N) ; la caméra plane au-dessus du joueur, la souris la dirige,
+ *    et chaque garde visé un instant est marqué (contour visible à travers les murs pendant une minute).
  * La position de la caméra est appliquée par mixin/CameraMixin ; le corps qui bascule, par mixin/CorpsMixin.
  */
 public final class Cinema {
     private Cinema() {}
 
-    public enum Plan { AUCUN, SYNCHRO, SAUT, EXEC }
+    public enum Plan { AUCUN, SYNCHRO, SAUT, EXEC, AIGLE }
 
     private static Plan plan = Plan.AUCUN;
     private static int t, duree, fin, chute;
@@ -74,6 +76,58 @@ public final class Cinema {
         centre = p.getPos().add(victime).multiply(0.5).add(0, 1.1, 0);
     }
 
+    // ───────────────────────── la vue de l'aigle ─────────────────────────
+
+    private static final int AIGLE_MAX = 20 * 30;
+    private static int vise = -1, viseDepuis, marques;
+    private static final java.util.Set<Integer> MARQUES = new java.util.HashSet<>();
+
+    /** Touche N : l'aigle s'envole (ou revient). */
+    public static void aigle(ClientPlayerEntity p) {
+        if (plan == Plan.AIGLE) { finir(); p.playSound(SoundEvents.ENTITY_PHANTOM_FLAP, 0.8f, 1.2f); return; }
+        if (plan != Plan.AUCUN || !p.isOnGround() && !p.isTouchingWater()) return;
+        commencer(Plan.AIGLE, AIGLE_MAX);
+        centre = p.getEyePos();
+        vise = -1; viseDepuis = 0; marques = 0;
+        p.playSound(SoundEvents.ENTITY_PHANTOM_AMBIENT, 1f, 1.5f);
+        p.playSound(SoundEvents.ENTITY_PHANTOM_FLAP, 1f, 0.8f);
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new fr.fenua.ombre.ActionPayload(fr.fenua.ombre.ActionPayload.AIGLE));
+    }
+
+    /** Pendant la vue de l'aigle, le corps du joueur ne bouge pas (voir mixin/EntreeMixin). */
+    public static boolean corpsFige() { return plan == Plan.AIGLE; }
+
+    private static Vec3d oeilAigle(ClientPlayerEntity p, float td) {
+        double monte = Math.min(1, (t + td) / 20.0);
+        double e = monte * monte * (3 - 2 * monte);
+        Vec3d dir = p.getRotationVec(td);
+        double hx = dir.x, hz = dir.z, n = Math.max(0.01, Math.sqrt(hx * hx + hz * hz));
+        return centre.add(-hx / n * 6 * e, 30 * e + 1, -hz / n * 6 * e);
+    }
+
+    private static void tickAigle(ClientPlayerEntity p) {
+        if (p.hurtTime > 0 || t >= duree) { finir(); return; }
+        if (t < 20) return;
+        // Le garde que l'on vise : à moins de 4° du centre de l'écran, à moins de 140 blocs
+        Vec3d oeil = oeilAigle(p, 1), dir = p.getRotationVec(1);
+        int meilleur = -1;
+        double mieux = Math.cos(Math.toRadians(4));
+        for (var e : MinecraftClient.getInstance().world.getEntities()) {
+            if (!(e instanceof net.minecraft.entity.mob.MobEntity m) || !m.isAlive() || !fr.fenua.ombre.Discretion.estGardeClient(m)) continue;
+            Vec3d d = m.getPos().add(0, 1, 0).subtract(oeil);
+            double l = d.length();
+            if (l > 140) continue;
+            double c = d.dotProduct(dir) / l;
+            if (c > mieux) { mieux = c; meilleur = m.getId(); }
+        }
+        if (meilleur != vise) { vise = meilleur; viseDepuis = 0; }
+        else if (vise >= 0 && ++viseDepuis == 8 && MARQUES.add(vise)) {
+            marques++;
+            net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new fr.fenua.ombre.ActionPayload(fr.fenua.ombre.ActionPayload.MARQUER, vise));
+            p.playSound(SoundEvents.ENTITY_PHANTOM_AMBIENT, 0.4f, 1.9f);
+        }
+    }
+
     private static void finir() {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (avant != null) mc.options.setPerspective(avant);
@@ -110,6 +164,7 @@ public final class Cinema {
                 else if (t >= duree) finir();
             }
             case EXEC -> { if (t >= duree) finir(); }
+            case AIGLE -> tickAigle(p);
             default -> {}
         }
     }
@@ -168,6 +223,11 @@ public final class Cinema {
                 oeil = centre.add(Math.sin(a) * 3.4, 0.6 + 0.4 * u, -Math.cos(a) * 3.4);
                 regard = centre;
             }
+            case AIGLE -> {
+                // La caméra suit la souris (le regard du joueur), depuis le ciel
+                Vec3d o = degager(p, centre, oeilAigle(p, td));
+                return new double[]{o.x, o.y, o.z, p.getYaw(td), p.getPitch(td)};
+            }
             default -> { return null; }
         }
         oeil = degager(p, regard, oeil);
@@ -192,11 +252,32 @@ public final class Cinema {
     public static void dessiner(DrawContext ctx, MinecraftClient mc) {
         if (plan == Plan.AUCUN || plan == Plan.EXEC && duree < 4) return;
         int w = ctx.getScaledWindowWidth(), h = ctx.getScaledWindowHeight();
+        if (plan == Plan.AIGLE) { dessinerAigle(ctx, mc, w, h); return; }
         float entree = Math.min(1f, t / 8f), sortie = plan == Plan.SAUT && fin > 0 ? fin / 16f : Math.min(1f, (duree - t) / 8f);
         int bande = (int) (h * 0.12f * Math.min(entree, sortie));
         ctx.getMatrices().push();
         ctx.getMatrices().translate(0, 0, 500);                  // par-dessus la barre d'objets
         dessinerBandes(ctx, mc, w, h, bande);
+        ctx.getMatrices().pop();
+    }
+
+    /** La vue de l'aigle : un voile doré sur les bords, le réticule qui se remplit quand on vise un garde. */
+    private static void dessinerAigle(DrawContext ctx, MinecraftClient mc, int w, int h) {
+        ctx.getMatrices().push();
+        ctx.getMatrices().translate(0, 0, 500);
+        ctx.fillGradient(0, 0, w, h / 6, 0x70402810, 0x00402810);
+        ctx.fillGradient(0, h - h / 6, w, h, 0x00402810, 0x70402810);
+        int cx = w / 2, cy = h / 2, r = 9;
+        int c = vise >= 0 ? (viseDepuis >= 8 ? 0xFFE0281E : 0xFFF2C23A) : 0xC0FFFFFF;
+        ctx.fill(cx - r, cy - r, cx - r + 4, cy - r + 1, c); ctx.fill(cx - r, cy - r, cx - r + 1, cy - r + 4, c);
+        ctx.fill(cx + r - 4, cy - r, cx + r, cy - r + 1, c); ctx.fill(cx + r - 1, cy - r, cx + r, cy - r + 4, c);
+        ctx.fill(cx - r, cy + r - 1, cx - r + 4, cy + r, c); ctx.fill(cx - r, cy + r - 4, cx - r + 1, cy + r, c);
+        ctx.fill(cx + r - 4, cy + r - 1, cx + r, cy + r, c); ctx.fill(cx + r - 1, cy + r - 4, cx + r, cy + r, c);
+        if (vise >= 0 && viseDepuis < 8) ctx.fill(cx - 8, cy + r + 3, cx - 8 + viseDepuis * 2, cy + r + 4, 0xFFF2C23A);
+        var tr = mc.textRenderer;
+        ctx.drawCenteredTextWithShadow(tr, Text.literal("§6✦ Vue de l'aigle ✦"), cx, 12, 0xFFFFFF);
+        ctx.drawCenteredTextWithShadow(tr, Text.literal("§7Vise un garde un instant pour le marquer · §fN§7 : revenir"), cx, 24, 0xFFFFFF);
+        ctx.drawCenteredTextWithShadow(tr, Text.literal("§f" + marques + " §7marqué" + (marques > 1 ? "s" : "") + " · §f" + Math.max(0, (duree - t) / 20) + " s"), cx, h - 22, 0xFFFFFF);
         ctx.getMatrices().pop();
     }
 
