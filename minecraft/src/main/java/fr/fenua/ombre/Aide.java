@@ -7,6 +7,7 @@ public final class Aide {
     public static final String TEXTE = String.join("\n",
             "§6§lL'Ombre — Prague 1600",
             "§6Touche H§r : l'écran avec toutes les commandes détaillées.",
+            "§6§l/ombre initiation§r : commence par là ! La Ruelle d'Or t'apprend tout, pas à pas (30 leçons). §7/ombre initiation <n>§r : reprendre à l'étape n.",
             "§eEscalade§r : Espace contre un mur. Z/S monter-descendre, Q/D côté, Espace bondir, S+Espace saut arrière, Maj lâcher.",
             "§eClic droit maintenu§r : saisir les perches, enseignes, réverbères et câbles de tyrolienne.",
             "§eCourse libre§r : en sprintant, tu montes les blocs d'un mètre sans sauter, et tes sauts portent plus loin.",

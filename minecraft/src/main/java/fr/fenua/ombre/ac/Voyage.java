@@ -35,6 +35,7 @@ public final class Voyage {
         w.spawnParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 1, p.getZ(), 25, 0.4, 0.8, 0.4, 0.02);
         p.teleport(w, but.getX() + 0.5, but.getY(), but.getZ() + 0.5, p.getYaw(), 10f);
         p.fallDistance = 0;
+        p.addCommandTag("ombre_voyage");      // pour l'initiation
         p.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 25, 0, false, false));
         w.playSound(null, but, SoundEvents.ENTITY_ILLUSIONER_MIRROR_MOVE, SoundCategory.PLAYERS, 0.8f, 0.8f);
         p.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("")));

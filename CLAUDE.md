@@ -158,6 +158,16 @@ Projet séparé du jeu web : **« L'Ombre — Prague 1600 »**, mod **Fabric** p
   - **Vol à la tire** (`Passant.interactMob`), **désynchronisation** (`Gardes.apresMort`), **enchaînement** (`Assassinat.CHAINE`).
   - Le serveur envoie `EtatPayload` (soupçons, zone, notoriété) 4 fois par seconde et `JournalPayload` (objectifs, points de vue, marqueurs) chaque seconde.
   - Touches : G roue des outils, J carte. X et C sont pris par Minecraft (barres d'outils du créatif). Les touches sont **positionnelles** (GLFW) : pour un AZERTY, préférer des lettres à la même place qu'en QWERTY.
+- **Initiation** (`initiation/`) : `/ombre initiation` bâtit la Ruelle d'Or (`RuelleDOr`) devant le joueur : 20 cours le long de +x (`Initiation.LEN`, débuts `S`), 15 de large, séparées par des murs à grille (barreaux de fer en z = 6 à 8) et coiffées de barrières jusqu'à y = 27.
+  - `Initiation` tient les 30 étapes (`Etape` : titre, lignes, but pour la boussole, `debut`, `reussie`, `ratee`, `ouvre` la grille), vérifiées deux fois par seconde.
+  - `Ctx` donne les coordonnées de la cour, fait venir les recrues désarmées (`garde`, étiquette `ombre_init` ; `ombre_aveugle` = mannequin que la détection ignore) et les passants.
+  - L'étape du joueur est dans le tableau des scores `ombre_initiation`, l'emplacement de la ruelle dans un `PersistentState` du monde.
+  - Échec d'une étape de discrétion : retour à la première étape de la cour, tout est remis à neuf.
+  - Les monstres sauvages (slimes des mondes plats) sont chassés de la ruelle.
+  - Les gestes signalés par étiquette : `ombre_voyage`, `ombre_instinct`, `ombre_vol`.
+  - Le panneau de leçon passe par `JournalPayload` (lignes « T » titre et « I » explications).
+  - Testée en jeu de bout en bout (sauf perches, course sur mur, rebords, bonds et glisse en tyrolienne, dont la géométrie reprend celle déjà éprouvée de `CarteParcours`).
+- **Modèles** : le générateur corrige seul les faces superposées (`decoller`, la plus petite pièce avance de 0,02) ; c'était le « clignotement » des cabines.
 - Blocs (`bloc/`) : blocs de parkour d'origine, `Decor` (formes génériques orientées ou non, familles `Etal`, `Reverbere`, `Gouttiere`, `Balcon`, `Banc`, `Charrette`, `Cheminee`), `Cachettes` (puits, cabine), `Variantes` (couleurs, bois, pierres, enseignes, affiches, construction, escaliers/dalles). **Les effets se testent par famille (`instanceof`)**, pour que toutes les variantes les gardent.
 - Côté client (`src/client`) : `HudAC` (boussole, flèches, barre de zone, notoriété, journal, « ? »/« ! »), `RoueOutils`, `EcranVoyage`, `Parcours` (machine à états : LIBRE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, EXEC, GRAPPIN ; murs et rebords sans clic droit ; **clic droit maintenu pour perches, enseignes, lanternes et câbles**), `Assassin` (cible, contour rouge, invite), `Animations` + `mixin/PosesMixin`, `RenduCordes`, `RenduHumain`, `EcranAide` (touche H), `mixin/ClicMixin` (l'objet n'est pas utilisé quand le clic droit attrape).
 - Cartes : `/ombre prague` (`CartePrague`), `/ombre parcours` (`CarteParcours`, entraînement), `/ombre arene` (`Arene`, petit fortin), `/ombre vitrine` (tous les blocs), `/ombre kit`.

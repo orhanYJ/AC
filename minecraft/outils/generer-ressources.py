@@ -61,6 +61,20 @@ COUL_FR = {"white": ("blanc", "blanche"), "orange": ("orange", "orange"), "magen
            "brown": ("marron", "marron"), "green": ("vert", "verte"), "red": ("rouge", "rouge"), "black": ("noir", "noire")}
 RGB = {"rouge": (176, 46, 38), "blanc": (233, 236, 236), "vert": (84, 109, 27), "bleu": (53, 57, 157), "jaune": (248, 198, 39), "noir": (29, 29, 33)}
 
+# Cabine à rideau (2 blocs de haut). Aucune pièce ne doit en chevaucher une autre : deux faces de textures
+# différentes au même endroit « clignotent » (le toit recouvrait le haut des montants et du fond).
+def cabine(n, rideau):
+    modele(n, {"bois": "spruce_planks", "cadre": "stripped_dark_oak_log", "rideau": rideau, "fer": "iron_block"},
+           [el([0, 0, 14], [16, 30, 16], "bois", uv=[0, 0, 16, 16]),
+            el([0, 0, 0], [1, 30, 14], "cadre", uv=[0, 0, 1, 16]), el([15, 0, 0], [16, 30, 14], "cadre", uv=[0, 0, 1, 16]),
+            el([0, 30, 0], [16, 32, 16], "cadre", uv=[0, 0, 16, 2]),
+            el([1, 0, 0.5], [15, 29, 1.2], "rideau", uv=[1, 0, 15, 16]), el([1, 29, 0], [15, 30, 0.4], "fer", uv=[0, 0, 14, 1])])
+    # Le dessus et le dessous du toit gardent toute leur texture
+    m = json.load(open(f"{A}/models/block/{n}.json"))
+    for f in ("up", "down"): m["elements"][3]["faces"][f]["uv"] = [0, 0, 16, 16]
+    ecrire(f"{A}/models/block/{n}.json", m)
+cabine("cabine", "red_wool")
+
 # ───────────── Auvents et cabines de toutes les couleurs ─────────────
 for c, (m, f) in COUL_FR.items():
     n = f"auvent_{c}"
@@ -68,9 +82,7 @@ for c, (m, f) in COUL_FR.items():
            [el([0, 9, 0], [16, 11, 16], "toile", rot={"origin": [8, 10, 0], "axis": "x", "angle": 22.5}), el([0, 10, 0], [16, 12, 1], "bois")])
     oriente(n); objet_bloc(n); butin(n); sans_forme(n, ["ombre:auvent", f"{c}_dye"]); NOMS[f"block.ombre.{n}"] = f"Auvent {m}"
     n = f"cabine_{c}"
-    modele(n, {"bois": "spruce_planks", "cadre": "stripped_dark_oak_log", "rideau": f"{c}_wool", "fer": "iron_block"},
-           [el([0, 0, 14], [16, 32, 16], "bois"), el([0, 0, 0], [1, 32, 14], "cadre"), el([15, 0, 0], [16, 32, 14], "cadre"),
-            el([0, 30, 0], [16, 32, 16], "cadre"), el([1, 0, 0.5], [15, 29, 1.2], "rideau"), el([0, 29, 0], [16, 30, 1], "fer")])
+    cabine(n, f"{c}_wool")
     oriente(n); objet_bloc(n); butin(n); sans_forme(n, ["ombre:cabine", f"{c}_dye"]); NOMS[f"block.ombre.{n}"] = f"Cabine à rideau {m}"
 
 # Auvents rayés : une texture à bandes pour chaque paire
@@ -687,4 +699,33 @@ def plaquer(dossier):
         if change:
             ecrire(p, m); n += 1
     return n
+# ───────────── Faces superposées ─────────────
+# Deux pièces dont les faces tombent exactement au même endroit « clignotent » (le jeu ne sait pas laquelle
+# dessiner devant). On avance la plus petite d'un cinquantième de pixel : elle passe devant, sans que ça se voie.
+FACES_AXE = {"west": (0, "from", -1), "east": (0, "to", 1), "down": (1, "from", -1), "up": (1, "to", 1),
+             "north": (2, "from", -1), "south": (2, "to", 1)}
+def decoller(dossier):
+    n = 0
+    for f in os.listdir(dossier):
+        p = os.path.join(dossier, f)
+        m = json.load(open(p))
+        els = [e for e in m.get("elements", []) if "rotation" not in e]
+        change = False
+        for _ in range(6):
+            bouge = False
+            for i, a in enumerate(els):
+                for b in els[i + 1:]:
+                    for face, (k, c, sens) in FACES_AXE.items():
+                        if face not in a["faces"] or face not in b["faces"] or abs(a[c][k] - b[c][k]) > 1e-6: continue
+                        o = [q for q in range(3) if q != k]
+                        if not all(min(a["to"][q], b["to"][q]) - max(a["from"][q], b["from"][q]) > 0.01 for q in o): continue
+                        aire = lambda e: (e["to"][o[0]] - e["from"][o[0]]) * (e["to"][o[1]] - e["from"][o[1]])
+                        petit = a if aire(a) <= aire(b) else b
+                        petit[c][k] = round(petit[c][k] + 0.02 * sens, 3)
+                        bouge = change = True
+            if not bouge: break
+        if change:
+            ecrire(p, m); n += 1
+    return n
+print("faces superposées corrigées :", decoller(f"{A}/models/block"))
 print("modèles corrigés :", plaquer(f"{A}/models/block"))

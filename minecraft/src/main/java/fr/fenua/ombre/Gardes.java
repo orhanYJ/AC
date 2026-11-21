@@ -155,7 +155,14 @@ public final class Gardes {
                     if (e instanceof Figure f && (!mission || p.getCommandTags().contains(f.qui() == Figure.TYCHO ? "ombre_m_tycho" : "ombre_m_kepler"))) continue;
                     cibles.add(e.getBlockPos().asLong());
                 }
-                ServerPlayNetworking.send(p, new JournalPayload(mission ? Mission.lignes(p) : List.of(), vues, noms, cibles));
+                List<String> tuto = fr.fenua.ombre.initiation.Initiation.lignes(p);
+                if (tuto != null) {
+                    // En initiation : le panneau des leçons, et le losange vers le but de l'étape
+                    cibles.clear();
+                    BlockPos but = fr.fenua.ombre.initiation.Initiation.but(p);
+                    if (but != null) cibles.add(but.asLong());
+                }
+                ServerPlayNetworking.send(p, new JournalPayload(tuto != null ? tuto : mission ? Mission.lignes(p) : List.of(), vues, noms, cibles));
             }
         }
 
@@ -276,7 +283,8 @@ public final class Gardes {
      * un innocent tué, c'est la « désynchronisation » (comme dans Assassin's Creed) et la notoriété qui bondit.
      */
     public static void apresMort(LivingEntity mort, DamageSource source) {
-        if (mort instanceof fr.fenua.ombre.entite.Gardes.Hallebardier && source.getAttacker() instanceof PlayerEntity)
+        if (mort instanceof fr.fenua.ombre.entite.Gardes.Hallebardier && source.getAttacker() instanceof PlayerEntity
+                && !mort.getCommandTags().contains(fr.fenua.ombre.initiation.Initiation.TAG))
             mort.dropStack(new net.minecraft.item.ItemStack(fr.fenua.ombre.objet.Objets.TENUE));
         if (!(mort.getWorld() instanceof ServerWorld w)) return;
         if (mort instanceof Passant && source.getAttacker() instanceof ServerPlayerEntity tueur) {

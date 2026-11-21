@@ -76,7 +76,7 @@ public final class Detection {
 
     /** Jusqu'où ce garde peut te remarquer maintenant (0 s'il ne peut pas). */
     private static double portee(MobEntity g, PlayerEntity p) {
-        if (g.hasStatusEffect(Effets.ENDORMI)) return 0;
+        if (g.hasStatusEffect(Effets.ENDORMI) || g.getCommandTags().contains("ombre_aveugle")) return 0;   // endormi, ou mannequin
         double base = Math.max(16, g.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE));
         double f = p.getAttackDistanceScalingFactor(g);
         return f <= 0.001 ? 1.6 : Math.max(2.0, base * f);

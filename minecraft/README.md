@@ -14,6 +14,24 @@ Lien direct : <https://github.com/orhanYJ/AC/raw/claude/elegant-feynman-qh6m7g/m
 
 Pour une grosse carte graphique : ajouter **Sodium** et **Iris** (version 1.21.1) dans `mods`, et un pack de shaders (*Complementary Reimagined*, *BSL*) dans `.minecraft\shaderpacks`. Les toits de Prague au coucher du soleil…
 
+## Commencer : l'initiation
+
+Crée un monde **Plat** (commandes autorisées), puis tape **`/ombre initiation`**. La **Ruelle d'Or** du château de Prague se construit devant toi : **20 cours fermées par des grilles, 30 leçons**. Maître Vojtěch (inventé) t'y apprend tout, une chose à la fois :
+
+| Cours | Ce qu'on y apprend |
+|---|---|
+| 1 à 7 | L'entrée et la boussole, l'escalade et la gouttière, le saut arrière, les rebords, la course libre et les bonds, la course sur mur, les perches |
+| 8 et 9 | Le monte-charge et la tyrolienne ; le point de vue, le saut de la foi, la carte et le voyage rapide |
+| 10 à 12 | L'armurerie (roue des outils, instinct), les cachettes et le sifflet, la foule |
+| 13 et 14 | La cour d'armes (assassinat dans le dos, aérien, depuis le rebord, double), les couteaux et les fléchettes |
+| 15 à 20 | Le déguisement, la zone interdite, la notoriété et les avis de recherche, le vol à la tire, le lance-grappin, la sortie |
+
+- En haut à gauche, un **panneau** explique la leçon en cours ; sur la **boussole**, un **losange doré** montre où aller. Quand la leçon est réussie, la grille s'ouvre.
+- Les gardes de l'initiation sont **désarmés**. Dans les cours de discrétion, s'ils te repèrent, tu reviens simplement à l'entrée de la cour.
+- Si tu meurs, tu réapparais à l'entrée de la cour où tu étais.
+- **`/ombre initiation 14`** reprend à l'étape 14 (de 1 à 30).
+- Une fois l'initiation finie : `/ombre prague`.
+
 ## Jouer
 
 1. Crée un monde **Plat**, avec **« Autoriser les commandes : OUI »**, difficulté **Normale**.
@@ -109,7 +127,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Carte et voyage rapide** | Touche **J** : un parchemin avec les points de vue, les cibles et toi. Clic sur un point de vue (ou touches 1 à 9) : tu y retournes d'un coup — sauf si des gardes te cherchent |
 | **Notoriété** | Monte à chaque alerte, bondit si un innocent meurt. À 75, tu es **RECHERCHÉ** : les gardes te reconnaissent de loin. **Arrache les avis de recherche** (clic droit) pour la faire baisser |
 | **Désynchronisation** | Tuer un passant : l'écran se trouble, la notoriété bondit. L'Ombre ne tue pas d'innocents |
-| **Vol à la tire** | Accroupi, dans le dos d'un passant, la main vide : clic droit pour prendre sa bourse. Vu de face, il crie « Au voleur ! » |
+| **Vol à la tire** | Accroupi, dans le dos d'un passant : clic droit pour prendre sa bourse. Vu de face, il crie « Au voleur ! » |
 | **Enchaînement** | Juste après un assassinat, tu as 2,5 s pour en enchaîner un autre au sol, même sur un garde qui t'a vu |
 | **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas |
 
@@ -132,6 +150,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 
 | Commande | Effet |
 |---|---|
+| `/ombre initiation` | **Commence ici** : la Ruelle d'Or, 30 leçons pas à pas (`/ombre initiation <n>` pour reprendre à l'étape n) |
 | `/ombre prague` | La Vieille-Ville de 1600, avec sa mission |
 | `/ombre kit` | Tout l'équipement de l'assassin |
 | `/ombre vitrine` | Les 189 blocs du mod exposés en rangées |

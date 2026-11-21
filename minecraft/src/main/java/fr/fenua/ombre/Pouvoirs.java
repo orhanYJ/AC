@@ -59,6 +59,7 @@ public final class Pouvoirs {
             return;
         }
         PROCHAIN_INSTINCT.put(p.getUuid(), t + 15 * 20);
+        p.addCommandTag("ombre_instinct");      // pour l'initiation
         int n = 0;
         for (MobEntity m : w.getEntitiesByClass(MobEntity.class, p.getBoundingBox().expand(40),
                 e -> e.isAlive() && (e instanceof HostileEntity || e.getCommandTags().contains(Gardes.GARDE)))) {

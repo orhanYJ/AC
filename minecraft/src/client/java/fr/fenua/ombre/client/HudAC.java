@@ -210,6 +210,7 @@ public final class HudAC {
             y += 10;
         }
         if (EtatAC.objectifs.isEmpty()) return;
+        if (EtatAC.objectifs.get(0).startsWith("T")) { lecon(ctx, tr, x, y + 2); return; }
         y += 2;
         ctx.drawTextWithShadow(tr, Text.literal("§6Prague, 1600"), x, y, 0xFFFFFF);
         y += 11;
@@ -226,6 +227,24 @@ public final class HudAC {
             ctx.getMatrices().pop();
             y += 9;
         }
+    }
+
+    /** L'initiation : le panneau de la leçon en cours (titre doré, explications), sur fond sombre. */
+    private static void lecon(DrawContext ctx, TextRenderer tr, int x, int y) {
+        // Pas plus large que la place laissée à gauche de la boussole
+        int largeur = Math.max(150, Math.min(250, ctx.getScaledWindowWidth() / 2 - LARGEUR_BOUSSOLE / 2 - 14));
+        java.util.List<net.minecraft.text.OrderedText> lignes = new java.util.ArrayList<>();
+        String titre = EtatAC.objectifs.get(0).substring(1);
+        for (int i = 1; i < EtatAC.objectifs.size(); i++)
+            lignes.addAll(tr.wrapLines(Text.literal("§f" + EtatAC.objectifs.get(i).substring(1)), largeur - 10));
+        var titres = tr.wrapLines(Text.literal("§6§l" + titre), largeur - 10);
+        int h = 6 + titres.size() * 10 + lignes.size() * 10;
+        ctx.fill(x - 2, y - 2, x + largeur, y + h, 0xA0101010);
+        ctx.fill(x - 2, y - 2, x, y + h, 0xFFF2C23A);
+        int ly = y + 2;
+        for (var t : titres) { ctx.drawTextWithShadow(tr, t, x + 5, ly, 0xFFFFFF); ly += 10; }
+        ly += 3;
+        for (var l : lignes) { ctx.drawTextWithShadow(tr, l, x + 5, ly, 0xFFFFFF); ly += 10; }
     }
 
     // ───────────── dans le monde : « ? » et « ! » au-dessus des gardes ─────────────

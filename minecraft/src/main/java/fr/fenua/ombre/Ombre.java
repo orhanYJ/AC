@@ -39,6 +39,9 @@ public class Ombre implements ModInitializer {
         // Chaque tick : alarme qui se propage, points de vue, course libre
         ServerTickEvents.END_SERVER_TICK.register(Gardes::tick);
 
+        // L'initiation (la Ruelle d'Or) : on vérifie deux fois par seconde si l'étape est réussie
+        ServerTickEvents.END_SERVER_TICK.register(fr.fenua.ombre.initiation.Initiation::tick);
+
         // Touches spéciales envoyées par le client (instinct, siffler, assassiner)
         PayloadTypeRegistry.playC2S().register(ActionPayload.ID, ActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(fr.fenua.ombre.ac.EtatPayload.ID, fr.fenua.ombre.ac.EtatPayload.CODEC);
@@ -60,6 +63,12 @@ public class Ombre implements ModInitializer {
                         .then(CommandManager.literal("parcours")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> CarteParcours.construire(ctx.getSource())))
+                        .then(CommandManager.literal("initiation")
+                                .requires(src -> src.hasPermissionLevel(2))
+                                .executes(ctx -> fr.fenua.ombre.initiation.RuelleDOr.construire(ctx.getSource()))
+                                .then(CommandManager.argument("etape", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, 99))
+                                        .executes(ctx -> fr.fenua.ombre.initiation.Initiation.aller(ctx.getSource().getPlayerOrThrow(),
+                                                com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "etape")))))
                         .then(CommandManager.literal("prague")
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .executes(ctx -> CartePrague.construire(ctx.getSource())))

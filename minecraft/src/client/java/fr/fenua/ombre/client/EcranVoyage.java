@@ -84,7 +84,8 @@ public class EcranVoyage extends Screen {
         if (EtatAC.objectifs.isEmpty()) ctx.drawTextWithShadow(textRenderer, Text.literal("§7Aucune mission"), jx, jy, 0xFFFFFF);
         for (String o : EtatAC.objectifs) {
             boolean fait = o.startsWith("1");
-            for (var ligne : textRenderer.wrapLines(Text.literal((fait ? "§a✔ §7" : "§f◆ ") + o.substring(1)), 140)) {
+            String deb = o.startsWith("T") ? "§6" : o.startsWith("I") ? "§7" : fait ? "§a✔ §7" : "§f◆ ";
+            for (var ligne : textRenderer.wrapLines(Text.literal(deb + o.substring(1)), 140)) {
                 ctx.drawTextWithShadow(textRenderer, ligne, jx, jy, 0xFFFFFF);
                 jy += 10;
             }
