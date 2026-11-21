@@ -76,6 +76,8 @@ public final class Detection {
 
     /** Jusqu'où voit un garde, en blocs, avant la discrétion (accroupi, nuit, dans le dos…) et la notoriété. */
     public static final double VUE_GARDE = 13, VUE_CAPITAINE = 15, VUE_ARBALETRIER = 18;
+    /** Au-delà de cette hauteur au-dessus d'un garde à pied, on est hors de sa vue. */
+    public static final double TOIT = 3.5;
 
     /** Jusqu'où ce garde peut te remarquer maintenant (0 s'il ne peut pas). */
     private static double portee(MobEntity g, PlayerEntity p) {
@@ -84,8 +86,9 @@ public final class Detection {
         // toits, qui guettent, un peu plus). Avant, on prenait la portée de suivi de Minecraft : 32 pour l'arbalétrier.
         double base = g instanceof fr.fenua.ombre.entite.Gardes.Arbaletrier ? VUE_ARBALETRIER
                 : g instanceof fr.fenua.ombre.entite.Gardes.Capitaine ? VUE_CAPITAINE : VUE_GARDE;
-        // Un garde au sol lève rarement les yeux : sur les toits, il te remarque moins
-        if (!(g instanceof fr.fenua.ombre.entite.Gardes.Arbaletrier) && p.getY() - g.getY() > 4) base *= 0.6;
+        // Un garde au sol ne lève pas les yeux : sur les toits (plus de 3,5 blocs au-dessus de lui), il ne te voit pas.
+        // Seuls les arbalétriers, postés en hauteur, surveillent les toits.
+        if (!(g instanceof fr.fenua.ombre.entite.Gardes.Arbaletrier) && p.getY() - g.getY() > TOIT) return 0;
         double f = p.getAttackDistanceScalingFactor(g);
         return f <= 0.001 ? 1.6 : Math.max(2.0, base * f);
     }

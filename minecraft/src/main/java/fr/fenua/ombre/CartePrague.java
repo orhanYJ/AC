@@ -1380,31 +1380,84 @@ public final class CartePrague {
             golem.setPositionTarget(new BlockPos(ox + lx + 3, oy, oz + lz), 16);
             w.spawnEntity(golem);
         }
-        // La garde : hallebardiers dans les rues, par deux ; arbalétriers sur les toits
-        for (int g = 0; g < 7; g++) {
-            int k = 1 + r.nextInt(N - 1), t = RUE + 4 + r.nextInt(VILLE - 2 * RUE - 8);
+        // La garde, comme dans Assassin's Creed : jamais lâchée au hasard. Des postes (par deux aux carrefours,
+        // aux portes, sur les toits) et des rondes (autour d'un îlot, ou d'un bout à l'autre d'une rue).
+        java.util.List<int[]> carrefours = new java.util.ArrayList<>();
+        for (int i = 1; i < N; i++) for (int j = 1; j < N; j++) carrefours.add(new int[]{i * PAS + 3, j * PAS + 3});
+        java.util.Collections.shuffle(carrefours, r);
+        int postes = 0;
+        for (int[] c : carrefours) {
+            if (postes >= 5) break;
+            int x1 = c[0] - 2, z1 = c[1] - 2, x2 = c[0] + 2, z2 = c[1] + 2;
+            if (!vide(x1, 0, z1) || !vide(x1, 1, z1) || !vide(x2, 0, z2) || !vide(x2, 1, z2)) continue;
+            // L'un surveille la rue nord-sud, l'autre la rue est-ouest
+            float l1 = r.nextBoolean() ? 180 : 0, l2 = r.nextBoolean() ? 90 : -90;
+            poste(garde(Entites.HALLEBARDIER, x1, 0, z1, 4, "Hallebardier", rouges, false), l1);
+            poste(garde(Entites.HALLEBARDIER, x2, 0, z2, 4, "Hallebardier", rouges, false), l2);
+            postes++;
+        }
+        // Les rondes autour d'un îlot : deux hallebardiers qui marchent ensemble, de carrefour en carrefour
+        java.util.List<int[]> ilots = new java.util.ArrayList<>();
+        for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) if (!((j == 1 || j == 2) && (i == 1 || i == 2))) ilots.add(new int[]{i, j});
+        java.util.Collections.shuffle(ilots, r);
+        for (int n = 0; n < 4 && n < ilots.size(); n++) {
+            int i = ilots.get(n)[0], j = ilots.get(n)[1];
+            int[][] coins = {{i * PAS + 3, j * PAS + 3}, {(i + 1) * PAS + 3, j * PAS + 3}, {(i + 1) * PAS + 3, (j + 1) * PAS + 3}, {i * PAS + 3, (j + 1) * PAS + 3}};
+            if (r.nextBoolean()) java.util.Collections.reverse(java.util.Arrays.asList(coins));   // dans un sens ou dans l'autre
+            java.util.List<net.minecraft.util.math.Vec3d> route = new java.util.ArrayList<>();
+            for (int[] q : coins) route.add(new net.minecraft.util.math.Vec3d(ox + q[0] + 0.5, oy, oz + q[1] + 0.5));
+            for (int k = 0; k < 2; k++) ronde(garde(Entites.HALLEBARDIER, coins[0][0] + k, 0, coins[0][1] + k, 4, "Hallebardier de ronde", rouges, false), route);
+        }
+        // Les rondes d'un bout à l'autre d'une rue : un homme seul, qui fait les cent pas
+        for (int n = 0; n < 4; n++) {
+            int k = 1 + r.nextInt(N - 1), j = r.nextInt(N);
             boolean ns = r.nextBoolean();
-            int x = ns ? k * PAS + 3 : t, z = ns ? t : k * PAS + 3;
-            garde(Entites.HALLEBARDIER, x, 0, z, 10, "Hallebardier", rouges, false);
-            garde(Entites.HALLEBARDIER, x + 1, 0, z + 1, 10, "Hallebardier", rouges, false);
+            int a = RUE + j * PAS + 2, b = RUE + j * PAS + ILOT - 3, c = k * PAS + 3 + (r.nextBoolean() ? 1 : -1);
+            java.util.List<net.minecraft.util.math.Vec3d> route = java.util.List.of(
+                    new net.minecraft.util.math.Vec3d(ox + (ns ? c : a) + 0.5, oy, oz + (ns ? a : c) + 0.5),
+                    new net.minecraft.util.math.Vec3d(ox + (ns ? c : b) + 0.5, oy, oz + (ns ? b : c) + 0.5));
+            ronde(garde(Entites.HALLEBARDIER, ns ? c : a, 0, ns ? a : c, 4, "Hallebardier de ronde", rouges, false), route);
         }
+        // Les arbalétriers : en poste sur les toits plats (toits-terrasses, passerelles), tournés vers une rue
         int poses = 0;
-        for (int essai = 0; essai < 300 && poses < 10; essai++) {
-            int x = r.nextInt(VILLE), z = r.nextInt(PROFONDEUR), h = hauteur[x][z];
-            if (h > 0 && !vide(x, h, z) && vide(x, h + 1, z) && vide(x, h + 2, z)) {
-                garde(Entites.ARBALETRIER, x, h + 1, z, 3, "Arbalétrier", rouges, false);
-                poses++;
-            }
+        for (int essai = 0; essai < 600 && poses < 10; essai++) {
+            int x = 1 + r.nextInt(VILLE - 2), z = 1 + r.nextInt(PROFONDEUR - 2), h = hauteur[x][z];
+            if (h <= 0 || vide(x, h, z) || !vide(x, h + 1, z) || !vide(x, h + 2, z)) continue;
+            boolean plat = true;                                           // un toit plat tout autour (pas une pente de tuiles)
+            for (int a = -1; a <= 1 && plat; a++) for (int c = -1; c <= 1 && plat; c++)
+                plat = !vide(x + a, h, z + c) && vide(x + a, h + 1, z + c) && vide(x + a, h + 2, z + c)
+                        && w.getBlockState(new BlockPos(ox + x + a, oy + h, oz + z + c)).isSolidBlock(w, new BlockPos(ox + x + a, oy + h, oz + z + c));
+            if (!plat) continue;
+            float lacet = x % PAS < PAS / 2 ? 90 : -90;
+            if (r.nextBoolean()) lacet = z % PAS < PAS / 2 ? 180 : 0;
+            poste(garde(Entites.ARBALETRIER, x, h + 1, z, 2, "Arbalétrier", rouges, false), lacet);
+            poses++;
         }
-        garde(Entites.HALLEBARDIER, tychoX + 3, 0, tychoZ - 6, 6, "Hallebardier de l'hôtel de ville", rouges, false);
-        garde(Entites.ARBALETRIER, orlojX - 4, orlojH, orlojZ + 3, 1, "Arbalétrier de l'horloge", rouges, false);
+        poste(garde(Entites.HALLEBARDIER, tychoX + 3, 0, tychoZ - 6, 3, "Hallebardier de l'hôtel de ville", rouges, false), 0);
+        poste(garde(Entites.ARBALETRIER, orlojX - 4, orlojH, orlojZ + 3, 1, "Arbalétrier de l'horloge", rouges, false), 0);
         // Les cibles (personnages inventés) et leur garde
-        garde(Entites.CAPITAINE, tourPontA0 + 1, tourPontH, tourPontC0 + 1, 2, "Ottokar von Rabenstein, grand maître du Corbeau", ors, true)
-                .addCommandTag("ombre_cible_ottokar");
-        garde(Entites.ARBALETRIER, tourPontA0 + 1, tourPontH, tourPontC0 + 7, 2, "Arbalétrier du Corbeau", rouges, false);
-        garde(Entites.HALLEBARDIER, tourPontX - 6, 0, tourPontZ - 6, 4, "Hallebardier du pont", rouges, false);
-        garde(Entites.CAPITAINE, laboX, laboY, laboZ, 1, "Melchior Kragl, alchimiste du Corbeau", ors, true)
-                .addCommandTag("ombre_cible_kragl");
+        Entity ottokar = garde(Entites.CAPITAINE, tourPontA0 + 1, tourPontH, tourPontC0 + 1, 2, "Ottokar von Rabenstein, grand maître du Corbeau", ors, true);
+        ottokar.addCommandTag("ombre_cible_ottokar");
+        poste(ottokar, -90);
+        poste(garde(Entites.ARBALETRIER, tourPontA0 + 1, tourPontH, tourPontC0 + 7, 2, "Arbalétrier du Corbeau", rouges, false), 90);
+        poste(garde(Entites.HALLEBARDIER, tourPontX - 6, 0, tourPontZ - 6, 3, "Hallebardier du pont", rouges, false), 90);
+        Entity kragl = garde(Entites.CAPITAINE, laboX, laboY, laboZ, 1, "Melchior Kragl, alchimiste du Corbeau", ors, true);
+        kragl.addCommandTag("ombre_cible_kragl");
+        poste(kragl, 0);
+    }
+
+    /** Ce garde tient son poste, là où il est, tourné vers « lacet » (degrés de Minecraft : 0 = sud, 90 = ouest). */
+    private void poste(Entity e, float lacet) {
+        if (!(e instanceof net.minecraft.entity.mob.MobEntity m)) return;
+        fr.fenua.ombre.entite.Ordres.poste(m, m.getPos(), lacet);
+        m.setYaw(lacet); m.setHeadYaw(lacet); m.setBodyYaw(lacet);
+    }
+
+    /** Ce garde fait sa ronde par ces points, en boucle ; il n'est plus tenu de rester près de son point de départ. */
+    private void ronde(Entity e, java.util.List<net.minecraft.util.math.Vec3d> route) {
+        if (!(e instanceof PathAwareEntity m)) return;
+        fr.fenua.ombre.entite.Ordres.ronde(m, route);
+        m.setPositionTarget(BlockPos.ORIGIN, -1);
     }
 
     private void passant(int x, int z) { passant(x, z, -1, 14); }
