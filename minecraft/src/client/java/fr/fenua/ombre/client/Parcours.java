@@ -58,6 +58,7 @@ public final class Parcours {
     private static int poseBond;               // ticks de la pose de bond
     private static double cible;               // hauteur visée (rétablissement, monte-charge)
     private static double hisseX0, hisseZ0, hisseAvance;   // rétablissement : d'où l'on part, de combien on avance
+    private static boolean zTenu;              // arrivé au bord en montant : Z doit être relâché avant de passer par-dessus
     // Passage d'un angle de mur (en escalade ou suspendu) : quelques ticks où le corps contourne le coin
     private static final int VIRAGE = 6;
     private static int virage;
@@ -264,10 +265,15 @@ public final class Parcours {
         if (in.sneaking) { virage = 0; lacher(10); return; }
         if (virage > 0) { virer(p); return; }
 
-        // Le haut du mur est à portée : on se rétablit (en montant, ou à la fin d'un bond)
+        // Le haut du mur est à portée (en montant, ou à la fin d'un bond) :
+        // en sprint, ou sur un muret, on passe par-dessus d'un trait ; sinon on s'arrête suspendu au bord
         if (vers > 0.3 || bondMur > 0) {
             double h = hauteurRebord(p, p.getX() + murX * 0.6, p.getZ() + murZ * 0.6, -0.3, 1.9);
-            if (!Double.isNaN(h)) { hisser(p, murX, murZ, h); return; }
+            if (!Double.isNaN(h)) {
+                if (client.options.sprintKey.isPressed() || h - p.getY() < 1.4) { hisser(p, murX, murZ, h); return; }
+                arriverAuBord(p, h);
+                return;
+            }
         }
 
         // Plus de mur devant ?
@@ -324,6 +330,7 @@ public final class Parcours {
         double[] e = entree(p, in);
         double tx = -murZ, tz = murX;
         double vers = dot(e, murX, murZ), cote = e[0] * tx + e[1] * tz;
+        if (vers <= 0.3) zTenu = false;
 
         if (in.sneaking) { virage = 0; lacher(12); return; }
         if (virage > 0) { virer(p); return; }
@@ -340,7 +347,7 @@ public final class Parcours {
             }
             return;
         }
-        if (vers > 0.5 && duree > 6) { monterDuRebord(p); return; }
+        if (vers > 0.5 && duree > 6 && !zTenu) { monterDuRebord(p); return; }
         if (vers < -0.5 && duree > 6 && bloqueBuste(p, murX * 0.3, murZ * 0.3, 0.3)) {   // redescendre sur le mur
             changer(Etat.MUR);
             return;
@@ -360,6 +367,19 @@ public final class Parcours {
         p.setVelocity(gx + murX * 0.02, 0, gz + murZ * 0.02);
         if (!bloque(p, murX * 0.3, murZ * 0.3)) changer(Etat.LIBRE);
         if (duree % 10 == 0) rattrape();
+    }
+
+    /** En montant le long du mur, les mains arrivent au bord : on s'y arrête, suspendu (de là, assassinat depuis le rebord). */
+    private static void arriverAuBord(ClientPlayerEntity p, double haut) {
+        changer(Etat.REBORD);
+        zTenu = true;
+        bondMur = 0;
+        double y = haut - MAINS;
+        if (p.getWorld().isSpaceEmpty(p, p.getBoundingBox().offset(0, y - p.getY(), 0))) p.setPosition(p.getX(), y, p.getZ());
+        p.setVelocity(0, 0, 0);
+        p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.6f, 0.9f);
+        p.sendMessage(Text.literal("§7Au bord — §fZ§7 (à nouveau) ou §fEspace§7 : passer par-dessus · §fS§7 : redescendre"), true);
+        rattrape();
     }
 
     private static void monterDuRebord(ClientPlayerEntity p) {

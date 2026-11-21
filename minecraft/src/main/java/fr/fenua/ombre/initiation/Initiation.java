@@ -89,7 +89,8 @@ public final class Initiation {
         e(ESCALADE, "Escalade",
                 "Cours vers le mur et appuie sur §6Espace§f : tu t'accroches.",
                 "§6Z§f monte, §6S§f descend, §6Q§f / §6D§f sur le côté (les angles se passent), §6Maj§f lâche.",
-                "Le long de la §6gouttière§f, on grimpe deux fois plus vite. En haut, on se rétablit tout seul.",
+                "Le long de la §6gouttière§f, on grimpe deux fois plus vite. En haut, tu t'arrêtes suspendu au bord :",
+                "§6Z§f à nouveau ou §6Espace§f pour passer par-dessus (en sprint, §6Ctrl§f, on passe d'un trait).",
                 "Monte sur le mur, puis saute dans le foin de l'autre côté.")
                 .but(7, 8, 7).si(c -> c.sur(6, 7, 8)).ouvre();
 
@@ -204,7 +205,7 @@ public final class Initiation {
                 .but(12, 5, 8).si(c -> c.morts("ombre_init_g2"));
         e(ASSASSINATS, "Assassinat depuis le rebord",
                 "Un mannequin monte la garde sur le rempart.",
-                "Grimpe le rempart et §6arrête-toi juste sous le bord§f (relâche Z) : ses pieds au-dessus de ta tête.",
+                "Grimpe le rempart : arrivé en haut, tu restes §6suspendu au bord§f, ses pieds au-dessus de ta tête.",
                 "§6R§f : tu le tires par-dessus le bord.")
                 .but(19, 2, 7).si(c -> c.morts("ombre_init_g3"));
         e(ASSASSINATS, "Double assassinat",
@@ -364,6 +365,8 @@ public final class Initiation {
             Ctx c = new Ctx(p, p.getServerWorld(), o, s.cour);
             long t = p.getServerWorld().getTime();
             if (t - DEPUIS.getOrDefault(p.getUuid(), 0L) < 20) continue;   // laisser l'étape s'installer
+            // Loin de sa cour (téléporté ailleurs), on ne juge rien : ses gardes, hors de portée, sembleraient morts
+            if (c.x() < -24 || c.x() > LEN[s.cour] + 24 || Math.abs(c.z() - 7) > 40 || Math.abs(c.y()) > 40) continue;
             if (s.ratee != null && s.ratee.test(c)) { echec(p, e, o); continue; }
             if (s.reussie.test(c)) avancer(p, e, o);
         }

@@ -23,7 +23,7 @@ public class EcranAide extends Screen {
             new String[]{"Q ou D + Espace", "Bondir sur le côté"},
             new String[]{"S + Espace", "Saut arrière vers le mur d'en face (on s'y raccroche tout seul)"},
             new String[]{"Maj", "Lâcher prise"},
-            new String[]{"(en haut)", "On se rétablit tout seul par-dessus le bord"},
+            new String[]{"(en haut)", "On s'arrête suspendu au bord ; Z à nouveau ou Espace : par-dessus. En sprint (Ctrl) : d'un trait"},
             new String[]{"#Rebords", ""},
             new String[]{"(automatique)", "En tombant le long d'un mur, on saisit le bord qui passe aux mains"},
             new String[]{"Z ou Espace", "Se hisser (sur une poutre, on s'arrête au milieu)"},
