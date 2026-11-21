@@ -48,7 +48,7 @@ public final class Rappel {
         e(POUTRE, "Se hisser sur une poutre",
                 "Saute du palier vers la poutre : tes mains la saisissent.",
                 "§6Espace§f : tu te hisses et tu t'arrêtes §6pile au milieu§f de la poutre, au lieu de passer par-dessus.",
-                "(L'eau, en dessous, ne fait pas mal.)")
+                "(L'eau, en dessous, ne fait pas mal. Pour un saut de la foi, il faudrait regarder vers le bas en sautant.)")
                 .but(9, 5, 7).si(c -> c.p.isOnGround() && c.w.getBlockState(c.p.getBlockPos()).isOf(OmbreBlocs.POUTRE)).ouvre();
 
         e(BORD, "S'arrêter au bord",

@@ -147,7 +147,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Vue de l'aigle** | Touche **N** : la caméra s'envole au-dessus de toi. Vise un garde un instant : il est marqué une minute, visible à travers les murs. **N** pour revenir |
 | **Plumes de corbeau** | Quinze plumes cachées sur les hauteurs de Prague, signalées par une colonne de lumière ; le journal les compte, et la quinzième rapporte une bourse |
 | **Course des toits** | Au coin nord-ouest de Prague, un anneau de flammes sur un toit : le départ. Franchis les balises dans l'ordre par les toits, les passerelles et les échelles, sans toucher la rue. Chrono et record |
-| **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas. Saute : la caméra te filme de derrière, tu plonges tête la première bras en croix, le foin jaillit à l'arrivée |
+| **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas. Quand une poutre ou un rebord est à portée devant toi, c'est un saut ordinaire vers lui : pour le saut de la foi, **regarde vers le bas** en sautant. Saute : la caméra te filme de derrière, tu plonges tête la première bras en croix, le foin jaillit à l'arrivée |
 | **Scènes filmées** | Bandes noires de cinéma et caméra libre : à la synchronisation (l'aigle tourne autour du point de vue, jauge « Synchronisation »), au saut de la foi, et à chaque assassinat (plan de côté) |
 
 ### Objets

@@ -36,15 +36,23 @@ public final class HudAC {
     private HudAC() {}
 
     private static final int LARGEUR_BOUSSOLE = 220, CHAMP = 100;   // la boussole couvre ±100°
-    private static boolean sautDeLaFoi;
+    private static boolean sautDeLaFoi, priseDevant;
 
-    /** Au bord d'un saut de la foi (calculé au tick d'avant). */
-    public static boolean sautDeLaFoi() { return sautDeLaFoi; }
+    /**
+     * Le saut de la foi part-il si l'on quitte le bord maintenant ? Il faut une meule (ou l'eau) en contrebas ;
+     * et s'il y a devant soi quelque chose à attraper (poutre, rebord, mur), il faut en plus regarder vers le bas —
+     * sinon c'est un saut ordinaire vers cette prise.
+     */
+    public static boolean sautDeLaFoi() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        return sautDeLaFoi && (!priseDevant || mc.player != null && mc.player.getPitch() > 35);
+    }
 
     // ───────────── chaque tick ─────────────
 
     public static void tick(MinecraftClient mc) {
         sautDeLaFoi = mc.player != null && sautPossible(mc.player);
+        priseDevant = sautDeLaFoi && priseDevant(mc.player);
     }
 
     /** Debout au bord d'un vide, une meule (ou l'eau, du foin, un auvent) au moins 5 blocs plus bas devant soi. */
@@ -65,6 +73,19 @@ public final class HudAC {
                 break;
             }
         }
+        return false;
+    }
+
+    /** Une prise à portée de saut devant soi (de 1 à 4,5 blocs, entre la taille et 2,5 blocs au-dessus des pieds) ? */
+    private static boolean priseDevant(ClientPlayerEntity p) {
+        float yaw = p.getYaw() * MathHelper.RADIANS_PER_DEGREE;
+        double fx = -MathHelper.sin(yaw), fz = MathHelper.cos(yaw);
+        var w = p.getWorld();
+        for (double d = 1.0; d <= 4.5; d += 0.5)
+            for (double dy = 0.5; dy <= 2.5; dy += 0.5) {
+                BlockPos b = BlockPos.ofFloored(p.getX() + fx * d, p.getY() + dy, p.getZ() + fz * d);
+                if (!w.getBlockState(b).getCollisionShape(w, b).isEmpty()) return true;
+            }
         return false;
     }
 
@@ -96,7 +117,9 @@ public final class HudAC {
         notorieteEtJournal(ctx, tr, pulse);
 
         if (sautDeLaFoi && mc.currentScreen == null)
-            ctx.drawCenteredTextWithShadow(tr, Text.literal("§6⬇ Saut de la foi §7— saute dans le vide"), w / 2, h / 2 + 40, 0xFFFFFF);
+            ctx.drawCenteredTextWithShadow(tr, Text.literal(sautDeLaFoi()
+                    ? "§6⬇ Saut de la foi §7— saute dans le vide"
+                    : "§7⬇ Saut de la foi : §fregarde vers le bas§7 et saute (sinon, tu sautes vers la prise devant toi)"), w / 2, h / 2 + 40, 0xFFFFFF);
     }
 
     /** L'angle d'un point par rapport au regard, en degrés (négatif à gauche, positif à droite). */

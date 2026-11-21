@@ -152,6 +152,8 @@ public final class Cinema {
                 if (t >= duree) finir();
             }
             case SAUT -> {
+                // Les mains ont attrapé une prise en chemin : ce n'était pas un saut de la foi, on rend la caméra
+                if (Parcours.accroche()) { finir(); return; }
                 boolean arrive = p.isOnGround() || p.isTouchingWater()
                         || p.getWorld().getBlockState(p.getBlockPos()).isOf(OmbreBlocs.MEULE)
                         || p.getWorld().getBlockState(p.getBlockPos()).isOf(OmbreBlocs.CHARRETTE);

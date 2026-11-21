@@ -96,7 +96,7 @@ public class EcranAide extends Screen {
             new String[]{"Désynchronisation", "Tuer un passant : l'Ombre ne tue pas d'innocents (notoriété +50)"},
             new String[]{"Vol à la tire", "Accroupi dans le dos d'un passant, clic droit : sa bourse. Vu de face : « Au voleur ! »"},
             new String[]{"Enchaînement", "Après un assassinat, 2,5 s pour en enchaîner un autre au sol, même sur un garde qui t'a vu"},
-            new String[]{"Saut de la foi", "Au bord d'un vide, une invite dorée dit quand une meule ou l'eau t'attend en bas"},
+            new String[]{"Saut de la foi", "Au bord d'un vide, une invite dorée dit quand une meule ou l'eau t'attend en bas ; si une prise est devant toi, regarde vers le bas pour sauter"},
             new String[]{"Journal (à gauche)", "Les objectifs de la mission de Prague ; ils se cochent tout seuls"},
             new String[]{"#Commandes du chat", ""},
             new String[]{"/ombre initiation", "Commence ici ! La Ruelle d'Or : 20 cours, 30 leçons pas à pas, de l'escalade à l'assassinat"},

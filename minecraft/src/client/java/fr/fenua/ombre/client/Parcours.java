@@ -111,6 +111,9 @@ public final class Parcours {
 
     static double balancement() { return theta; }
 
+    /** Accroché à quelque chose (mur, rebord, perche, câble…) plutôt que libre. */
+    static boolean accroche() { return etat != Etat.LIBRE; }
+
 
     /** Orientation du corps (en degrés) quand il fait face au mur, ou NaN. */
     static float corpsVersMur() {
