@@ -75,7 +75,7 @@ Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 |---|---|
 | S'accrocher | **Espace** en poussant vers le mur, ou en sautant contre lui |
 | Monter / descendre | **Z / S** (Ctrl : plus vite ; le long d'une **gouttière**, deux fois plus vite) |
-| Se déplacer sur le côté | **Q / D** |
+| Se déplacer sur le côté | **Q / D** — les angles se passent tout seuls (coin d'une maison ou coin rentrant), la caméra suit |
 | Bondir vers le haut / sur le côté | **Espace** / **Q ou D + Espace** |
 | Saut arrière vers le mur d'en face | **S + Espace** (on s'y raccroche tout seul) |
 | Lâcher | **Maj** |
@@ -84,7 +84,7 @@ Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 
 | Geste | Touches |
 |---|---|
-| **Rebord** | Automatique en tombant le long d'un mur. Z ou Espace se hisser · Q/D glisser · Q/D + Espace sauter au rebord voisin · S redescendre · Maj lâcher |
+| **Rebord** | Automatique en tombant le long d'un mur. Z ou Espace se hisser (on s'arrête pile sur une poutre étroite) · Q/D glisser, angles compris · Q/D + Espace sauter au rebord voisin · S redescendre · Maj lâcher |
 | **Course sur mur** | En sprint, sauter le long d'un mur, Z enfoncé ; Espace rebondit vers le mur d'en face |
 | **Perche, enseigne, lanterne à potence, câble** | **Clic droit maintenu** en passant à portée : on se balance (Z = élan et projection) ou on glisse |
 | **Arbalète à grappin** | Clic droit vers le bord d'un toit (40 blocs) : on est tiré jusqu'en haut |

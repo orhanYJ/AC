@@ -88,7 +88,7 @@ public final class Initiation {
 
         e(ESCALADE, "Escalade",
                 "Cours vers le mur et appuie sur §6Espace§f : tu t'accroches.",
-                "§6Z§f monte, §6S§f descend, §6Q§f / §6D§f sur le côté, §6Maj§f lâche.",
+                "§6Z§f monte, §6S§f descend, §6Q§f / §6D§f sur le côté (les angles se passent), §6Maj§f lâche.",
                 "Le long de la §6gouttière§f, on grimpe deux fois plus vite. En haut, on se rétablit tout seul.",
                 "Monte sur le mur, puis saute dans le foin de l'autre côté.")
                 .but(7, 8, 7).si(c -> c.sur(6, 7, 8)).ouvre();

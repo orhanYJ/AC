@@ -27,7 +27,7 @@ import net.minecraft.world.World;
  * Les états :
  *  LIBRE      : marche, course, saut. Le saut en sprint porte plus loin (bond).
  *  MUR        : accroché à un mur (Espace en poussant vers lui, ou en sautant contre lui), on reste en place. Z/S montent et descendent (vers le mur / à l'opposé),
- *               Q/D se déplacent sur le côté. Espace : bond vers le haut ; avec Q/D, bond sur le côté ;
+ *               Q/D se déplacent sur le côté, et passent les angles (saillants comme rentrants), caméra comprise. Espace : bond vers le haut ; avec Q/D, bond sur le côté ;
  *               en tirant à l'opposé du mur, saut arrière vers le mur d'en face (on s'y raccroche seul).
  *               Maj : lâcher. En haut, on se rétablit tout seul.
  *  REBORD     : suspendu par les mains à un bord (on le saisit tout seul en tombant le long du mur). Q/D glissent, Q/D + Espace sautent vers le bord voisin,
@@ -57,6 +57,13 @@ public final class Parcours {
     private static int bondMur;                // ticks d'un bond vers le haut le long du mur
     private static int poseBond;               // ticks de la pose de bond
     private static double cible;               // hauteur visée (rétablissement, monte-charge)
+    private static double hisseX0, hisseZ0, hisseAvance;   // rétablissement : d'où l'on part, de combien on avance
+    // Passage d'un angle de mur (en escalade ou suspendu) : quelques ticks où le corps contourne le coin
+    private static final int VIRAGE = 6;
+    private static int virage;
+    private static boolean virSaillant;
+    private static double virAx, virAz, virMx, virMz, virD1;
+    private static float virYaw;
     private static boolean sautAvant, solAvant;
     private static boolean prise, priseAvant;    // le clic droit : la main qui attrape
 
@@ -244,7 +251,8 @@ public final class Parcours {
         double vers = dot(e, murX, murZ), cote = e[0] * tx + e[1] * tz;
         Vec3d v = p.getVelocity();
 
-        if (in.sneaking) { lacher(10); return; }
+        if (in.sneaking) { virage = 0; lacher(10); return; }
+        if (virage > 0) { virer(p); return; }
 
         // Le haut du mur est à portée : on se rétablit (en montant, ou à la fin d'un bond)
         if (vers > 0.3 || bondMur > 0) {
@@ -287,8 +295,10 @@ public final class Parcours {
         double lat = 0;
         if (Math.abs(cote) > 0.3) {
             double s = Math.signum(cote);
-            // On ne file pas au-delà du bout du mur
-            if (bloqueBuste(p, murX * 0.3 + tx * s * 0.45, murZ * 0.3 + tz * s * 0.45, 0.3)) lat = s * (vite ? 0.15 : 0.1);
+            // Un mur en travers (coin rentrant), ou le bout du mur (coin saillant) : on passe l'angle
+            if (murEnTravers(p, tx * s, tz * s)) { if (contourner(p, tx * s, tz * s, false)) return; }
+            else if (bloqueBuste(p, murX * 0.3 + tx * s * 0.45, murZ * 0.3 + tz * s * 0.45, 0.3)) lat = s * (vite ? 0.15 : 0.1);
+            else if (contourner(p, tx * s, tz * s, false)) return;
         }
         p.setVelocity(murX * 0.05 + tx * lat, vy, murZ * 0.05 + tz * lat);
         if (vy != 0 || lat != 0) {
@@ -305,7 +315,8 @@ public final class Parcours {
         double tx = -murZ, tz = murX;
         double vers = dot(e, murX, murZ), cote = e[0] * tx + e[1] * tz;
 
-        if (in.sneaking) { lacher(12); return; }
+        if (in.sneaking) { virage = 0; lacher(12); return; }
+        if (virage > 0) { virer(p); return; }
         if (nouveauSaut) {
             if (Math.abs(cote) > 0.5) {                          // saut vers le rebord voisin
                 double s = Math.signum(cote);
@@ -329,7 +340,11 @@ public final class Parcours {
         if (Math.abs(cote) > 0.3) {
             double s = Math.signum(cote);
             gx = tx * s * 0.12; gz = tz * s * 0.12;
-            if (Double.isNaN(hauteurRebord(p, p.getX() + gx * 4 + murX * 0.6, p.getZ() + gz * 4 + murZ * 0.6, 1.0, 2.2))) { gx = 0; gz = 0; }
+            boolean enTravers = murEnTravers(p, tx * s, tz * s);
+            if (enTravers || Double.isNaN(hauteurRebord(p, p.getX() + gx * 4 + murX * 0.6, p.getZ() + gz * 4 + murZ * 0.6, 1.0, 2.2))) {
+                gx = 0; gz = 0;
+                if (contourner(p, tx * s, tz * s, true)) return;   // l'angle : le bord continue de l'autre côté
+            }
             else phase += 0.3f;
         }
         p.setVelocity(gx + murX * 0.02, 0, gz + murZ * 0.02);
@@ -347,6 +362,9 @@ public final class Parcours {
     private static void hisser(ClientPlayerEntity p, double fx, double fz, double hauteur) {
         changer(Etat.HISSE);
         murX = fx; murZ = fz; cible = hauteur;
+        virage = 0;
+        hisseX0 = p.getX(); hisseZ0 = p.getZ();
+        hisseAvance = avancePourSeRetablir(p, fx, fz, hauteur);
         p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.6f, 1.0f);
         sansPrise = 10;
         hisse(p);
@@ -354,13 +372,101 @@ public final class Parcours {
     }
 
     private static void hisse(ClientPlayerEntity p) {
-        if (duree > 18) { changer(Etat.LIBRE); return; }
+        if (duree > 30) { changer(Etat.LIBRE); return; }
         if (p.getY() < cible + 0.02) {
             p.setVelocity(murX * 0.03, Math.min(0.42, cible + 0.08 - p.getY()) + 0.05, murZ * 0.03);
-        } else {
-            p.setVelocity(murX * 0.28, 0.05, murZ * 0.28);       // on bascule par-dessus le bord
-            changer(Etat.LIBRE);
+            return;
         }
+        // On bascule par-dessus le bord, juste ce qu'il faut : au milieu d'une poutre, un peu en retrait sur un toit
+        double fait = (p.getX() - hisseX0) * murX + (p.getZ() - hisseZ0) * murZ;
+        double reste = hisseAvance - fait;
+        if (reste <= 0.03 || (duree > 4 && bloque(p, murX * 0.1, murZ * 0.1))) {
+            p.setVelocity(0, 0, 0);
+            changer(Etat.LIBRE);
+            return;
+        }
+        double v = Math.min(0.24, reste);
+        p.setVelocity(murX * v, 0, murZ * v);
+    }
+
+    /**
+     * De combien avancer, une fois les pieds au niveau du bord, pour se tenir bien dessus :
+     * on mesure la largeur de ce qu'il y a sous les pieds dans la direction du mur
+     * (une poutre ne fait que 6 pixels) et on vise son milieu, sans aller plus de 0,75 bloc au-delà du bord.
+     */
+    private static double avancePourSeRetablir(ClientPlayerEntity p, double fx, double fz, double hauteur) {
+        World w = p.getWorld();
+        double debut = Double.NaN, fin = Double.NaN;
+        for (double t = 0; t <= 2.0; t += 0.05) {
+            double x = p.getX() + fx * t, z = p.getZ() + fz * t;
+            boolean plein = !w.isSpaceEmpty(new Box(x - 0.01, hauteur - 0.06, z - 0.01, x + 0.01, hauteur - 0.01, z + 0.01));
+            if (plein && Double.isNaN(debut)) debut = t;
+            if (!plein && !Double.isNaN(debut)) { fin = t; break; }
+        }
+        if (Double.isNaN(debut)) return 0.9;                     // rien de mesurable : la poussée d'autrefois
+        if (Double.isNaN(fin)) fin = 2.0;
+        return debut + Math.min((fin - debut) / 2, 0.75);
+    }
+
+    // ───────────────────────── les angles ─────────────────────────
+
+    /**
+     * Passer un angle en se déplaçant dans la direction (ax, az), le long du mur.
+     * Coin rentrant : un mur nous barre la route ; il devient le mur auquel on s'accroche.
+     * Coin saillant : le mur s'arrête ; on fait le tour du coin et on s'accroche à sa face de côté.
+     * Suspendu à un rebord (rebord = vrai), il faut aussi que le bord continue de l'autre côté.
+     */
+    private static boolean contourner(ClientPlayerEntity p, double ax, double az, boolean rebord) {
+        World w = p.getWorld();
+        if (murEnTravers(p, ax, az)) {
+            if (rebord && Double.isNaN(hauteurRebord(p, p.getX() + ax * 0.6, p.getZ() + az * 0.6, 1.0, 2.2))) return false;
+            commencerVirage(p, ax, az, false);
+            return true;
+        }
+        // Où le mur s'arrête-t-il ? On dépasse son arête d'un demi-corps, puis on avance le long de sa face de côté
+        double bout = Double.NaN;
+        for (double t = 0; t <= 1.0; t += 0.05)
+            if (!bloqueBuste(p, murX * 0.3 + ax * t, murZ * 0.3 + az * t, 0.3)) { bout = t; break; }
+        if (Double.isNaN(bout)) return false;
+        double d1 = bout + 0.03;                                 // « bout » met déjà le corps juste au-delà de l'arête
+        double ox = ax * d1 + murX * 0.65, oz = az * d1 + murZ * 0.65;
+        Box arrivee = p.getBoundingBox().offset(ox, 0, oz);
+        if (!w.isSpaceEmpty(p, p.getBoundingBox().offset(ax * d1, 0, az * d1)) || !w.isSpaceEmpty(p, arrivee)) return false;
+        Box buste = new Box(arrivee.minX, arrivee.minY + 0.3, arrivee.minZ, arrivee.maxX, arrivee.maxY - 0.1, arrivee.maxZ).offset(-ax * 0.35, 0, -az * 0.35);
+        if (w.isSpaceEmpty(p, buste)) return false;              // pas de face de côté (un mur trop mince)
+        if (rebord && Double.isNaN(hauteurRebord(p, p.getX() + ox - ax * 0.6, p.getZ() + oz - az * 0.6, 1.0, 2.2))) return false;
+        commencerVirage(p, -ax, -az, true);
+        virAx = ax; virAz = az; virD1 = d1;
+        return true;
+    }
+
+    /** Un mur barre-t-il la route dans la direction (ax, az) ? Un vrai mur : il dépasse d'au moins un demi-bloc (pas une gouttière). */
+    private static boolean murEnTravers(ClientPlayerEntity p, double ax, double az) {
+        return bloqueBuste(p, ax * 0.2, az * 0.2, 0.3) && bloqueBuste(p, ax * 0.2 - murX * 0.5, az * 0.2 - murZ * 0.5, 0.3);
+    }
+
+    private static float capDe(double x, double z) { return (float) Math.toDegrees(Math.atan2(-x, z)); }
+
+    private static void commencerVirage(ClientPlayerEntity p, double nx, double nz, boolean saillant) {
+        virMx = murX; virMz = murZ;
+        virSaillant = saillant;
+        virYaw = MathHelper.wrapDegrees(capDe(nx, nz) - capDe(murX, murZ)) / VIRAGE;
+        murX = nx; murZ = nz;
+        virage = VIRAGE;
+        p.setVelocity(0, 0, 0);                                  // sinon la pesanteur du tick d'avant nous fait glisser
+        p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.4f, 1.1f);
+        rattrape();
+    }
+
+    /** Un tick du passage d'angle : la caméra pivote avec le corps ; au coin saillant, on longe puis on contourne. */
+    private static void virer(ClientPlayerEntity p) {
+        virage--;
+        p.setYaw(p.getYaw() + virYaw);
+        double v1 = virD1 / (VIRAGE / 2.0), v2 = 0.65 / (VIRAGE / 2.0);
+        if (!virSaillant) p.setVelocity(murX * 0.03, 0, murZ * 0.03);
+        else if (virage >= VIRAGE / 2) p.setVelocity(virAx * v1, 0, virAz * v1);
+        else p.setVelocity(virMx * v2, 0, virMz * v2);
+        phase += 0.3f;
     }
 
     // ───────────────────────── MUR_COURU ─────────────────────────
