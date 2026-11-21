@@ -58,6 +58,8 @@ public class Ombre implements ModInitializer {
                 (payload, context) -> fr.fenua.ombre.ac.Profil.recevoir(context.player(), payload));
         // La bourse, les points et les compétences, une fois par seconde
         ServerTickEvents.END_SERVER_TICK.register(fr.fenua.ombre.ac.Profil::tick);
+        // Les quêtes : filatures, livraisons, lieux à atteindre
+        ServerTickEvents.END_SERVER_TICK.register(fr.fenua.ombre.ac.Quetes::tick);
         ServerPlayNetworking.registerGlobalReceiver(ActionPayload.ID,
                 (payload, context) -> Pouvoirs.agir(context.player(), payload.action(), payload.cible()));
         ServerPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.VoyagePayload.ID,
@@ -91,6 +93,11 @@ public class Ombre implements ModInitializer {
                                 .requires(src -> src.hasPermissionLevel(2))
                                 .then(CommandManager.argument("numero", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, Choregraphie.NB))
                                         .executes(ctx -> Assassinat.imposerScene(ctx.getSource(),
+                                                com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "numero") - 1))))
+                        .then(CommandManager.literal("memoire")
+                                .requires(src -> src.hasPermissionLevel(2))
+                                .then(CommandManager.argument("numero", com.mojang.brigadier.arguments.IntegerArgumentType.integer(1, fr.fenua.ombre.ac.Quetes.HISTOIRE.size()))
+                                        .executes(ctx -> fr.fenua.ombre.ac.Quetes.aller(ctx.getSource().getPlayerOrThrow(),
                                                 com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "numero") - 1))))
                         .then(CommandManager.literal("kit")
                                 .requires(src -> src.hasPermissionLevel(2))

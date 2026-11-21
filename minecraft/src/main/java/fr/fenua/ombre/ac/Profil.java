@@ -174,7 +174,7 @@ public final class Profil {
     /** Une marchandise : l'objet, combien, le prix en thalers. */
     public record Offre(Item objet, int nombre, int prix) {}
 
-    public static final String BOUTIQUE = "ombre_boutique:";
+    public static final String BOUTIQUE = "ombre_boutique.";
     public static final String[] MARCHANDS = {"Armurier", "Apothicaire", "Fripier"};
     public static final List<List<Offre>> BOUTIQUES = List.of(
             List.of(new Offre(OmbreItems.COUTEAUX, 5, 30), new Offre(Objets.FLECHETTE_SOPORIFIQUE, 4, 40),
@@ -235,7 +235,7 @@ public final class Profil {
         p.sendMessage(Text.literal("§6Fouillé : +" + or + " thalers" + (pris.isEmpty() ? "" : " §7· " + String.join(", ", pris))), true);
         p.getWorld().playSound(null, corps.getBlockPos(), SoundEvents.ITEM_ARMOR_EQUIP_LEATHER.value(), SoundCategory.PLAYERS, 0.8f, 0.9f);
         ((ServerWorld) corps.getWorld()).spawnParticles(ParticleTypes.WAX_ON, corps.getX(), corps.getY() + 0.3, corps.getZ(), 8, 0.4, 0.1, 0.4, 0);
-        fr.fenua.ombre.ac.Quetes.evenement(p, "fouille", null);
+        fr.fenua.ombre.ac.Quetes.evenement(p, "fouille", corps);
         envoyer(p, -1);
     }
 

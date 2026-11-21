@@ -40,7 +40,8 @@ public final class Mission {
         if (!p.getCommandTags().contains(ACTIVE) || !p.addCommandTag(tag)) return;
         for (String[] o : OBJECTIFS) if (o[0].equals(tag)) p.sendMessage(Text.literal("§a✔ " + o[1]), true);
         p.getWorld().playSound(null, p.getBlockPos(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 0.6f, 1.4f);
-        if (p.getCommandTags().contains("ombre_m_ottokar") && p.getCommandTags().contains("ombre_m_kragl") && p.addCommandTag("ombre_m_fin")) epilogue(p);
+        // (Avec l'histoire en sept mémoires, c'est elle qui conclut : voir Quetes)
+        if (!Quetes.active(p) && p.getCommandTags().contains("ombre_m_ottokar") && p.getCommandTags().contains("ombre_m_kragl") && p.addCommandTag("ombre_m_fin")) epilogue(p);
     }
 
     /** La fin : ce que l'histoire a retenu. */

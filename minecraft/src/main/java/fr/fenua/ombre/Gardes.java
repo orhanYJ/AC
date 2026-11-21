@@ -150,7 +150,9 @@ public final class Gardes {
                     String[] x = t.split(":", 3);
                     try { vues.add(Long.parseLong(x[1])); noms.add(x.length > 2 ? x[2] : "Point de vue"); } catch (NumberFormatException ignore) {}
                 }
-                for (Entity e : MARQUEURS.getOrDefault(p.getServerWorld(), List.of())) {
+                boolean quetes = fr.fenua.ombre.ac.Quetes.active(p);
+                if (quetes) cibles.addAll(fr.fenua.ombre.ac.Quetes.marqueurs(p));
+                for (Entity e : quetes ? List.<Entity>of() : MARQUEURS.getOrDefault(p.getServerWorld(), List.of())) {
                     if (!e.isAlive() || e.squaredDistanceTo(p) > 300 * 300) continue;
                     if (e instanceof Figure f && (!mission || p.getCommandTags().contains(f.qui() == Figure.TYCHO ? "ombre_m_tycho" : "ombre_m_kepler"))) continue;
                     cibles.add(e.getBlockPos().asLong());
@@ -164,7 +166,8 @@ public final class Gardes {
                     BlockPos but = fr.fenua.ombre.initiation.Cours.but(p);
                     if (but != null) cibles.add(but.asLong());
                 }
-                ServerPlayNetworking.send(p, new JournalPayload(tuto != null ? tuto : mission ? Mission.lignes(p) : List.of(), vues, noms, cibles));
+                List<String> journal = tuto != null ? tuto : quetes ? fr.fenua.ombre.ac.Quetes.lignesEtFacultatifs(p) : mission ? Mission.lignes(p) : List.of();
+                ServerPlayNetworking.send(p, new JournalPayload(journal, vues, noms, cibles));
             }
         }
 
@@ -278,6 +281,7 @@ public final class Gardes {
         w.playSound(null, p.getBlockPos(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 0.8f, 0.7f);
         w.spawnParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 1, p.getZ(), 30, 1.5, 0.5, 1.5, 0.02);
         Mission.marquer(p, "ombre_m_vue");
+        fr.fenua.ombre.ac.Quetes.evenement(p, "synchro", nom);
     }
 
     /**
@@ -289,6 +293,7 @@ public final class Gardes {
                 && !mort.getCommandTags().contains(fr.fenua.ombre.initiation.Initiation.TAG))
             mort.dropStack(new net.minecraft.item.ItemStack(fr.fenua.ombre.objet.Objets.TENUE));
         if (!(mort.getWorld() instanceof ServerWorld w)) return;
+        if (source.getAttacker() instanceof ServerPlayerEntity tueur) fr.fenua.ombre.ac.Quetes.mort(mort, tueur);
         if (mort instanceof Passant && source.getAttacker() instanceof ServerPlayerEntity tueur) {
             tueur.networkHandler.sendPacket(new TitleS2CPacket(Text.literal("§4Désynchronisation")));
             tueur.networkHandler.sendPacket(new SubtitleS2CPacket(Text.literal("§7L'Ombre ne tue pas d'innocents")));

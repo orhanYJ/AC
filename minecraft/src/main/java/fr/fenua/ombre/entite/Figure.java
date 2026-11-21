@@ -112,6 +112,7 @@ public class Figure extends PathAwareEntity {
             if (joueur instanceof net.minecraft.server.network.ServerPlayerEntity sp) {
                 if (qui() == TYCHO) fr.fenua.ombre.ac.Mission.marquer(sp, "ombre_m_tycho");
                 if (qui() == KEPLER) fr.fenua.ombre.ac.Mission.marquer(sp, "ombre_m_kepler");
+                fr.fenua.ombre.ac.Quetes.evenement(sp, "parle", this);
             }
             getLookControl().lookAt(joueur);
         }

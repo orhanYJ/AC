@@ -239,9 +239,16 @@ public final class HudAC {
         if (EtatAC.objectifs.isEmpty()) return;
         if (EtatAC.objectifs.get(0).startsWith("T")) { lecon(ctx, tr, x, y + 2); return; }
         y += 2;
-        ctx.drawTextWithShadow(tr, Text.literal("§6Prague, 1600"), x, y, 0xFFFFFF);
-        y += 11;
+        boolean titres = EtatAC.objectifs.stream().anyMatch(o -> o.startsWith("H"));
+        if (!titres) { ctx.drawTextWithShadow(tr, Text.literal("§6Prague, 1600"), x, y, 0xFFFFFF); y += 11; }
         for (String o : EtatAC.objectifs) {
+            // « H » : la mémoire en cours (titre doré) ; « S » : la quête secondaire (titre jaune)
+            if (o.startsWith("H") || o.startsWith("S")) {
+                if (y > 30) y += 3;
+                ctx.drawTextWithShadow(tr, Text.literal((o.startsWith("H") ? "§6§l" : "§e⚑ ") + o.substring(1)), x, y, 0xFFFFFF);
+                y += 11;
+                continue;
+            }
             boolean fait = o.startsWith("1");
             String texte = o.substring(1);
             boolean facultatif = texte.startsWith("Facultatif");

@@ -18,19 +18,20 @@ public final class ProfilClient {
     public static boolean a(String id) { return COMPETENCES.contains(id); }
 
     /**
-     * Le corps de garde visé (Minecraft ne laisse pas viser un mort : on lance notre propre rayon depuis les yeux,
-     * à 4,5 blocs, sur des boîtes élargies au sol, puisque le corps est couché).
+     * Le corps de garde visé : Minecraft ne laisse pas viser un mort, et un corps couché est difficile à viser.
+     * On prend celui qui est le plus près de la direction du regard (à moins de 30°), à moins de 4 blocs.
      */
     public static net.minecraft.entity.LivingEntity corpsVise(MinecraftClient mc) {
         if (mc.player == null || mc.world == null) return null;
-        net.minecraft.util.math.Vec3d oeil = mc.player.getEyePos(), fin = oeil.add(mc.player.getRotationVec(1f).multiply(4.5));
+        net.minecraft.util.math.Vec3d oeil = mc.player.getEyePos(), regard = mc.player.getRotationVec(1f);
         net.minecraft.entity.LivingEntity mieux = null;
-        double d = Double.MAX_VALUE;
+        double meilleur = Math.cos(Math.toRadians(30));
         for (net.minecraft.entity.LivingEntity l : mc.world.getEntitiesByClass(net.minecraft.entity.LivingEntity.class,
-                mc.player.getBoundingBox().expand(6), e -> !e.isAlive() && fr.fenua.ombre.Discretion.estGardeClient(e) && !FOUILLES.contains(e.getId()))) {
-            net.minecraft.util.math.Box b = new net.minecraft.util.math.Box(l.getX() - 1.1, l.getY(), l.getZ() - 1.1, l.getX() + 1.1, l.getY() + 0.7, l.getZ() + 1.1);
-            var t = b.raycast(oeil, fin);
-            if (t.isPresent() && t.get().squaredDistanceTo(oeil) < d) { d = t.get().squaredDistanceTo(oeil); mieux = l; }
+                mc.player.getBoundingBox().expand(5), e -> !e.isAlive() && fr.fenua.ombre.Discretion.estGardeClient(e) && !FOUILLES.contains(e.getId()))) {
+            net.minecraft.util.math.Vec3d vers = l.getPos().add(0, 0.3, 0).subtract(oeil);
+            if (vers.length() > 4.2) continue;
+            double c = vers.normalize().dotProduct(regard);
+            if (c > meilleur) { meilleur = c; mieux = l; }
         }
         return mieux;
     }

@@ -46,6 +46,7 @@ public class Passant extends PathAwareEntity {
     protected void initGoals() {
         goalSelector.add(0, new SwimGoal(this));
         goalSelector.add(1, new EscapeDangerGoal(this, 1.45));
+        goalSelector.add(3, new Ordres.But(this));                 // un messager suit sa route
         goalSelector.add(4, new WanderAroundFarGoal(this, 0.55));
         goalSelector.add(5, new LookAtEntityGoal(this, PlayerEntity.class, 6));
         goalSelector.add(6, new LookAtEntityGoal(this, Passant.class, 5));
@@ -95,6 +96,14 @@ public class Passant extends PathAwareEntity {
                     getLookControl().lookAt(joueur);
                     playSound(SoundEvents.ENTITY_VILLAGER_AMBIENT, 0.8f, 1.1f);
                     fr.fenua.ombre.ac.Profil.envoyer(sp, Integer.parseInt(t.substring(fr.fenua.ombre.ac.Profil.BOUTIQUE.length())));
+                }
+                return net.minecraft.util.ActionResult.SUCCESS;
+            }
+            // Un habitant de l'histoire (messager, donneur de quête) : on lui parle
+            if (getCommandTags().stream().anyMatch(t -> t.startsWith("ombre_pnj."))) {
+                if (!getWorld().isClient() && joueur instanceof net.minecraft.server.network.ServerPlayerEntity sp) {
+                    getLookControl().lookAt(joueur);
+                    fr.fenua.ombre.ac.Quetes.evenement(sp, "parle", this);
                 }
                 return net.minecraft.util.ActionResult.SUCCESS;
             }

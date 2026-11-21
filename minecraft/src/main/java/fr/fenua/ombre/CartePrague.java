@@ -71,6 +71,7 @@ public final class CartePrague {
                 if (t.startsWith("ombre_m_") || t.startsWith(Gardes.VUE_SYNCHRO)) j.removeCommandTag(t);
             j.addCommandTag(fr.fenua.ombre.ac.Mission.ACTIVE);
             fr.fenua.ombre.ac.Notoriete.ajouter(j, -100, null);
+            fr.fenua.ombre.ac.Quetes.commencer(j);
         }
         src.sendFeedback(() -> Text.literal("§6Prague, 1600.§r La Vieille-Ville s'élève au nord-est, la Vltava coule à l'est.\n"
                 + "§eMission§r : parle à §6Tycho Brahe§r et à §6Johannes Kepler§r, au pied de l'horloge astronomique (clic droit).\n"
@@ -114,6 +115,7 @@ public final class CartePrague {
                 if (i == 3 && j == 1) tyn(bx, bz);
                 else if (i == 3 && j == 3) chantier(bx, bz);
                 else if (i == 0 && j == 4) jardin(bx, bz);
+                else if (i == 4 && j == 4) entrepots(bx, bz);
                 else ilot(bx, bz);
             }
         place();
@@ -126,6 +128,107 @@ public final class CartePrague {
         gens();
         zones();
         defis();
+        lieuxDeQuete();
+    }
+
+    // ───────────────────────── les lieux de l'histoire ─────────────────────────
+
+    /** Un repère de quête : un marqueur invisible nommé, que les quêtes retrouvent (voir ac/Quetes). */
+    private void repere(String id, double x, double y, double z) {
+        Entity m = EntityType.MARKER.create(w);
+        if (m == null) return;
+        m.refreshPositionAndAngles(ox + x + 0.5, oy + y, oz + z + 0.5, 0, 0);
+        m.setCustomName(Text.literal(id));
+        m.addCommandTag(fr.fenua.ombre.ac.Quetes.LIEU);
+        w.spawnEntity(m);
+    }
+
+    /** Un habitant qui offre une quête secondaire : il porte un « ! » au-dessus de la tête. */
+    private void donneur(String id, String nom, int x, int z, int sorte) {
+        Passant p = passant(x, z, sorte, 3);
+        if (p == null) return;
+        p.addCommandTag("ombre_pnj." + id);
+        p.setCustomName(Text.literal("§e! §f" + nom));
+        p.setCustomNameVisible(true);
+    }
+
+    /**
+     * Les lieux de l'histoire et des quêtes secondaires : la route du messager (rue à l'ouest de la grande place,
+     * jusqu'à la taverne du nord), les entrepôts du port, les rues des contrats, la porte de la tour du pont.
+     */
+    private void lieuxDeQuete() {
+        repere("messager_1", PAS + 3, 0, 2 * PAS + 2);
+        repere("messager_2", PAS + 3, 0, PAS + 3);
+        repere("messager_3", PAS + 3, 0, RUE + 12);
+        int ex = RUE + 4 * PAS, ez = RUE + 4 * PAS;                  // les entrepôts du port
+        repere("entrepot", ex + 15, 0, ez + 9);
+        repere("entrepot_g1", ex + 18, 0, ez + 3);
+        repere("entrepot_g2", ex + 21, 0, ez + 20);
+        repere("contrat1", 3 * PAS + 3, 0, 4 * PAS + 3);
+        repere("contrat2", 2 * PAS + 3, 0, 4 * PAS + 3);
+        repere("contrat3", 4 * PAS + 3, 0, 4 * PAS + 3);
+        repere("donneur3", 3 * PAS + 3, 0, 2 * PAS + 3);
+        repere("livraison", tourPontA0 - 3, 0, tourPontZ);
+        donneur("marta", "Veuve Marta", 4 * PAS + 3, 2 * PAS + 2, 2);
+        donneur("mathias", "Mathias l'imprimeur", PAS + 2, 4 * PAS + 3, 1);
+        donneur("bohuslav", "Bohuslav le marchand", 3 * PAS + 2, 2 * PAS + 4, 4);
+        donneur("ludmila", "Ludmila l'aubergiste", 4 * PAS + 2, 2 * PAS + 12, 3);
+        int px = RUE + PAS + ILOT + 10, pz = RUE + PAS + ILOT + 8;
+        donneur("pepik", "Pepík le gamin", px, pz, 5);
+    }
+
+    // ───────────────────────── les entrepôts du port ─────────────────────────
+
+    /**
+     * Les entrepôts du port (îlot du sud-est, au bord de la Vltava) : une grande halle de pierre et de bois,
+     * une plus petite, une cour pleine de caisses empilées (un parcours), une grue de bois, et la garde du Corbeau.
+     * Zone interdite (étendard).
+     */
+    private void entrepots(int bx, int bz) {
+        Block pierre = b("pierre_de_taille"), sol = b("dalles_de_pierre");
+        BlockState planches = Blocks.SPRUCE_PLANKS.getDefaultState(), poutre = Blocks.STRIPPED_SPRUCE_LOG.getDefaultState();
+        for (int x = bx; x < bx + ILOT; x++) for (int z = bz; z < bz + ILOT; z++) set(x, -1, z, (x + z) % 5 == 0 ? Blocks.COBBLESTONE.getDefaultState() : sol.getDefaultState());
+        // La grande halle : soubassement de pierre, étage de planches à colombages, toit de tuiles
+        halle(bx + 1, bz + 1, bx + 14, bz + 11, 8, pierre, planches, poutre);
+        halle(bx + 1, bz + 14, bx + 10, bz + 22, 6, pierre, planches, poutre);
+        // La cour : des piles de caisses de hauteurs différentes, des tonneaux, une charrette
+        int[][] piles = {{17, 2, 1}, {19, 2, 2}, {21, 3, 3}, {17, 6, 2}, {22, 7, 1}, {16, 13, 3}, {18, 15, 2}, {20, 17, 1}, {22, 19, 2}, {13, 13, 1}};
+        for (int[] q : piles) {
+            for (int y = 0; y < q[2]; y++) set(bx + q[0], y, bz + q[1], (y + q[0]) % 2 == 0 ? Blocks.STRIPPED_SPRUCE_WOOD.getDefaultState() : Blocks.BARREL.getDefaultState());
+            hauteur[bx + q[0]][bz + q[1]] = q[2];
+        }
+        for (int k = 0; k < 5; k++) set(bx + 13 + k, 0, bz + 22, vers(OmbreBlocs.TONNEAU, Direction.NORTH));
+        charrette(bx + 19, bz + 10, Direction.SOUTH, 1);
+        // La grue : un mât de bois et sa flèche au-dessus de la cour (perchoir au bout : un saut dans le foin)
+        boite(bx + 22, 0, bz + 12, bx + 22, 11, bz + 12, Blocks.STRIPPED_SPRUCE_LOG);
+        for (int x = bx + 16; x <= bx + 22; x++) set(x, 12, bz + 12, OmbreBlocs.POUTRE.getDefaultState().with(Properties.HORIZONTAL_AXIS, Direction.Axis.X));
+        for (int y = 0; y <= 11; y++) set(bx + 21, y, bz + 12, Blocks.LADDER.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.WEST));
+        boite(bx + 16, 0, bz + 11, bx + 17, 0, bz + 13, OmbreBlocs.MEULE);
+        set(bx + 16, 1, bz + 12, OmbreBlocs.MEULE);
+        // La zone interdite et ses lanternes
+        set(bx + 20, 0, bz + 5, vers(OmbreBlocs.ETENDARD, Direction.WEST));
+        for (int[] q : new int[][]{{15, 1}, {23, 1}, {15, 23}, {23, 12}}) { set(bx + q[0], 0, bz + q[1], Blocks.SPRUCE_FENCE); set(bx + q[0], 1, bz + q[1], Blocks.LANTERN); }
+        lieu("Entrepôts du port", bx + 8, 14, bz + 6);
+    }
+
+    /** Une halle : soubassement de pierre (3 de haut), étage de planches entre des poteaux, toit de tuiles, grandes portes. */
+    private void halle(int x0, int z0, int x1, int z1, int h, Block pierre, BlockState planches, BlockState poutre) {
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) {
+            boolean bord = x == x0 || x == x1 || z == z0 || z == z1;
+            for (int y = 0; y < h; y++) {
+                if (!bord) { set(x, y, z, Blocks.AIR); continue; }
+                boolean poteau = (x - x0) % 4 == 0 && (z == z0 || z == z1) || (z - z0) % 4 == 0 && (x == x0 || x == x1);
+                set(x, y, z, y < 3 ? pierre.getDefaultState() : poteau || y == h - 1 ? poutre : planches);
+            }
+            hauteur[x][z] = h;
+        }
+        // Les grandes portes côté cour (est), des lucarnes, des caisses dedans
+        int zm = (z0 + z1) / 2;
+        for (int z = zm - 1; z <= zm + 1; z++) for (int y = 0; y < 3; y++) set(x1, y, z, Blocks.AIR);
+        for (int z = z0 + 2; z < z1 - 1; z += 3) { set(x0, 4, z, Blocks.GLASS_PANE); set(x1, 4, z, Blocks.GLASS_PANE); }
+        for (int x = x0 + 2; x < x1 - 1; x += 2) for (int y = 0; y < 1 + (x % 3); y++) set(x, y, z0 + 2, (x + y) % 2 == 0 ? Blocks.BARREL.getDefaultState() : Blocks.STRIPPED_SPRUCE_WOOD.getDefaultState());
+        set(x0 + 2, 1, zm, Blocks.LANTERN);
+        toit(x0, z0, x1, z1, h, Direction.EAST, b("pierre_de_taille"));
     }
 
     // ───────────────────────── les défis des toits ─────────────────────────
