@@ -115,6 +115,7 @@ public final class HudAC {
         zone(ctx, tr, w, pulse);
         fleches(ctx, mc, p, w, h, pulse);
         notorieteEtJournal(ctx, tr, pulse);
+        bourse(ctx, tr, mc);
 
         if (sautDeLaFoi && mc.currentScreen == null)
             ctx.drawCenteredTextWithShadow(tr, Text.literal(sautDeLaFoi()
@@ -299,6 +300,21 @@ public final class HudAC {
             tr.draw(s, x, 0, (c & 0xFFFFFF) | 0x80000000, false, mat, ctx.consumers(), TextRenderer.TextLayerType.SEE_THROUGH, 0, 0xF000F0);
             tr.draw(s, x, 0, c, false, mat, ctx.consumers(), TextRenderer.TextLayerType.NORMAL, 0, 0xF000F0);
             m.pop();
+        }
+    }
+
+    /** En haut à droite : la bourse et les points à dépenser ; sous le viseur, l'invite pour fouiller un corps. */
+    private static void bourse(DrawContext ctx, TextRenderer tr, MinecraftClient mc) {
+        int w = ctx.getScaledWindowWidth();
+        String b = "§6⛁ " + ProfilClient.thalers;
+        ctx.drawTextWithShadow(tr, Text.literal(b), w - tr.getWidth(b) - 6, 6, 0xFFFFFF);
+        if (ProfilClient.points > 0) {
+            String pts = "§b✦ " + ProfilClient.points + " point" + (ProfilClient.points > 1 ? "s" : "") + " §7(K)";
+            ctx.drawTextWithShadow(tr, Text.literal(pts), w - tr.getWidth(pts) - 6, 17, 0xFFFFFF);
+        }
+        if (ProfilClient.corpsVise(mc) != null) {
+            String s = "§f[Clic droit] §6Fouiller le corps";
+            ctx.drawTextWithShadow(tr, Text.literal(s), w / 2 - tr.getWidth(s) / 2, ctx.getScaledWindowHeight() / 2 + 14, 0xFFFFFF);
         }
     }
 }

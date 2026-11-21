@@ -1361,7 +1361,18 @@ public final class CartePrague {
         }
         int px = RUE + PAS + ILOT + 14, pz = RUE + PAS + ILOT + 3;          // le milieu de la grande place
         for (int i = 0; i < 34; i++) passant(px - 22 + r.nextInt(44), pz - 22 + r.nextInt(44));
-        for (int[] m : marchands) passant(m[0], m[1], -1, 1);
+        // Les marchands des étals ; un sur deux tient boutique (clic droit : armurier, apothicaire, fripier)
+        int nm = 0;
+        for (int[] m : marchands) {
+            Passant p = passant(m[0], m[1], -1, 1);
+            if (p != null && nm % 2 == 0) {
+                int k = (nm / 2) % fr.fenua.ombre.ac.Profil.MARCHANDS.length;
+                p.addCommandTag(fr.fenua.ombre.ac.Profil.BOUTIQUE + k);
+                p.setCustomName(Text.literal(fr.fenua.ombre.ac.Profil.MARCHANDS[k]));
+                p.setCustomNameVisible(true);
+            }
+            nm++;
+        }
         if (grueH > 0) for (int i = 0; i < 4; i++) passant(grueX - 10 + r.nextInt(8), grueZ - 2 + r.nextInt(5), 1, 6);      // les ouvriers
         if (jardinX > 0) for (int i = 0; i < 3; i++) passant(jardinX - 4 + r.nextInt(8), jardinZ - 6 + r.nextInt(3), 6, 8);  // les moines
         for (int i = 0; i < 5; i++) passant(VILLE + 2 + r.nextInt(FLEUVE - 4), 2 * PAS + 1 + r.nextInt(RUE - 2));
@@ -1460,12 +1471,12 @@ public final class CartePrague {
         m.setPositionTarget(BlockPos.ORIGIN, -1);
     }
 
-    private void passant(int x, int z) { passant(x, z, -1, 14); }
+    private Passant passant(int x, int z) { return passant(x, z, -1, 14); }
 
     /** Un passant ; « sorte » choisit son habit (-1 : au hasard), « rayon » jusqu'où il flâne. */
-    private void passant(int x, int z, int sorte, int rayon) {
+    private Passant passant(int x, int z, int sorte, int rayon) {
         Passant p = Entites.PASSANT.create(w);
-        if (p == null || x < 0 || z < 0 || x >= LARGEUR || z >= PROFONDEUR || !vide(x, 0, z) || !vide(x, 1, z)) return;
+        if (p == null || x < 0 || z < 0 || x >= LARGEUR || z >= PROFONDEUR || !vide(x, 0, z) || !vide(x, 1, z)) return null;
         BlockPos pos = new BlockPos(ox + x, oy, oz + z);
         p.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360, 0);
         p.initialize(w, w.getLocalDifficulty(pos), SpawnReason.COMMAND, null);
@@ -1473,6 +1484,7 @@ public final class CartePrague {
         if (sorte >= 0) p.setVariante(sorte);
         p.setPositionTarget(pos, rayon);
         w.spawnEntity(p);
+        return p;
     }
 
     private void figure(int qui, int x, int z) {

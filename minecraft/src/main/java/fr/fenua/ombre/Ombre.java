@@ -52,6 +52,12 @@ public class Ombre implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(fr.fenua.ombre.ac.VoyagePayload.ID, fr.fenua.ombre.ac.VoyagePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ExecutionPayload.ID, ExecutionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(SynchroPayload.ID, SynchroPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(fr.fenua.ombre.ac.Profil.ProfilPayload.ID, fr.fenua.ombre.ac.Profil.ProfilPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(fr.fenua.ombre.ac.Profil.DemandePayload.ID, fr.fenua.ombre.ac.Profil.DemandePayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.Profil.DemandePayload.ID,
+                (payload, context) -> fr.fenua.ombre.ac.Profil.recevoir(context.player(), payload));
+        // La bourse, les points et les compétences, une fois par seconde
+        ServerTickEvents.END_SERVER_TICK.register(fr.fenua.ombre.ac.Profil::tick);
         ServerPlayNetworking.registerGlobalReceiver(ActionPayload.ID,
                 (payload, context) -> Pouvoirs.agir(context.player(), payload.action(), payload.cible()));
         ServerPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.VoyagePayload.ID,

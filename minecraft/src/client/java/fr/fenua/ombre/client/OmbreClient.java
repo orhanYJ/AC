@@ -24,7 +24,7 @@ import org.lwjgl.glfw.GLFW;
 
 /** Côté joueur : les touches (modifiables dans Options › Commandes), le parkour, la cible d'assassinat, le dessin des cordes. */
 public class OmbreClient implements ClientModInitializer {
-    private static KeyBinding instinct, siffler, aide, assassiner, roue, voyage, aigle;
+    private static KeyBinding instinct, siffler, aide, assassiner, roue, voyage, aigle, competences;
 
     /** Le nom de la touche d'assassinat (R par défaut, modifiable). */
     static String toucheAssassiner() { return assassiner.getBoundKeyLocalizedText().getString().toUpperCase(); }
@@ -37,7 +37,11 @@ public class OmbreClient implements ClientModInitializer {
         assassiner = touche("key.ombre.assassiner", GLFW.GLFW_KEY_R);
         roue = touche("key.ombre.roue", GLFW.GLFW_KEY_G);       // (X est déjà pris par Minecraft)
         voyage = touche("key.ombre.voyage", GLFW.GLFW_KEY_J);
-        aigle = touche("key.ombre.aigle", GLFW.GLFW_KEY_N);     // N : même place en AZERTY et en QWERTY   // J : même place en AZERTY et en QWERTY
+        aigle = touche("key.ombre.aigle", GLFW.GLFW_KEY_N);
+        competences = touche("key.ombre.competences", GLFW.GLFW_KEY_K);
+        // La bourse, les points, les compétences ; l'étal d'un marchand
+        ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.Profil.ProfilPayload.ID, (payload, ctx) -> ProfilClient.recevoir(payload));
+     // N : même place en AZERTY et en QWERTY   // J : même place en AZERTY et en QWERTY
 
         // Ce que pensent les gardes, la zone, la notoriété ; le journal et les points de vue
         ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.EtatPayload.ID, (payload, ctx) -> EtatAC.recevoir(payload));
@@ -71,7 +75,7 @@ public class OmbreClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
-            if (!client.isPaused()) { Parcours.tick(client); Assassin.tick(client); HudAC.tick(client); Cinema.tick(client); }
+            if (!client.isPaused()) { ProfilClient.tick(client); Parcours.tick(client); Assassin.tick(client); HudAC.tick(client); Cinema.tick(client); }
             while (assassiner.wasPressed()) Assassin.frapper();
             while (instinct.wasPressed()) ClientPlayNetworking.send(new ActionPayload(ActionPayload.INSTINCT));
             while (siffler.wasPressed()) ClientPlayNetworking.send(new ActionPayload(ActionPayload.SIFFLER));
@@ -79,6 +83,7 @@ public class OmbreClient implements ClientModInitializer {
             while (roue.wasPressed()) if (client.currentScreen == null) client.setScreen(new RoueOutils(roue));
             while (aigle.wasPressed()) if (client.currentScreen == null) Cinema.aigle(client.player);
             while (voyage.wasPressed()) if (client.currentScreen == null) client.setScreen(new EcranVoyage());
+            while (competences.wasPressed()) if (client.currentScreen == null) client.setScreen(new EcranCompetences());
         });
 
         // Les blocs appellent ici quand le joueur part en tyrolienne ou en monte-charge

@@ -87,18 +87,32 @@ public class Passant extends PathAwareEntity {
      */
     @Override
     protected net.minecraft.util.ActionResult interactMob(PlayerEntity joueur, net.minecraft.util.Hand main) {
-        if (main != net.minecraft.util.Hand.MAIN_HAND || !joueur.isSneaking())
+        if (main != net.minecraft.util.Hand.MAIN_HAND) return super.interactMob(joueur, main);
+        // Un marchand : un clic droit (debout) ouvre sa boutique
+        if (!joueur.isSneaking()) {
+            for (String t : getCommandTags()) if (t.startsWith(fr.fenua.ombre.ac.Profil.BOUTIQUE)) {
+                if (!getWorld().isClient() && joueur instanceof net.minecraft.server.network.ServerPlayerEntity sp) {
+                    getLookControl().lookAt(joueur);
+                    playSound(SoundEvents.ENTITY_VILLAGER_AMBIENT, 0.8f, 1.1f);
+                    fr.fenua.ombre.ac.Profil.envoyer(sp, Integer.parseInt(t.substring(fr.fenua.ombre.ac.Profil.BOUTIQUE.length())));
+                }
+                return net.minecraft.util.ActionResult.SUCCESS;
+            }
             return super.interactMob(joueur, main);
+        }
         if (getWorld().isClient()) return net.minecraft.util.ActionResult.SUCCESS;
         if (getCommandTags().contains("ombre_vole")) {
             joueur.sendMessage(net.minecraft.text.Text.literal("§7Sa bourse est déjà vide."), true);
             return net.minecraft.util.ActionResult.SUCCESS;
         }
-        if (fr.fenua.ombre.Discretion.dansLeDos(this, joueur)) {
+        boolean adroit = fr.fenua.ombre.ac.Profil.a(joueur, "voleur");
+        if (adroit || fr.fenua.ombre.Discretion.dansLeDos(this, joueur)) {
             addCommandTag("ombre_vole");
-            int n = 2 + random.nextInt(5);
-            joueur.getInventory().offerOrDrop(new net.minecraft.item.ItemStack(fr.fenua.ombre.objet.Objets.THALERS, n));
-            joueur.sendMessage(net.minecraft.text.Text.literal("§6Bourse volée : " + n + " thalers"), true);
+            int n = (4 + random.nextInt(9)) * (adroit ? 2 : 1);
+            if (joueur instanceof net.minecraft.server.network.ServerPlayerEntity sp) {
+                fr.fenua.ombre.ac.Profil.ajouterThalers(sp, n, "bourse volée");
+                fr.fenua.ombre.ac.Quetes.evenement(sp, "vol", this);
+            }
             joueur.addCommandTag("ombre_vol");      // pour l'initiation
             playSound(SoundEvents.ENTITY_ITEM_PICKUP, 0.4f, 1.6f);
         } else {

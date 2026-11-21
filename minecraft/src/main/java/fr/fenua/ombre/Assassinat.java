@@ -260,7 +260,7 @@ public final class Assassinat {
                 tuer(sw, x.joueur, v);
                 x.joueur.swingHand(Hand.MAIN_HAND, true);
                 String nom = x.nom;
-                if (x.joueur.getOffHandStack().isOf(OmbreItems.LAME)) {
+                if (x.joueur.getOffHandStack().isOf(OmbreItems.LAME) || fr.fenua.ombre.ac.Profil.a(x.joueur, "double")) {
                     for (LivingEntity autre : sw.getEntitiesByClass(LivingEntity.class, v.getBoundingBox().expand(2.5),
                             e -> e != v && visable(e) && !repere(e, x.joueur))) {
                         tuer(sw, x.joueur, autre);
@@ -273,7 +273,7 @@ public final class Assassinat {
             }
             if (x.t >= duree) {
                 it.remove();
-                CHAINE_JUSQUA.put(x.joueur.getUuid(), sw.getTime() + CHAINE);
+                CHAINE_JUSQUA.put(x.joueur.getUuid(), sw.getTime() + (fr.fenua.ombre.ac.Profil.a(x.joueur, "chaine") ? 2 * CHAINE : CHAINE));
             }
         }
     }

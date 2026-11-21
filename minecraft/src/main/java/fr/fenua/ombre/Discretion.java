@@ -35,12 +35,12 @@ public final class Discretion {
         // Recherché : les gardes te reconnaissent de plus loin
         if (observateur != null && estGarde(observateur)) f *= fr.fenua.ombre.ac.Notoriete.facteur(joueur);
 
-        if (joueur.isSneaking()) f *= 0.75;          // s'ajoute au ×0,8 de Minecraft
+        if (joueur.isSneaking()) f *= fr.fenua.ombre.ac.Profil.a(joueur, "velours") ? 0.5 : 0.75;   // s'ajoute au ×0,8 de Minecraft
         if (joueur.isSprinting()) f *= 1.3;          // courir attire l'œil
 
         World w = joueur.getWorld();
         int lumiere = w.getLightLevel(BlockPos.ofFloored(joueur.getEyePos()));
-        if (lumiere <= 4) f *= 0.55;                 // dans le noir
+        if (lumiere <= 4) f *= fr.fenua.ombre.ac.Profil.a(joueur, "nuit") ? 0.3 : 0.55;   // dans le noir
         else if (lumiere <= 7) f *= 0.8;             // dans la pénombre
 
         if (observateur instanceof LivingEntity obs) {
@@ -68,7 +68,7 @@ public final class Discretion {
     public static boolean dansLaFoule(PlayerEntity joueur) {
         if (joueur.isSprinting() || !joueur.isOnGround()) return false;
         return joueur.getWorld().getEntitiesByClass(fr.fenua.ombre.entite.Passant.class,
-                joueur.getBoundingBox().expand(2.5), e -> e.isAlive()).size() >= 2;
+                joueur.getBoundingBox().expand(2.5), e -> e.isAlive()).size() >= (fr.fenua.ombre.ac.Profil.a(joueur, "foule") ? 1 : 2);
     }
 
     /** Vrai si le joueur est en dehors du cône de vue de l'observateur. */

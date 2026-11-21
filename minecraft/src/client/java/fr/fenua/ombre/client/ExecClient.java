@@ -48,7 +48,8 @@ public final class ExecClient {
 
     /** Cette créature est-elle la victime d'une scène en cours (ou qui vient de finir : on la garde à terre) ? */
     public static boolean victime(Entity e) {
-        return e.getId() == victime && k(0) < 1 + 45.0 / Choregraphie.DUREE[scene];
+        return e.getId() == victime && (k(0) < 1 + 45.0 / Choregraphie.DUREE[scene]
+                || (e instanceof net.minecraft.entity.LivingEntity l && !l.isAlive() && k(0) < 1 + 1300.0 / Choregraphie.DUREE[scene]));
     }
 
     /** Un point du repère de la scène, dans le monde. */

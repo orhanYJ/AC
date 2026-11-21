@@ -451,6 +451,8 @@ public final class Parcours {
 
         // Ce que veulent les touches : monter, descendre (Ctrl + S : glissade), aller sur le côté
         double vy = vers > 0.3 ? (vite ? 0.2 : 0.13) : vers < -0.3 ? (vite ? -0.42 : -0.17) : 0;
+        double grimpeur = ProfilClient.a("grimpeur") ? 1.3 : 1.0;          // compétence « Grimpeur »
+        if (vy > 0) vy *= grimpeur;
         if (vy > 0 && gouttiere(p)) vy *= 1.8;                   // le long d'une gouttière, on monte vite
         if (vy < 0 && sol) { changer(Etat.LIBRE); return; }
         double lat = 0;
@@ -461,7 +463,7 @@ public final class Parcours {
             if (murEnTravers(p, tx * s, tz * s)) { if (contourner(p, tx * s, tz * s, false)) return; }
             else if (bloqueBuste(p, tx * s * 0.15, tz * s * 0.15, 0.0) && passerSurplombCote(p, tx * s, tz * s)) return;
             else if (appui(p, tx * s * 0.45, tz * s * 0.45) || appui(p, tx * s * 1.2, tz * s * 1.2) || appui(p, tx * s * 1.9, tz * s * 1.9))
-                lat = s * (vite ? 0.17 : 0.11);
+                lat = s * (vite ? 0.17 : 0.11) * grimpeur;
             else if (contourner(p, tx * s, tz * s, false)) return;
         }
         // On y va en douceur : la vitesse rejoint peu à peu celle voulue

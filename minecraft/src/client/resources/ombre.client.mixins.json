@@ -10,7 +10,8 @@
     "ClicMixin",
     "CameraMixin",
     "CorpsMixin",
-    "EntreeMixin"
+    "EntreeMixin",
+    "CorpsRougeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
