@@ -155,6 +155,7 @@ Projet séparé du jeu web : **« L'Ombre — Prague 1600 »**, mod **Fabric** p
   - **Journal** (`Mission`, étiquettes `ombre_m_*` sur le joueur ; `ombre_mission_prague` l'active).
   - **Points de vue mémorisés** : étiquettes `ombre_vue:<pos>:<nom>`, le nom vient du marqueur `ombre_lieu` le plus proche.
   - **Voyage rapide** (`Voyage`, `VoyagePayload`).
+  - **Carte** (`EcranVoyage`, touche J) : relevé du terrain réel sur 320 × 320 blocs autour du joueur à l'ouverture (bloc du dessus via la carte des hauteurs, barrières et décor transparent ignorés), couleurs de carte de Minecraft sauf pour les blocs du mod (table `COULEURS` : tuiles rouges, crépis…), ombrage par le voisin du nord, eau plus sombre en profondeur, mélange parchemin et grain de papier ; morceaux non chargés = parchemin vierge. Texture dynamique (`NativeImageBackedTexture`) libérée à la fermeture. Zones interdites repérées en cherchant les étendards pendant le relevé. 4 zooms (molette), glisser pour se déplacer.
   - **Vol à la tire** (`Passant.interactMob`), **désynchronisation** (`Gardes.apresMort`), **enchaînement** (`Assassinat.CHAINE`).
   - Le serveur envoie `EtatPayload` (soupçons, zone, notoriété) 4 fois par seconde et `JournalPayload` (objectifs, points de vue, marqueurs) chaque seconde.
   - Touches : G roue des outils, J carte. X et C sont pris par Minecraft (barres d'outils du créatif). Les touches sont **positionnelles** (GLFW) : pour un AZERTY, préférer des lettres à la même place qu'en QWERTY.

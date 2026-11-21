@@ -125,7 +125,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Roue des outils** | Maintiens **G** : le jeu se fige, montre un outil avec la souris, relâche — il passe dans ta main |
 | **Boussole** | En haut de l'écran : les points cardinaux, les **cibles en losange doré** avec leur distance, les points de vue synchronisés, les gardes en alerte |
 | **Journal de mission** | À gauche de l'écran ; les objectifs se cochent tout seuls (parler à Tycho et Kepler, éliminer les deux cibles, et en facultatif synchroniser un point de vue et arracher un avis de recherche) |
-| **Carte et voyage rapide** | Touche **J** : un parchemin avec les points de vue, les cibles et toi. Clic sur un point de vue (ou touches 1 à 9) : tu y retournes d'un coup — sauf si des gardes te cherchent |
+| **Carte et voyage rapide** | Touche **J** : le vrai terrain vu du dessus, dessiné comme un vieux plan sur parchemin (toits, rues, rivière ; ce que tu n'as pas encore vu reste vierge), avec les zones interdites en rouge, les points de vue, les cibles et ta flèche. Molette : zoom ; glisser : déplacer. Clic sur un point de vue (ou touches 1 à 9) : tu y retournes d'un coup — sauf si des gardes te cherchent |
 | **Notoriété** | Monte à chaque alerte, bondit si un innocent meurt. À 75, tu es **RECHERCHÉ** : les gardes te reconnaissent de loin. **Arrache les avis de recherche** (clic droit) pour la faire baisser |
 | **Désynchronisation** | Tuer un passant : l'écran se trouble, la notoriété bondit. L'Ombre ne tue pas d'innocents |
 | **Vol à la tire** | Accroupi, dans le dos d'un passant : clic droit pour prendre sa bourse. Vu de face, il crie « Au voleur ! » |
