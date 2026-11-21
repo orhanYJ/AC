@@ -45,8 +45,8 @@ import java.util.Random;
  *  - Au nord, le rabbin Loew et son Golem. Une foule, des hallebardiers, des arbalétriers sur les toits.
  */
 public final class CartePrague {
-    private static final int ILOT = 24, RUE = 7, PAS = ILOT + RUE, N = 4, VILLE = N * PAS + RUE;   // 131
-    private static final int FLEUVE = 22, RIVE = 13, LARGEUR = VILLE + FLEUVE + RIVE, PROFONDEUR = VILLE;
+    private static final int ILOT = 24, RUE = 7, PAS = ILOT + RUE, N = 5, VILLE = N * PAS + RUE;   // 162
+    private static final int FLEUVE = 24, RIVE = 34, LARGEUR = VILLE + FLEUVE + RIVE, PROFONDEUR = VILLE;
     private static final int HAUT_MAX = 30;
 
     private final ServerWorld w;
@@ -109,8 +109,10 @@ public final class CartePrague {
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++) {
                 int bx = RUE + i * PAS, bz = RUE + j * PAS;
-                if (j == 1 && (i == 1 || i == 2)) continue;          // la place
+                if ((j == 1 || j == 2) && (i == 1 || i == 2)) continue;   // la grande place (2 × 2 îlots)
                 if (i == 3 && j == 1) tyn(bx, bz);
+                else if (i == 3 && j == 3) chantier(bx, bz);
+                else if (i == 0 && j == 4) jardin(bx, bz);
                 else ilot(bx, bz);
             }
         place();
@@ -141,6 +143,8 @@ public final class CartePrague {
         lieu("Horloge astronomique", orlojX, orlojH, orlojZ);
         lieu("Église de Týn", tynX, tynH + 6, tynZ);
         lieu("Tour du pont Charles", tourPontX, tourPontH, tourPontZ);
+        if (grueH > 0) lieu("La grue du chantier", grueX, grueH, grueZ);
+        if (jardinX > 0) lieu("Le jardin du couvent", jardinX, 4, jardinZ);
     }
 
     private void lieu(String nom, int x, int y, int z) {
@@ -301,8 +305,8 @@ public final class CartePrague {
     private int orlojX, orlojZ, orlojH, orlojTx1, tychoX, tychoZ;
 
     private void place() {
-        int x0 = RUE + PAS, x1 = RUE + 2 * PAS + ILOT - 1, z0 = RUE + PAS, z1 = z0 + ILOT - 1;
-        boite(x0, -1, z0, x1, -1, z1, b("pave"));
+        int x0 = RUE + PAS, x1 = RUE + 2 * PAS + ILOT - 1, z0 = RUE + PAS, z1 = RUE + 2 * PAS + ILOT - 1;
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) set(x, -1, z, b((x * 7 + z * 3) % 11 == 0 ? "dalles_de_pierre" : "pave"));
         // La tour de l'horloge, à l'ouest de la place (l'hôtel de ville)
         int tx0 = x0, tx1 = x0 + 6, tz0 = z0 + 6, tz1 = z0 + 12, h = 32;
         boite(tx0, 0, tz0, tx1, h - 1, tz1, b("pierre_noircie"));
@@ -334,24 +338,277 @@ public final class CartePrague {
         set(tx1 + 3, 0, tz0 - 2, OmbreBlocs.SPHERE);
         set(tx1 + 3, 0, tz1 + 7, vers(OmbreBlocs.PUPITRE, Direction.EAST));
         tychoX = tx1 + 4; tychoZ = tz0 + 4;
-        // Le marché, la fontaine, les arbres, les bancs
-        int cx = (x0 + x1) / 2 + 4, cz = (z0 + z1) / 2;
-        set(cx, 0, cz, OmbreBlocs.FONTAINE);
-        for (int k = 0; k < 16; k++) {
-            double a = k * Math.PI * 2 / 16;
-            int x = cx + (int) Math.round(Math.cos(a) * 12), z = cz + (int) Math.round(Math.sin(a) * 8);
-            Direction d = Math.abs(Math.cos(a)) > Math.abs(Math.sin(a)) ? (Math.cos(a) > 0 ? Direction.WEST : Direction.EAST) : (Math.sin(a) > 0 ? Direction.NORTH : Direction.SOUTH);
-            if (vide(x, 0, z)) set(x, 0, z, vers(b(ETALS[k % ETALS.length]), d));
-        }
-        for (int[] p : new int[][]{{x1 - 2, z0 + 2}, {x1 - 2, z1 - 2}, {cx - 4, z0 + 1}}) arbre(p[0], p[1]);
-        set(cx - 3, 0, z1 - 1, vers(OmbreBlocs.BANC, Direction.SOUTH));
-        set(cx + 3, 0, z1 - 1, vers(b("banc_dark_oak"), Direction.SOUTH));
-        set(cx, 0, z0 + 1, vers(b("banc_spruce"), Direction.NORTH));
-        set(x0 + 10, 0, z1 - 2, vers(b("cabine_red"), Direction.NORTH));
-        set(x1 - 6, 0, z0 + 1, OmbreBlocs.COLONNE);
-        set(cx + 7, 0, cz + 3, vers(OmbreBlocs.CHARRETTE, Direction.NORTH));
-        set(cx + 6, 0, cz - 4, vers(OmbreBlocs.TONNEAU, Direction.WEST));
+        marche(x0, x1, z0, z1);
         boite(tx1 + 2, 0, tz1 + 1, tx1 + 4, 1, tz1 + 3, OmbreBlocs.MEULE);                    // juste sous la gargouille sud
+    }
+
+
+    // ───────────────────────── le marché de la place ─────────────────────────
+
+    /** Les marchands, derrière leurs étals (on les fait venir avec la foule). */
+    private final java.util.List<int[]> marchands = new java.util.ArrayList<>();
+
+    /** Place un bloc dans le repère d'une construction tournée vers « face » : a vers la droite, p vers l'arrière. */
+    private void rel(int x, int z, Direction face, int a, int y, int p, BlockState st) {
+        Direction droite = face.rotateYClockwise(), arriere = face.getOpposite();
+        set(x + droite.getOffsetX() * a + arriere.getOffsetX() * p, y, z + droite.getOffsetZ() * a + arriere.getOffsetZ() * p, st);
+    }
+    private boolean videRel(int x, int z, Direction face, int a0, int a1, int p0, int p1, int y1) {
+        Direction droite = face.rotateYClockwise(), arriere = face.getOpposite();
+        for (int a = a0; a <= a1; a++) for (int p = p0; p <= p1; p++) for (int y = 0; y <= y1; y++)
+            if (!vide(x + droite.getOffsetX() * a + arriere.getOffsetX() * p, y, z + droite.getOffsetZ() * a + arriere.getOffsetZ() * p)) return false;
+        return true;
+    }
+
+    private static final String[][] MARCHANDISES = {
+            // marchandise, toile 1, toile 2, ce qui trône sur le comptoir
+            {"fruits", "orange_wool", "white_wool", "melon"}, {"poisson", "blue_wool", "white_wool", "water_cauldron"},
+            {"fleurs", "pink_wool", "white_wool", "potted_red_tulip"}, {"pain", "yellow_wool", "brown_wool", "cake"},
+            {"etoffes", "purple_wool", "yellow_wool", "red_wool"}, {"legumes", "lime_wool", "white_wool", "pumpkin"}};
+
+    /**
+     * Un étal de marché, tourné vers « face » (là où se tiennent les clients) : trois de large, deux de profondeur.
+     * Devant, le comptoir chargé de marchandises ; derrière, les tonneaux et la place du marchand ;
+     * quatre poteaux et une toile rayée aux couleurs du métier, avec un auvent qui déborde vers les clients.
+     * (x, z) : le coin avant gauche.
+     */
+    private void etal(int x, int z, Direction face, int sorte) {
+        String[] m = MARCHANDISES[Math.floorMod(sorte, MARCHANDISES.length)];
+        if (!videRel(x, z, face, 0, 2, 0, 1, 3)) return;
+        BlockState comptoir = vers(b("etal_" + m[0]), face), poteau = Blocks.SPRUCE_FENCE.getDefaultState();
+        BlockState t1 = Registries.BLOCK.get(Identifier.ofVanilla(m[1])).getDefaultState(), t2 = Registries.BLOCK.get(Identifier.ofVanilla(m[2])).getDefaultState();
+        for (int a = 0; a <= 2; a++) rel(x, z, face, a, 0, 0, comptoir);
+        rel(x, z, face, 0, 0, 1, Blocks.BARREL.getDefaultState());
+        rel(x, z, face, 2, 0, 1, m[0].equals("poisson") ? Blocks.WATER_CAULDRON.getDefaultState() : Blocks.BARREL.getDefaultState());
+        for (int y = 1; y <= 2; y++) for (int[] c : new int[][]{{0, 0}, {2, 0}, {0, 1}, {2, 1}}) rel(x, z, face, c[0], y, c[1], poteau);
+        for (int a = 0; a <= 2; a++) for (int p = 0; p <= 1; p++) rel(x, z, face, a, 3, p, a % 2 == 0 ? t1 : t2);
+        for (int a = 0; a <= 2; a++) rel(x, z, face, a, 3, -1, vers(b("auvent_raye_" + (a % 2 == 0 ? "rouge_blanc" : "rouge_jaune")), face.getOpposite()));
+        rel(x, z, face, 1, 1, 0, Registries.BLOCK.get(Identifier.ofVanilla(m[3])).getDefaultState());
+        Direction droite = face.rotateYClockwise(), arriere = face.getOpposite();
+        marchands.add(new int[]{x + droite.getOffsetX() + arriere.getOffsetX(), z + droite.getOffsetZ() + arriere.getOffsetZ()});
+    }
+
+    /** Une tente de marché : cinq de large, quatre de profondeur, toit de toile en bâtière, tables et tonneaux dessous. */
+    private void tente(int x, int z, BlockState toile1, BlockState toile2) {
+        BlockState poteau = Blocks.SPRUCE_FENCE.getDefaultState();
+        for (int[] c : new int[][]{{0, 0}, {4, 0}, {0, 3}, {4, 3}, {2, 0}, {2, 3}}) boite(x + c[0], 0, z + c[1], x + c[0], 2, z + c[1], poteau);
+        for (int a = 0; a <= 4; a++) {
+            BlockState t = a % 2 == 0 ? toile1 : toile2;
+            set(x + a, 3, z, t); set(x + a, 3, z + 3, t);
+            set(x + a, 4, z + 1, t); set(x + a, 4, z + 2, t);
+        }
+        set(x + 1, 0, z + 1, vers(b("etal_etoffes"), Direction.SOUTH));
+        set(x + 3, 0, z + 1, vers(b("etal_pain"), Direction.SOUTH));
+        set(x + 1, 0, z + 2, Blocks.BARREL);
+        set(x + 3, 0, z + 2, vers(OmbreBlocs.TONNEAU, Direction.EAST));
+        marchands.add(new int[]{x + 2, z + 2});
+    }
+
+    /** La grande fontaine : un bassin de sept, la colonne et sa statue au milieu. */
+    private void fontaineBassin(int cx, int cz) {
+        for (int a = -3; a <= 3; a++) for (int c = -3; c <= 3; c++) {
+            if (Math.abs(a) == 3 && Math.abs(c) == 3) continue;
+            boolean bord = Math.abs(a) == 3 || Math.abs(c) == 3 || (Math.abs(a) == 2 && Math.abs(c) == 3) || (Math.abs(a) == 3 && Math.abs(c) == 2);
+            set(cx + a, -2, cz + c, Blocks.STONE_BRICKS);
+            set(cx + a, -1, cz + c, bord ? b("pierre_sculptee").getDefaultState() : Blocks.WATER.getDefaultState());
+            set(cx + a, 0, cz + c, bord ? b("pierre_de_taille_dalle").getDefaultState() : Blocks.WATER.getDefaultState());
+        }
+        for (int y = 0; y <= 3; y++) set(cx, y, cz, b(y == 3 ? "pierre_sculptee" : "pierre_lisse"));
+        set(cx, 4, cz, b("statue"));
+        for (Direction d : Direction.Type.HORIZONTAL) set(cx + d.getOffsetX(), 1, cz + d.getOffsetZ(), OmbreBlocs.FONTAINE);
+    }
+
+    /** Les tréteaux des comédiens : une estrade, un rideau rouge, l'affiche. */
+    private void scene(int x, int z) {
+        boite(x, 0, z, x + 6, 0, z + 3, Blocks.SPRUCE_PLANKS);
+        for (int a = 0; a <= 6; a++) {
+            boite(x + a, 1, z + 3, x + a, 4, z + 3, a == 0 || a == 6 ? Blocks.STRIPPED_SPRUCE_LOG.getDefaultState() : Blocks.RED_WOOL.getDefaultState());
+            set(x + a, 5, z + 3, Blocks.SPRUCE_SLAB);
+        }
+        set(x + 3, 2, z + 2, vers(b("affiche_comediens"), Direction.SOUTH));
+        set(x + 1, 1, z, Blocks.LANTERN); set(x + 5, 1, z, Blocks.LANTERN);
+        for (int a : new int[]{1, 3, 5}) set(x + a, 0, z - 2, vers(b("banc_spruce"), Direction.SOUTH));
+    }
+
+    /**
+     * La grande place : la fontaine au milieu, douze étals tournés vers elle, deux tentes,
+     * les tréteaux des comédiens, des bancs, des charrettes, des arbres, des lanternes.
+     */
+    private void marche(int x0, int x1, int z0, int z1) {
+        int cx = (x0 + x1) / 2 + 2, cz = (z0 + z1) / 2;
+        fontaineBassin(cx, cz);
+        int sorte = 0;
+        for (int k = 0; k < 4; k++) {
+            int sx = cx - 14 + k * 8;
+            etal(sx + 2, cz - 13, Direction.SOUTH, sorte++);     // au nord, tournés vers le sud (coin avant gauche à l'est)
+            etal(sx, cz + 13, Direction.NORTH, sorte++);
+        }
+        etal(cx - 18, cz - 4, Direction.EAST, sorte++);
+        etal(cx - 18, cz + 6, Direction.EAST, sorte++);
+        etal(cx + 18, cz + 4, Direction.WEST, sorte++);
+        etal(cx + 18, cz - 6, Direction.WEST, sorte++);
+        tente(x0 + 12, z0 + 2, Blocks.WHITE_WOOL.getDefaultState(), Blocks.RED_WOOL.getDefaultState());
+        tente(x1 - 14, z0 + 2, Blocks.WHITE_WOOL.getDefaultState(), Blocks.BLUE_WOOL.getDefaultState());
+        scene(x1 - 12, z1 - 7);
+        // Bancs autour de la fontaine, un puits, des charrettes, des tonneaux
+        for (Direction d : Direction.Type.HORIZONTAL) set(cx + d.getOffsetX() * 6, 0, cz + d.getOffsetZ() * 6, vers(OmbreBlocs.BANC, d));
+        set(cx - 9, 0, cz + 7, OmbreBlocs.PUITS);
+        set(cx + 9, 0, cz - 8, vers(OmbreBlocs.CHARRETTE, Direction.NORTH));
+        set(x0 + 14, 0, z1 - 4, vers(OmbreBlocs.CHARRETTE, Direction.EAST));
+        set(x1 - 4, 0, cz, vers(OmbreBlocs.CARROSSE, Direction.NORTH));
+        for (int[] t : new int[][]{{cx - 6, cz - 9}, {cx + 7, cz + 9}, {x0 + 20, cz}}) {
+            set(t[0], 0, t[1], Blocks.BARREL); set(t[0] + 1, 0, t[1], Blocks.BARREL); set(t[0], 1, t[1], Blocks.BARREL);
+        }
+        for (int[] p : new int[][]{{x1 - 2, z0 + 2}, {x1 - 2, z1 - 2}, {x0 + 10, z1 - 2}, {x0 + 22, z0 + 2}}) arbre(p[0], p[1]);
+        for (int[] l : new int[][]{{cx - 10, cz}, {cx + 10, cz}, {cx, cz - 10}, {cx, cz + 10}}) {
+            boite(l[0], 0, l[1], l[0], 2, l[1], OmbreBlocs.LAMPADAIRE);
+            set(l[0], 3, l[1], OmbreBlocs.TETE_LAMPADAIRE);
+        }
+        set(x0 + 24, 0, z1 - 1, vers(b("cabine_red"), Direction.NORTH));
+        set(x1 - 6, 0, z0 + 1, OmbreBlocs.COLONNE);
+        set(cx + 3, 0, cz + 20, vers(OmbreBlocs.TONNEAU, Direction.WEST));
+    }
+
+    // ───────────────────────── le chantier et sa grue ─────────────────────────
+
+    private int grueX, grueZ, grueH;
+
+    /**
+     * Un îlot en chantier : une grande maison à moitié bâtie, ses échafaudages, des tas de pierres et de bois,
+     * et une grue à roue (les maçons de 1600 en avaient : des hommes marchaient dans la roue pour hisser les pierres).
+     * Du haut de sa flèche, un point de vue.
+     */
+    private void chantier(int bx, int bz) {
+        boite(bx, -1, bz, bx + ILOT - 1, -1, bz + ILOT - 1, Blocks.COARSE_DIRT);
+        for (int x = bx; x < bx + ILOT; x++) for (int z = bz; z < bz + ILOT; z++) if ((x * 5 + z * 3) % 7 == 0) set(x, -1, z, Blocks.GRAVEL);
+        rangee(bx, bz, 9, Direction.NORTH);                        // des maisons déjà finies
+        // Les murs en cours : leur sommet est inégal ; des trous de fenêtres attendent leurs vitres
+        int a0 = bx + 11, a1 = bx + 22, c0 = bz + 3, c1 = bz + 13;
+        Block mur = b("pierre_de_taille");
+        for (int x = a0; x <= a1; x++) for (int z = c0; z <= c1; z++) {
+            if (x != a0 && x != a1 && z != c0 && z != c1) continue;
+            int h = 6 + (int) (4 * Math.abs(Math.sin(x * 0.7 + z * 0.4))) + (x == a0 || x == a1 ? 2 : 0);
+            for (int y = 0; y < h; y++) set(x, y, z, (y % 4 == 3) && (x + z) % 3 == 0 ? Blocks.AIR.getDefaultState() : mur.getDefaultState());
+        }
+        for (int x = a0; x <= a1; x++) for (int z = c0; z <= c1; z++) hauteur[x][z] = 7;
+        // Un plancher posé à mi-hauteur, des poutres en attente
+        boite(a0 + 1, 4, c0 + 1, a1 - 1, 4, c0 + 5, Blocks.SPRUCE_PLANKS);
+        for (int z = c0 + 7; z < c1; z += 2) boite(a0 + 1, 4, z, a1 - 1, 4, z, OmbreBlocs.POUTRE.getDefaultState().with(Properties.HORIZONTAL_AXIS, Direction.Axis.X));
+        // Les échafaudages, au sud et à l'ouest
+        for (int x = a0 - 1; x <= a1 + 1; x += 2) boite(x, 0, c1 + 1, x, 8, c1 + 1, OmbreBlocs.ECHAFAUDAGE);
+        for (int z = c0; z <= c1; z += 2) boite(a0 - 1, 0, z, a0 - 1, 8, z, OmbreBlocs.ECHAFAUDAGE);
+        for (int y : new int[]{3, 6}) {
+            boite(a0 - 1, y, c1 + 2, a1 + 1, y, c1 + 2, Blocks.SPRUCE_SLAB);
+            boite(a0 - 2, y, c0, a0 - 2, y, c1 + 2, Blocks.SPRUCE_SLAB);
+        }
+        // Les tas : pierres, bois, sable ; une charrette chargée
+        boite(bx + 3, 0, bz + 15, bx + 5, 1, bz + 16, Blocks.COBBLESTONE);
+        boite(bx + 3, 0, bz + 19, bx + 6, 0, bz + 20, Blocks.OAK_LOG.getDefaultState().with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.X));
+        set(bx + 4, 1, bz + 19, Blocks.OAK_LOG.getDefaultState().with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.X));
+        boite(bx + 18, 0, bz + 18, bx + 19, 0, bz + 19, Blocks.SAND);
+        set(bx + 18, 1, bz + 18, Blocks.SAND);
+        set(bx + 14, 0, bz + 20, vers(OmbreBlocs.CHARRETTE, Direction.EAST));
+        boite(bx + 1, 0, bz + 22, bx + 2, 1, bz + 23, OmbreBlocs.MEULE);
+        // La grue : un mât de 18, une flèche qui s'avance au-dessus du chantier, le câble et sa charge, la roue au pied
+        int gx = bx + 8, gz = bz + 17, h = 18;
+        for (int y = 0; y < h; y++) {
+            set(gx, y, gz, Blocks.STRIPPED_SPRUCE_LOG);
+            if (y % 4 == 0) { set(gx - 1, y, gz, Blocks.SPRUCE_FENCE); set(gx + 1, y, gz, Blocks.SPRUCE_FENCE); }
+        }
+        for (int x = gx - 2; x <= gx + 9; x++) set(x, h, gz, OmbreBlocs.POUTRE.getDefaultState().with(Properties.HORIZONTAL_AXIS, Direction.Axis.X));
+        set(gx - 2, h + 1, gz, Blocks.COBBLESTONE);                    // le contrepoids
+        set(gx + 9, h + 1, gz, OmbreBlocs.PERCHOIR);                   // au bout de la flèche : un point de vue
+        for (int y = h - 1; y >= 8; y--) set(gx + 8, y, gz, Blocks.CHAIN);
+        boite(gx + 7, 7, gz - 1, gx + 9, 7, gz + 1, Blocks.SPRUCE_PLANKS);
+        set(gx + 8, 8, gz - 1, Blocks.COBBLESTONE); set(gx + 7, 8, gz + 1, Blocks.COBBLESTONE);
+        // La roue : un cercle de planches debout, contre le mât
+        for (int t = 0; t < 24; t++) {
+            double ang = t * Math.PI * 2 / 24;
+            int yy = 3 + (int) Math.round(Math.sin(ang) * 3), zz = gz + 1 + (int) Math.round(Math.cos(ang) * 3);
+            if (yy >= 0) set(gx - 2, yy, zz, Blocks.SPRUCE_PLANKS);
+        }
+        set(gx - 2, 3, gz + 1, Blocks.STRIPPED_SPRUCE_LOG);
+        grueX = gx + 9; grueZ = gz; grueH = h + 2;
+    }
+
+    // ───────────────────────── le jardin du couvent ─────────────────────────
+
+    /** Un jardin clos de couvent : allées en croix, massifs, haies, arbres fruitiers, un kiosque, et des herbes hautes où se cacher. */
+    private void jardin(int bx, int bz) {
+        int b1x = bx + ILOT - 1, b1z = bz + ILOT - 1, mx = bx + ILOT / 2, mz = bz + ILOT / 2;
+        for (int x = bx; x <= b1x; x++) for (int z = bz; z <= b1z; z++) {
+            boolean allee = Math.abs(x - mx) <= 1 || Math.abs(z - mz) <= 1;
+            set(x, -1, z, allee ? Blocks.GRAVEL.getDefaultState() : Blocks.GRASS_BLOCK.getDefaultState());
+            if (x == bx || x == b1x || z == bz || z == b1z) {
+                boolean porte = Math.abs(x - mx) <= 1 || Math.abs(z - mz) <= 1;
+                if (!porte) { set(x, 0, z, Blocks.STONE_BRICK_WALL); if ((x + z) % 4 == 0) set(x, 1, z, Blocks.STONE_BRICK_WALL); }
+            }
+        }
+        BlockState haie = Blocks.AZALEA_LEAVES.getDefaultState().with(LeavesBlock.PERSISTENT, true);
+        Block[] fleurs = {Blocks.POPPY, Blocks.CORNFLOWER, Blocks.OXEYE_DAISY, Blocks.ALLIUM, Blocks.DANDELION, Blocks.AZURE_BLUET, Blocks.LILY_OF_THE_VALLEY};
+        for (int[] q : new int[][]{{bx + 2, bz + 2}, {mx + 3, bz + 2}, {bx + 2, mz + 3}, {mx + 3, mz + 3}}) {
+            int qx1 = q[0] + ILOT / 2 - 6, qz1 = q[1] + ILOT / 2 - 6;
+            for (int x = q[0]; x <= qx1; x++) for (int z = q[1]; z <= qz1; z++) {
+                boolean bord = x == q[0] || x == qx1 || z == q[1] || z == qz1;
+                if (bord) { set(x, 0, z, haie); continue; }
+                if ((x + z) % 3 != 0) set(x, 0, z, fleurs[Math.floorMod(x * 3 + z, fleurs.length)]);
+            }
+        }
+        // Le carré sud-est : des herbes hautes (une cachette), un pommier
+        for (int x = mx + 4; x < b1x - 1; x++) for (int z = mz + 4; z < b1z - 1; z++) {
+            set(x, 0, z, Blocks.TALL_GRASS.getDefaultState().with(net.minecraft.block.TallPlantBlock.HALF, net.minecraft.block.enums.DoubleBlockHalf.LOWER));
+            set(x, 1, z, Blocks.TALL_GRASS.getDefaultState().with(net.minecraft.block.TallPlantBlock.HALF, net.minecraft.block.enums.DoubleBlockHalf.UPPER));
+        }
+        for (int[] t : new int[][]{{bx + 5, bz + 5}, {b1x - 5, bz + 5}, {bx + 5, b1z - 5}}) arbre(t[0], t[1]);
+        // Le kiosque, au croisement des allées
+        for (int[] c : new int[][]{{-2, -2}, {2, -2}, {-2, 2}, {2, 2}}) boite(mx + c[0], 0, mz + c[1], mx + c[0], 2, mz + c[1], Blocks.DARK_OAK_FENCE);
+        boite(mx - 2, 3, mz - 2, mx + 2, 3, mz + 2, Blocks.DARK_OAK_SLAB);
+        boite(mx - 1, 4, mz - 1, mx + 1, 4, mz + 1, b("ardoise_dalle"));
+        set(mx, 5, mz, Blocks.LANTERN);
+        set(mx, 0, mz, OmbreBlocs.FONTAINE);
+        set(mx - 3, 0, mz - 3, vers(b("banc_dark_oak"), Direction.SOUTH));
+        set(mx + 3, 0, mz + 3, vers(b("banc_dark_oak"), Direction.NORTH));
+        for (int x = bx; x <= b1x; x++) for (int z = bz; z <= b1z; z++) hauteur[x][z] = 1;
+        jardinX = mx; jardinZ = mz;
+    }
+
+    private int jardinX, jardinZ;
+
+    // ───────────────────────── sur la Vltava ─────────────────────────
+
+    /** Une barque amarrée, pointe vers le nord. */
+    private void barque(int x, int z) {
+        for (int k = 0; k < 7; k++) {
+            int l = k == 0 || k == 6 ? 0 : 1;
+            for (int a = -l; a <= l; a++) set(x + a, -1, z + k, (a == 0 && k > 0 && k < 6) ? Blocks.SPRUCE_PLANKS.getDefaultState() : Blocks.SPRUCE_SLAB.getDefaultState());
+            if (l == 1) { set(x - 1, 0, z + k, Blocks.SPRUCE_TRAPDOOR.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.WEST).with(Properties.OPEN, true));
+                          set(x + 1, 0, z + k, Blocks.SPRUCE_TRAPDOOR.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.EAST).with(Properties.OPEN, true)); }
+        }
+        set(x, 0, z + 3, Blocks.BARREL);
+    }
+
+    /**
+     * Le moulin à eau de la rive (la Vieille-Ville en avait toute une rangée au bord de la Vltava) :
+     * une maison de bois, et la grande roue qui trempe dans le courant.
+     */
+    private void moulin(int f0, int z0) {
+        boite(f0 - 7, 0, z0, f0 - 2, 6, z0 + 8, Blocks.SPRUCE_PLANKS);
+        boite(f0 - 6, 1, z0 + 1, f0 - 3, 5, z0 + 7, Blocks.AIR);
+        for (int y = 0; y <= 6; y += 3) boite(f0 - 7, y, z0, f0 - 2, y, z0 + 8, Blocks.STRIPPED_SPRUCE_LOG.getDefaultState().with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.Z));
+        set(f0 - 7, 1, z0 + 4, Blocks.AIR); set(f0 - 7, 2, z0 + 4, Blocks.AIR);
+        for (int k = 0; k <= 3; k++) boite(f0 - 7 + k, 7 + k, z0, f0 - 2 - k, 7 + k, z0 + 8, b("ardoise"));
+        set(f0 - 5, 1, z0 + 2, Blocks.GRINDSTONE); set(f0 - 4, 1, z0 + 6, Blocks.BARREL); set(f0 - 4, 2, z0 + 6, Blocks.BARREL);
+        for (int x = f0 - 7; x <= f0 - 2; x++) for (int z = z0; z <= z0 + 8; z++) hauteur[x][z] = 7;
+        // La roue, dans le plan nord-sud, son axe entre dans le moulin
+        int cz = z0 + 4, cy = 0;
+        for (int t = 0; t < 40; t++) {
+            double a = t * Math.PI * 2 / 40;
+            int y = cy + (int) Math.round(Math.sin(a) * 4), z = cz + (int) Math.round(Math.cos(a) * 4);
+            set(f0 + 1, y, z, Blocks.STRIPPED_SPRUCE_LOG); set(f0 + 2, y, z, Blocks.SPRUCE_PLANKS);
+        }
+        for (int k = -3; k <= 3; k++) { set(f0 + 1, cy + k, cz, Blocks.SPRUCE_FENCE); set(f0 + 1, cy, cz + k, Blocks.SPRUCE_FENCE); }
+        set(f0, cy, cz, Blocks.STRIPPED_SPRUCE_LOG.getDefaultState().with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.X));
+        set(f0 - 1, cy, cz, Blocks.STRIPPED_SPRUCE_LOG.getDefaultState().with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.X));
     }
 
     // ───────────────────────── l'église de Týn ─────────────────────────
@@ -425,12 +682,21 @@ public final class CartePrague {
             set(f0 - 1, -1, z, Blocks.STONE_BRICKS); set(f1 + 1, -1, z, Blocks.STONE_BRICKS);
             if (z % 2 == 0) { set(f0 - 1, 0, z, Blocks.STONE_BRICK_WALL); set(f1 + 1, 0, z, Blocks.STONE_BRICK_WALL); }
         }
-        // L'autre rive : herbe, quelques maisons, une petite tour de pont
+        // Sur l'eau : le moulin, des radeaux (un passage de parkour d'une rive à l'autre), des barques, un ponton
+        moulin(f0, 10);
+        for (int k = 0; k < 5; k++) boite(f0 + 2 + k * 4, -1, 30 + (k % 2) * 2, f0 + 3 + k * 4, -1, 32 + (k % 2) * 2, Blocks.SPRUCE_PLANKS);
+        for (int z : new int[]{80, 96, 112}) barque(f0 + 3 + r.nextInt(3), z);
+        for (int z = 88; z <= 92; z++) boite(f0, -1, z, f0 + 3, -1, z, Blocks.SPRUCE_PLANKS);
+        for (int z : new int[]{88, 92}) set(f0 + 3, 0, z, Blocks.SPRUCE_FENCE);
+        // L'autre rive (Malá Strana) : herbe, deux rangées de maisons le long d'une rue, un verger
         for (int x = f1 + 2; x < LARGEUR; x++) for (int z = 0; z < PROFONDEUR; z++) set(x, -1, z, (x + z) % 7 == 0 ? Blocks.COARSE_DIRT : Blocks.GRASS_BLOCK);
+        for (int x = f1 + 12; x <= f1 + 17; x++) for (int z = 0; z < PROFONDEUR; z++) set(x, -1, z, b("pave"));
         for (int z = 6; z < PROFONDEUR - 6; z += 9) {
             if (Math.abs(z - (2 * PAS + 3)) < 8) continue;
-            maison(f1 + 4, z, f1 + 11, z + 5 + r.nextInt(2), Direction.WEST, 2 + r.nextInt(2));
+            maison(f1 + 4, z, f1 + 11, z + 5 + r.nextInt(2), Direction.EAST, 2 + r.nextInt(2));
+            maison(f1 + 18, z, f1 + 25, z + 5 + r.nextInt(2), Direction.WEST, 2 + r.nextInt(2));
         }
+        for (int z = 8; z < PROFONDEUR - 6; z += 7) for (int x : new int[]{f1 + 29, f1 + 32}) if (x < LARGEUR - 1) arbre(x, z + (x % 2) * 3);
         // Le pont : dans l'axe de la rue entre les rangées 1 et 2
         int zp0 = 2 * PAS, zp1 = zp0 + RUE - 1;
         for (int x = f0 - 1; x <= f1 + 1; x++) {
@@ -516,7 +782,7 @@ public final class CartePrague {
                 if (t % PAS < RUE) continue;
                 if (r.nextInt(5) == 0 && vide(rue + 3, 0, t + 2)) set(rue + 3, 0, t + 2, vers(OmbreBlocs.CARROSSE, Direction.NORTH));
                 if (r.nextInt(4) == 0 && vide(rue + RUE - 2, 0, t + 5)) set(rue + RUE - 2, 0, t + 5, vers(OmbreBlocs.CHARRETTE, Direction.NORTH));
-                if (r.nextInt(5) == 0 && vide(t + 5, 0, rue + 1)) set(t + 5, 0, rue + 1, vers(b(hasard(new String[]{"etal_pain", "etal_legumes", "etal_fruits"})), Direction.SOUTH));
+                if (r.nextInt(4) == 0) etal(t + 6, rue + 2, Direction.SOUTH, r.nextInt(MARCHANDISES.length));
                 if (r.nextInt(4) == 0 && vide(t + 2, 0, rue + RUE - 2) && vide(t + 2, 3, rue + RUE - 2)) {
                     boite(t + 2, 0, rue + RUE - 2, t + 2, 2, rue + RUE - 2, OmbreBlocs.LAMPADAIRE);
                     set(t + 2, 3, rue + RUE - 2, OmbreBlocs.TETE_LAMPADAIRE);
@@ -539,8 +805,11 @@ public final class CartePrague {
             int x = ns ? k * PAS + 2 + r.nextInt(3) : t, z = ns ? t : k * PAS + 2 + r.nextInt(3);
             for (int i = 0; i < 3 + r.nextInt(2); i++) passant(x + r.nextInt(3) - 1, z + r.nextInt(3) - 1);
         }
-        int px = RUE + PAS + ILOT + 10, pz = RUE + PAS + 12;
-        for (int i = 0; i < 18; i++) passant(px - 12 + r.nextInt(24), pz - 8 + r.nextInt(16));
+        int px = RUE + PAS + ILOT + 14, pz = RUE + PAS + ILOT + 3;          // le milieu de la grande place
+        for (int i = 0; i < 34; i++) passant(px - 22 + r.nextInt(44), pz - 22 + r.nextInt(44));
+        for (int[] m : marchands) passant(m[0], m[1], -1, 1);
+        if (grueH > 0) for (int i = 0; i < 4; i++) passant(grueX - 10 + r.nextInt(8), grueZ - 2 + r.nextInt(5), 1, 6);      // les ouvriers
+        if (jardinX > 0) for (int i = 0; i < 3; i++) passant(jardinX - 4 + r.nextInt(8), jardinZ - 6 + r.nextInt(3), 6, 8);  // les moines
         for (int i = 0; i < 5; i++) passant(VILLE + 2 + r.nextInt(FLEUVE - 4), 2 * PAS + 1 + r.nextInt(RUE - 2));
         // Les personnages réels
         figure(Figure.TYCHO, tychoX, tychoZ);
@@ -558,7 +827,7 @@ public final class CartePrague {
             w.spawnEntity(golem);
         }
         // La garde : hallebardiers dans les rues, par deux ; arbalétriers sur les toits
-        for (int g = 0; g < 5; g++) {
+        for (int g = 0; g < 7; g++) {
             int k = 1 + r.nextInt(N - 1), t = RUE + 4 + r.nextInt(VILLE - 2 * RUE - 8);
             boolean ns = r.nextBoolean();
             int x = ns ? k * PAS + 3 : t, z = ns ? t : k * PAS + 3;
@@ -566,7 +835,7 @@ public final class CartePrague {
             garde(Entites.HALLEBARDIER, x + 1, 0, z + 1, 10, "Hallebardier", rouges, false);
         }
         int poses = 0;
-        for (int essai = 0; essai < 300 && poses < 7; essai++) {
+        for (int essai = 0; essai < 300 && poses < 10; essai++) {
             int x = r.nextInt(VILLE), z = r.nextInt(PROFONDEUR), h = hauteur[x][z];
             if (h > 0 && !vide(x, h, z) && vide(x, h + 1, z) && vide(x, h + 2, z)) {
                 garde(Entites.ARBALETRIER, x, h + 1, z, 3, "Arbalétrier", rouges, false);
@@ -584,14 +853,18 @@ public final class CartePrague {
                 .addCommandTag("ombre_cible_kragl");
     }
 
-    private void passant(int x, int z) {
+    private void passant(int x, int z) { passant(x, z, -1, 14); }
+
+    /** Un passant ; « sorte » choisit son habit (-1 : au hasard), « rayon » jusqu'où il flâne. */
+    private void passant(int x, int z, int sorte, int rayon) {
         Passant p = Entites.PASSANT.create(w);
         if (p == null || x < 0 || z < 0 || x >= LARGEUR || z >= PROFONDEUR || !vide(x, 0, z) || !vide(x, 1, z)) return;
         BlockPos pos = new BlockPos(ox + x, oy, oz + z);
         p.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360, 0);
         p.initialize(w, w.getLocalDifficulty(pos), SpawnReason.COMMAND, null);
         p.setPersistent();
-        p.setPositionTarget(pos, 14);
+        if (sorte >= 0) p.setVariante(sorte);
+        p.setPositionTarget(pos, rayon);
         w.spawnEntity(p);
     }
 

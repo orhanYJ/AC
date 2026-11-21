@@ -47,10 +47,12 @@ Les deux tours des cibles sont des **zones interdites** (étendards rouges) : la
 
 ### La carte `/ombre prague`
 
-- **La Vieille-Ville** : douze îlots de maisons bourgeoises, façades pastel ou en sgraffite, pignons sur rue, toits de tuiles rouges, lanternes à potence, enseignes, auvents, balcons, gouttières pour grimper, poutres d'un toit à l'autre, cours avec puits et linge.
-- **La place de la Vieille-Ville** : le marché, la fontaine, la foule, et la **tour de l'horloge astronomique** (cadran, galerie, flèche, gargouilles = points de vue).
+- **La Vieille-Ville** (5 × 5 îlots, 162 blocs de côté) : une vingtaine d'îlots de maisons bourgeoises, façades pastel ou en sgraffite, pignons sur rue, toits de tuiles rouges, lanternes à potence, enseignes, auvents, balcons, gouttières pour grimper, poutres d'un toit à l'autre, cours avec puits et linge.
+- **La grande place de la Vieille-Ville** : un vrai **marché** (douze étals de trois blocs, chacun avec son comptoir, ses tonneaux, sa toile rayée aux couleurs du métier et son marchand ; deux tentes), la **grande fontaine** et sa statue, les **tréteaux des comédiens**, des bancs, des charrettes, la foule, et la **tour de l'horloge astronomique** (cadran, galerie, flèche, gargouilles = points de vue). De petits étals aussi le long des rues.
+- **Le chantier** : une maison à moitié bâtie, ses échafaudages, des tas de pierres et de bois, des ouvriers, et une **grue à roue** de l'époque — on grimpe au mât, et le bout de la flèche est un point de vue.
+- **Le jardin du couvent** : allées, massifs de fleurs, haies, arbres fruitiers, kiosque, hautes herbes où se cacher, et des moines.
 - **L'église de Týn** : sa nef et ses **deux tours à flèches** (près de 50 blocs), des gargouilles, des perchoirs aux pointes, et le laboratoire de l'alchimiste.
-- **La Vltava** et le **pont Charles** avec ses statues, entre la **tour du pont** et la petite tour de l'autre rive, où attend **l'empereur Rodolphe II**.
+- **La Vltava** : un **moulin à eau** et sa grande roue, des **radeaux** qui forment un passage de parkour d'une rive à l'autre, des barques amarrées, un ponton. Le **pont Charles** avec ses statues, entre la **tour du pont** et la petite tour de l'autre rive (Malá Strana : deux rangées de maisons, un verger), où attend **l'empereur Rodolphe II**.
 - Au nord, dans la rue du quartier juif, **le rabbin Loew** et **le Golem**, qui s'en prend aux gardes.
 - Des **tyroliennes** : de la galerie de l'horloge vers Týn, du sommet de la tour du pont vers l'autre rive.
 
