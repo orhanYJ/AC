@@ -38,7 +38,7 @@ public class EcranVoyage extends Screen {
     private static final int N = 320;                          // la carte couvre 320 × 320 blocs autour de toi
     private static final int[] ZOOMS = {48, 96, 160, 320};      // largeur montrée, en blocs
     private static int zoom = 1;
-    private static final int PARCHEMIN = 0xE2CDA0;
+    static final int PARCHEMIN = 0xE2CDA0;
 
     private Identifier texture;
     private NativeImageBackedTexture image;
@@ -117,7 +117,7 @@ public class EcranVoyage extends Screen {
             Map.entry("boiserie", 0x8C643C), Map.entry("etendard", 0xAA1E1E), Map.entry("fontaine", 0x9AA8B8));
 
     /** La couleur d'un bloc vu du dessus, ou -1 s'il ne se voit pas (air, barrière, petit décor transparent). */
-    private static int couleur(BlockState s, ClientWorld w, BlockPos pos) {
+    static int couleur(BlockState s, ClientWorld w, BlockPos pos) {
         if (s.isAir() || s.isOf(Blocks.BARRIER)) return -1;
         Identifier id = Registries.BLOCK.getId(s.getBlock());
         if (id.getNamespace().equals("ombre")) {
@@ -128,14 +128,14 @@ public class EcranVoyage extends Screen {
         return m == MapColor.CLEAR ? -1 : m.color;
     }
 
-    private static int assombrir(int rgb, double f) {
+    static int assombrir(int rgb, double f) {
         int r = MathHelper.clamp((int) ((rgb >> 16 & 255) * f), 0, 255);
         int g = MathHelper.clamp((int) ((rgb >> 8 & 255) * f), 0, 255);
         int b = MathHelper.clamp((int) ((rgb & 255) * f), 0, 255);
         return r << 16 | g << 8 | b;
     }
 
-    private static int melange(int a, int b, double t) {
+    static int melange(int a, int b, double t) {
         int r = (int) ((a >> 16 & 255) * (1 - t) + (b >> 16 & 255) * t);
         int g = (int) ((a >> 8 & 255) * (1 - t) + (b >> 8 & 255) * t);
         int bl = (int) ((a & 255) * (1 - t) + (b & 255) * t);
@@ -143,7 +143,7 @@ public class EcranVoyage extends Screen {
     }
 
     /** Le grain du papier : une légère variation, toujours la même à un endroit donné. */
-    private static int papier(int rgb, int x, int z) {
+    static int papier(int rgb, int x, int z) {
         int h = (x * 73856093) ^ (z * 19349663);
         h ^= h >>> 13;
         double f = 0.95 + ((h & 255) / 255.0) * 0.07;

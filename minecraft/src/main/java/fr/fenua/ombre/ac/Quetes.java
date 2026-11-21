@@ -507,7 +507,7 @@ public final class Quetes {
         return "";
     }
 
-    /** Les losanges de la boussole : où mène l'étape en cours (et les habitants qui offrent une quête, à moins de 60 blocs). */
+    /** Les losanges de la boussole et de la mini-carte : où mène l'étape en cours (les « ! » des quêtes secondaires se voient sur la mini-carte). */
     public static List<Long> marqueurs(ServerPlayerEntity p) {
         List<Long> m = new ArrayList<>();
         ServerWorld w = p.getServerWorld();
@@ -518,11 +518,6 @@ public final class Quetes {
             Vec3d v = ou(p, w, et);
             if (v != null) m.add(BlockPos.ofFloored(v).asLong());
         }
-        if (sq == null)
-            for (Passant pa : w.getEntitiesByClass(Passant.class, p.getBoundingBox().expand(60), en -> en.getCommandTags().stream().anyMatch(t -> t.startsWith("ombre_pnj."))))
-                for (Quete q : SECONDAIRES)
-                    if (q.donneur() != null && pa.getCommandTags().contains("ombre_pnj." + q.donneur()) && !p.getCommandTags().contains("ombre_sqf:" + q.id()))
-                        m.add(pa.getBlockPos().asLong());
         return m;
     }
 
