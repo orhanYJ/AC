@@ -28,6 +28,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -169,7 +170,8 @@ public final class CartePrague {
         for (int x = 0; x < VILLE; x++)
             for (int z = 0; z < PROFONDEUR; z++) {
                 boolean rue = x % PAS < RUE || z % PAS < RUE;
-                set(x, -1, z, rue ? ((x + z) % 9 == 0 ? dalles : pave) : pave);
+                boolean rigole = (x % PAS == RUE / 2 && z % PAS >= RUE) || (z % PAS == RUE / 2 && x % PAS >= RUE);
+                set(x, -1, z, rigole ? Blocks.COBBLESTONE.getDefaultState() : rue ? ((x + z) % 9 == 0 ? dalles : pave) : pave);
             }
     }
 
@@ -205,44 +207,208 @@ public final class CartePrague {
     private static final String[] AFFICHES = {"affiche_proclamation", "affiche_recherche", "affiche_comediens", "affiche_foire", "affiche_almanach",
             "affiche_comete", "affiche_remede", "affiche_carte_du_ciel", "affiche_taverne", "affiche_joute", "affiche_bal_masque", "affiche_gazette"};
 
-    /** Une maison étroite, sa façade côté « facade », pignon sur rue, toit de tuiles en bâtière. */
+    /** Ce que chaque métier met dans sa boutique : le comptoir, puis ce qui garnit le mur du fond. */
+    private static final Map<String, String[]> METIERS = Map.ofEntries(
+            Map.entry("enseigne_boulangerie", new String[]{"ombre:etal_pain", "furnace", "barrel", "hay_block"}),
+            Map.entry("enseigne_brasseur", new String[]{"barrel", "ombre:tonneau_biere", "ombre:tonneau_biere", "barrel"}),
+            Map.entry("enseigne_apothicaire", new String[]{"ombre:etal_fleurs", "ombre:etagere_fioles", "brewing_stand", "ombre:etagere_fioles"}),
+            Map.entry("enseigne_horloger", new String[]{"spruce_planks", "ombre:horloge", "bookshelf", "ombre:horloge"}),
+            Map.entry("enseigne_imprimeur", new String[]{"spruce_planks", "bookshelf", "lectern", "bookshelf"}),
+            Map.entry("enseigne_boucherie", new String[]{"ombre:etal_poisson", "smoker", "barrel", "smoker"}),
+            Map.entry("enseigne_chapelier", new String[]{"ombre:etal_etoffes", "loom", "red_wool", "blue_wool"}),
+            Map.entry("enseigne_barbier", new String[]{"spruce_planks", "water_cauldron", "barrel", "water_cauldron"}),
+            Map.entry("enseigne_cordonnier", new String[]{"spruce_planks", "crafting_table", "barrel", "chest"}),
+            Map.entry("enseigne_alchimiste", new String[]{"spruce_planks", "ombre:alambic", "ombre:etagere_fioles", "cauldron"}),
+            Map.entry("enseigne_tailleur", new String[]{"ombre:etal_etoffes", "loom", "white_wool", "yellow_wool"}),
+            Map.entry("enseigne_marchand_vin", new String[]{"barrel", "ombre:tonneau_biere", "barrel", "ombre:tonneau_biere"}));
+
+    private static BlockState bloc(String nom) {
+        Identifier id = nom.contains(":") ? Identifier.of(nom) : Identifier.ofVanilla(nom);
+        return Registries.BLOCK.get(id).getDefaultState();
+    }
+
+    /** Un bloc tourné vers d, s'il a une orientation (horizontale) ; sinon tel quel. */
+    private static BlockState tourne(BlockState s, Direction d) {
+        if (s.contains(Properties.HORIZONTAL_FACING)) return s.with(Properties.HORIZONTAL_FACING, d);
+        if (s.contains(Properties.FACING)) return s.with(Properties.FACING, d);
+        return s;
+    }
+
+    /**
+     * Une maison étroite, sa façade côté « facade », pignon sur rue, toit de tuiles en bâtière.
+     * Dedans : des étages avec leurs planchers, une échelle de l'un à l'autre, et des pièces meublées
+     * (boutique ou cuisine au rez-de-chaussée, chambre ou salle à l'étage), éclairées.
+     * La façade est ordonnée : une boutique a ses vitrines, un auvent continu et une enseigne ; une habitation
+     * a une lanterne près de la porte et parfois un balcon ; une corniche continue sous le toit ;
+     * des fenêtres sur tous les murs, à tous les étages.
+     */
     private void maison(int x0, int z0, int x1, int z1, Direction facade, int etages) {
         int h = 4 + etages * 3;
         Block mur = b(hasard(FACADES));
         boite(x0, 0, z0, x1, h - 1, z1, mur);
         for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) hauteur[x][z] = h;
         boolean ns = facade.getAxis() == Direction.Axis.Z;
-        int debut = ns ? x0 : z0, fin = ns ? x1 : z1;
-        int bord = switch (facade) { case NORTH -> z0; case SOUTH -> z1; case WEST -> x0; default -> x1; };
-        int dx = facade.getOffsetX(), dz = facade.getOffsetZ();
-        Direction versMur = facade.getOpposite();
-        Block volets = b(hasard(VOLETS)), auvent = b(hasard(AUVENTS)), enseigne = b(hasard(ENSEIGNES));
+        int debut = ns ? x0 : z0, fin = ns ? x1 : z1, D = ns ? z1 - z0 : x1 - x0;
+        Direction versMur = facade.getOpposite(), uDir = ns ? Direction.EAST : Direction.SOUTH;
+        // (u, d) → monde : u le long de la façade, d de la façade (0) vers le mur du fond (D)
+        java.util.function.BiFunction<Integer, Integer, int[]> P = (u, d) -> switch (facade) {
+            case NORTH -> new int[]{u, z0 + d};
+            case SOUTH -> new int[]{u, z1 - d};
+            case WEST -> new int[]{x0 + d, u};
+            default -> new int[]{x1 - d, u};
+        };
+        java.util.function.Consumer<Object[]> poser = o -> { int[] q = P.apply((Integer) o[0], (Integer) o[1]); set(q[0], (Integer) o[2], q[1], (BlockState) o[3]); };
+
+        // Le soubassement de pierre tout autour, le bandeau sculpté au-dessus du rez-de-chaussée
+        for (int u = debut; u <= fin; u++) for (int d = 0; d <= D; d++) {
+            if (u != debut && u != fin && d != 0 && d != D) continue;
+            for (int y = 0; y <= 3; y++) poser.accept(new Object[]{u, d, y, b(y == 3 ? "pierre_sculptee" : "pierre_de_taille").getDefaultState()});
+        }
+        // L'intérieur : creux, avec un plancher à chaque étage
+        BlockState plancher = Blocks.SPRUCE_PLANKS.getDefaultState();
+        for (int u = debut + 1; u < fin; u++) for (int d = 1; d < D; d++) for (int y = 0; y < h; y++) {
+            boolean sol = y == 3 || (y >= 4 && (y - 4) % 3 == 0);
+            poser.accept(new Object[]{u, d, y, sol ? plancher : Blocks.AIR.getDefaultState()});
+        }
+        // L'échelle, dans le coin du fond, qui traverse tous les planchers
+        int haut = 4 + (etages - 1) * 3;
+        for (int y = 0; y <= haut; y++) poser.accept(new Object[]{fin - 1, D - 1, y, Blocks.LADDER.getDefaultState().with(Properties.HORIZONTAL_FACING, facade)});
+
         boolean boutique = r.nextInt(3) > 0;
-        int porte = debut + 1 + r.nextInt(Math.max(1, fin - debut - 1)), posEnseigne = debut + 1 + r.nextInt(Math.max(1, fin - debut - 1));
+        String enseigneNom = hasard(ENSEIGNES);
+        int porte = debut + 1 + r.nextInt(Math.max(1, fin - debut - 1));
+        boolean avecVolets = r.nextBoolean();
+        BlockState volets = vers(b(hasard(VOLETS)), versMur);
+        int mil = (debut + fin) / 2;
+        boolean balcon = !boutique && fin - debut >= 4 && r.nextBoolean();
+
+        // ── La façade
+        int posEnseigne = porte + 1 <= fin ? porte + 1 : porte - 1;
+        if (posEnseigne == debut) posEnseigne = porte + 1;
+        BlockState auvent = vers(b(hasard(AUVENTS)), versMur);
         for (int u = debut; u <= fin; u++) {
-            int x = ns ? u : bord, z = ns ? bord : u, xo = x + dx, zo = z + dz;
-            // Rez-de-chaussée : pierre, porte, vitrines ou arcades
-            for (int y = 0; y <= 3; y++) set(x, y, z, b(y == 3 ? "pierre_sculptee" : "pierre_de_taille"));
-            if (u == porte) { set(x, 0, z, Blocks.AIR); set(x, 1, z, Blocks.AIR); }
-            else if (boutique && (u - debut) % 2 == 1) { set(x, 1, z, Blocks.GLASS_PANE); set(x, 2, z, Blocks.GLASS_PANE); }
-            if (u == debut) {                                             // une gouttière à chaque mitoyen
+            int[] q = P.apply(u, 0);
+            int x = q[0], z = q[1], xo = x + facade.getOffsetX(), zo = z + facade.getOffsetZ();
+            if (u == debut) {                                             // une gouttière à chaque mitoyen, et rien d'autre
                 for (int y = 0; y < h; y++) set(xo, y, zo, vers(OmbreBlocs.GOUTTIERE, versMur));
                 continue;
             }
-            if (boutique && u == posEnseigne) set(xo, 3, zo, vers(enseigne, versMur));
-            else if (boutique && u != porte && r.nextInt(3) > 0) set(xo, 3, zo, vers(auvent, versMur));
-            else if (r.nextInt(4) == 0) set(xo, 2, zo, vers(OmbreBlocs.REVERBERE, versMur));
-            else if (r.nextInt(5) == 0) set(xo, 1, zo, vers(b(r.nextInt(3) == 0 ? "affiche_recherche" : hasard(AFFICHES)), versMur));
+            boolean fenetre = (u - debut) % 2 == 1;
+            if (u == porte) {
+                set(x, 0, z, Blocks.SPRUCE_DOOR.getDefaultState().with(Properties.HORIZONTAL_FACING, versMur).with(Properties.DOUBLE_BLOCK_HALF, net.minecraft.block.enums.DoubleBlockHalf.LOWER));
+                set(x, 1, z, Blocks.SPRUCE_DOOR.getDefaultState().with(Properties.HORIZONTAL_FACING, versMur).with(Properties.DOUBLE_BLOCK_HALF, net.minecraft.block.enums.DoubleBlockHalf.UPPER));
+            } else if (boutique) {
+                if (fenetre) { set(x, 1, z, Blocks.GLASS_PANE); set(x, 2, z, Blocks.GLASS_PANE); }
+                if (u == posEnseigne) set(xo, 3, zo, vers(b(enseigneNom), versMur));
+                else set(xo, 3, zo, auvent);
+            } else {
+                if (fenetre) { set(x, 1, z, Blocks.GLASS_PANE); set(x, 2, z, Blocks.GLASS_PANE); }
+                if (u == posEnseigne && r.nextInt(5) < 3) set(xo, 2, zo, vers(OmbreBlocs.REVERBERE, versMur));
+                else if (!fenetre && r.nextInt(6) == 0) set(xo, 1, zo, vers(b(r.nextInt(3) == 0 ? "affiche_recherche" : hasard(AFFICHES)), versMur));
+            }
             for (int k = 0; k < etages; k++) {
                 int yb = 4 + k * 3;
-                boolean fenetre = (u - debut) % 2 == 1;
-                if (fenetre) { set(x, yb + 1, z, Blocks.GLASS_PANE); set(x, yb + 2, z, Blocks.GLASS_PANE); }
-                if (k == 0 && r.nextInt(3) == 0) set(xo, yb, zo, vers(OmbreBlocs.BALCON, versMur));
-                else if (fenetre && r.nextBoolean()) { set(xo, yb + 1, zo, vers(volets, versMur)); set(xo, yb + 2, zo, vers(volets, versMur)); }
-                else if (k == etages - 1 && !fenetre) set(xo, yb + 1, zo, vers(OmbreBlocs.CORNICHE, versMur));
+                if (fenetre) {
+                    set(x, yb + 1, z, Blocks.GLASS_PANE); set(x, yb + 2, z, Blocks.GLASS_PANE);
+                    if (avecVolets) { set(xo, yb + 1, zo, volets); set(xo, yb + 2, zo, volets); }
+                }
+                if (k == 0 && balcon && Math.abs(u - mil) <= 1) set(xo, yb, zo, vers(OmbreBlocs.BALCON, versMur));
+            }
+            set(xo, h - 1, zo, vers(OmbreBlocs.CORNICHE, versMur));          // la corniche, d'un bout à l'autre
+        }
+        // ── Des fenêtres sur les autres murs aussi (côtés et arrière), à chaque étage
+        for (int k = -1; k < etages; k++) {
+            int y1 = k < 0 ? 1 : 4 + k * 3 + 1;
+            for (int u = debut + 1; u < fin; u += 2) { int[] q = P.apply(u, D); set(q[0], y1, q[1], Blocks.GLASS_PANE); set(q[0], y1 + 1, q[1], Blocks.GLASS_PANE); }
+            if (k < 0) continue;
+            for (int d = 2; d < D - 1; d += 3) for (int u : new int[]{debut, fin}) {
+                int[] q = P.apply(u, d); set(q[0], y1, q[1], Blocks.GLASS_PANE); set(q[0], y1 + 1, q[1], Blocks.GLASS_PANE);
+            }
+        }
+
+        // ── Le rez-de-chaussée : boutique du métier, ou cuisine
+        int[] sur = {debut + 1, fin - 2};                                // la largeur meublable (l'échelle prend fin - 1)
+        if (boutique) {
+            String[] m = METIERS.getOrDefault(enseigneNom, new String[]{"spruce_planks", "barrel", "barrel", "chest"});
+            for (int u = sur[0]; u <= sur[1]; u++) poser.accept(new Object[]{u, 3, 0, tourne(bloc(m[0]), facade)});
+            for (int i = 1; i < 4; i++) {
+                int u = debut + i;
+                if (u > sur[1]) break;
+                BlockState objet = bloc(m[i]);
+                // Ce qui s'accroche au mur (horloge, étagère) regarde le mur du fond ; le reste (four, coffre) regarde la pièce
+                poser.accept(new Object[]{u, D - 1, 0, tourne(objet, objet.getBlock() instanceof fr.fenua.ombre.bloc.Decor.Oriente ? versMur : facade)});
+            }
+            poser.accept(new Object[]{sur[0], 3, 1, Blocks.LANTERN.getDefaultState()});
+        } else {
+            poser.accept(new Object[]{debut + 1, D - 1, 0, Blocks.FURNACE.getDefaultState().with(Properties.HORIZONTAL_FACING, facade)});
+            if (debut + 2 <= sur[1]) poser.accept(new Object[]{debut + 2, D - 1, 0, Blocks.BARREL.getDefaultState()});
+            table(poser, mil, 3, 0, uDir, Blocks.LANTERN.getDefaultState());
+        }
+        // ── Les étages : chambre et salle en alternance
+        for (int k = 0; k < etages; k++) {
+            int y = 4 + k * 3 + 1;
+            if ((k + x0 + z0) % 2 == 0) {
+                // La chambre : le lit contre le mur, un coffre à son pied, un tapis, une bougie
+                poser.accept(new Object[]{debut + 1, 1, y, Blocks.RED_BED.getDefaultState().with(Properties.HORIZONTAL_FACING, facade).with(Properties.BED_PART, net.minecraft.block.enums.BedPart.HEAD)});
+                poser.accept(new Object[]{debut + 1, 2, y, Blocks.RED_BED.getDefaultState().with(Properties.HORIZONTAL_FACING, facade).with(Properties.BED_PART, net.minecraft.block.enums.BedPart.FOOT)});
+                poser.accept(new Object[]{debut + 1, 3, y, Blocks.CHEST.getDefaultState().with(Properties.HORIZONTAL_FACING, uDir)});
+                for (int u = debut + 2; u <= sur[1]; u++) for (int d = 2; d <= 4; d++) poser.accept(new Object[]{u, d, y, Blocks.BROWN_CARPET.getDefaultState()});
+                poser.accept(new Object[]{sur[1], D - 1, y, Blocks.LANTERN.getDefaultState()});
+            } else {
+                // La salle : une table et ses chaises, des livres au fond
+                table(poser, mil, 3, y, uDir, Blocks.LANTERN.getDefaultState());
+                for (int u = debut + 1; u <= sur[1]; u++) poser.accept(new Object[]{u, D - 1, y, Blocks.BOOKSHELF.getDefaultState()});
             }
         }
         toit(x0, z0, x1, z1, h, facade, mur);
+    }
+
+    /** Une table (un plateau de bois à hauteur de table), une lanterne dessus, une chaise de chaque côté. */
+    private void table(java.util.function.Consumer<Object[]> poser, int u, int d, int y, Direction uDir, BlockState dessus) {
+        poser.accept(new Object[]{u, d, y, Blocks.SPRUCE_SLAB.getDefaultState().with(Properties.SLAB_TYPE, net.minecraft.block.enums.SlabType.TOP)});
+        poser.accept(new Object[]{u, d, y + 1, dessus});
+        poser.accept(new Object[]{u - 1, d, y, Blocks.SPRUCE_STAIRS.getDefaultState().with(StairsBlock.FACING, uDir.getOpposite())});
+        poser.accept(new Object[]{u + 1, d, y, Blocks.SPRUCE_STAIRS.getDefaultState().with(StairsBlock.FACING, uDir)});
+    }
+
+    /**
+     * Une vraie charrette, brancards vers « dir » : un plateau de 2 × 3 posé sur ses deux roues, des ridelles,
+     * et sa charge (foin : on s'y cache et on y plonge ; tonneaux ; pierres ; ou presque vide).
+     */
+    private void charrette(int x, int z, Direction dir, int charge) {
+        if (!videRel(x, z, dir, -1, 2, -2, 3, 2)) return;
+        Direction droite = dir.rotateYClockwise(), arriere = dir.getOpposite();
+        BlockState planche = Blocks.SPRUCE_SLAB.getDefaultState().with(Properties.SLAB_TYPE, net.minecraft.block.enums.SlabType.TOP);
+        java.util.function.BiFunction<Direction, Boolean, BlockState> trappe = (f, bas) -> Blocks.DARK_OAK_TRAPDOOR.getDefaultState()
+                .with(Properties.HORIZONTAL_FACING, f).with(Properties.OPEN, true);
+        for (int a = 0; a <= 1; a++) for (int p = 0; p <= 2; p++) rel(x, z, dir, a, 0, p, planche);
+        rel(x, z, dir, -1, 0, 1, trappe.apply(droite.getOpposite(), true));      // les roues
+        rel(x, z, dir, 2, 0, 1, trappe.apply(droite, true));
+        for (int p = 0; p <= 2; p++) {                                         // les ridelles
+            rel(x, z, dir, -1, 1, p, Blocks.SPRUCE_TRAPDOOR.getDefaultState().with(Properties.HORIZONTAL_FACING, droite.getOpposite()).with(Properties.OPEN, true));
+            rel(x, z, dir, 2, 1, p, Blocks.SPRUCE_TRAPDOOR.getDefaultState().with(Properties.HORIZONTAL_FACING, droite).with(Properties.OPEN, true));
+        }
+        for (int a = 0; a <= 1; a++) rel(x, z, dir, a, 1, 3, Blocks.SPRUCE_TRAPDOOR.getDefaultState().with(Properties.HORIZONTAL_FACING, arriere).with(Properties.OPEN, true));
+        BlockState brancard = OmbreBlocs.POUTRE.getDefaultState().with(Properties.HORIZONTAL_AXIS, dir.getAxis());
+        for (int p = -2; p <= -1; p++) { rel(x, z, dir, 0, 0, p, brancard); rel(x, z, dir, 1, 0, p, brancard); }
+        switch (Math.floorMod(charge, 4)) {
+            case 0 -> {                                                         // du foin
+                for (int a = 0; a <= 1; a++) for (int p = 0; p <= 2; p++) rel(x, z, dir, a, 1, p, OmbreBlocs.MEULE.getDefaultState());
+                rel(x, z, dir, 0, 2, 1, OmbreBlocs.MEULE.getDefaultState()); rel(x, z, dir, 1, 2, 1, OmbreBlocs.MEULE.getDefaultState());
+            }
+            case 1 -> {                                                         // des tonneaux
+                for (int a = 0; a <= 1; a++) for (int p = 0; p <= 1; p++) rel(x, z, dir, a, 1, p, Blocks.BARREL.getDefaultState());
+                rel(x, z, dir, 0, 2, 0, Blocks.BARREL.getDefaultState());
+                rel(x, z, dir, 1, 1, 2, vers(OmbreBlocs.TONNEAU, droite));
+            }
+            case 2 -> {                                                         // des pierres de taille
+                for (int a = 0; a <= 1; a++) for (int p = 0; p <= 2; p++) rel(x, z, dir, a, 1, p, (a + p) % 2 == 0 ? b("pierre_de_taille").getDefaultState() : Blocks.COBBLESTONE.getDefaultState());
+            }
+            default -> {                                                        // presque vide : un sac, un tonneau
+                rel(x, z, dir, 0, 1, 2, Blocks.BARREL.getDefaultState());
+                rel(x, z, dir, 1, 1, 0, Blocks.HAY_BLOCK.getDefaultState());
+            }
+        }
     }
 
     /** Toit à deux pentes, faîte perpendiculaire à la rue ; le pignon de façade monte en triangle. */
@@ -453,8 +619,9 @@ public final class CartePrague {
         // Bancs autour de la fontaine, un puits, des charrettes, des tonneaux
         for (Direction d : Direction.Type.HORIZONTAL) set(cx + d.getOffsetX() * 6, 0, cz + d.getOffsetZ() * 6, vers(OmbreBlocs.BANC, d));
         set(cx - 9, 0, cz + 7, OmbreBlocs.PUITS);
-        set(cx + 9, 0, cz - 8, vers(OmbreBlocs.CHARRETTE, Direction.NORTH));
-        set(x0 + 14, 0, z1 - 4, vers(OmbreBlocs.CHARRETTE, Direction.EAST));
+        charrette(cx + 9, cz - 8, Direction.NORTH, 0);
+        charrette(x0 + 14, z1 - 6, Direction.EAST, 1);
+        charrette(cx - 12, cz + 18, Direction.WEST, 3);
         set(x1 - 4, 0, cz, vers(OmbreBlocs.CARROSSE, Direction.NORTH));
         for (int[] t : new int[][]{{cx - 6, cz - 9}, {cx + 7, cz + 9}, {x0 + 20, cz}}) {
             set(t[0], 0, t[1], Blocks.BARREL); set(t[0] + 1, 0, t[1], Blocks.BARREL); set(t[0], 1, t[1], Blocks.BARREL);
@@ -507,7 +674,7 @@ public final class CartePrague {
         set(bx + 4, 1, bz + 19, Blocks.OAK_LOG.getDefaultState().with(net.minecraft.block.PillarBlock.AXIS, Direction.Axis.X));
         boite(bx + 18, 0, bz + 18, bx + 19, 0, bz + 19, Blocks.SAND);
         set(bx + 18, 1, bz + 18, Blocks.SAND);
-        set(bx + 14, 0, bz + 20, vers(OmbreBlocs.CHARRETTE, Direction.EAST));
+        charrette(bx + 13, bz + 19, Direction.EAST, 2);
         boite(bx + 1, 0, bz + 22, bx + 2, 1, bz + 23, OmbreBlocs.MEULE);
         // La grue : un mât de 18, une flèche qui s'avance au-dessus du chantier, le câble et sa charge, la roue au pied
         int gx = bx + 8, gz = bz + 17, h = 18;
@@ -780,8 +947,7 @@ public final class CartePrague {
             int rue = k * PAS;
             for (int t = 3; t < VILLE - 3; t += 8) {
                 if (t % PAS < RUE) continue;
-                if (r.nextInt(5) == 0 && vide(rue + 3, 0, t + 2)) set(rue + 3, 0, t + 2, vers(OmbreBlocs.CARROSSE, Direction.NORTH));
-                if (r.nextInt(4) == 0 && vide(rue + RUE - 2, 0, t + 5)) set(rue + RUE - 2, 0, t + 5, vers(OmbreBlocs.CHARRETTE, Direction.NORTH));
+                if (r.nextInt(5) == 0) charrette(rue + 4, t + 3, Direction.NORTH, r.nextInt(4));
                 if (r.nextInt(4) == 0) etal(t + 6, rue + 2, Direction.SOUTH, r.nextInt(MARCHANDISES.length));
                 if (r.nextInt(4) == 0 && vide(t + 2, 0, rue + RUE - 2) && vide(t + 2, 3, rue + RUE - 2)) {
                     boite(t + 2, 0, rue + RUE - 2, t + 2, 2, rue + RUE - 2, OmbreBlocs.LAMPADAIRE);
