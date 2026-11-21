@@ -95,7 +95,7 @@ public final class Initiation {
                 .but(7, 8, 7).si(c -> c.sur(6, 7, 8)).ouvre();
 
         e(ARRIERE, "Bondir et sauter en arrière",
-                "Accroché à un mur : §6Espace§f bondit vers le haut, §6Q§f ou §6D§f + §6Espace§f sur le côté.",
+                "Accroché à un mur : §6Espace§f bondit vers le haut, §6Q§f/§6D§f + §6Espace§f sur le côté, §6Z§f + §6Q§f/§6D§f + §6Espace§f en diagonale.",
                 "Le mur suspendu (passe dessous) ne se grimpe pas depuis le sol.",
                 "Grimpe le mur d'en face, à mi-hauteur fais §6S§f + §6Espace§f : saut arrière,",
                 "tu te raccroches au mur suspendu. Monte dessus.")

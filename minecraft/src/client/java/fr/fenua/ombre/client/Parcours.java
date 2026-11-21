@@ -27,7 +27,9 @@ import net.minecraft.world.World;
  * Les états :
  *  LIBRE      : marche, course, saut. Le saut en sprint porte plus loin (bond).
  *  MUR        : accroché à un mur (Espace en poussant vers lui, ou en sautant contre lui), on reste en place. Z/S montent et descendent (vers le mur / à l'opposé),
- *               Q/D se déplacent sur le côté, et passent les angles (saillants comme rentrants), caméra comprise. Espace : bond vers le haut ; avec Q/D, bond sur le côté ;
+ *               Q/D se déplacent sur le côté (en douceur, en passant les fenêtres aux mains), et passent les angles
+ *               (saillants comme rentrants), caméra comprise. Z + Q/D + Espace : bond en diagonale ; Ctrl + Q/D + Espace :
+ *               grand saut latéral ; Ctrl + S : glissade. Espace : bond vers le haut ; avec Q/D, bond sur le côté ;
  *               en tirant à l'opposé du mur, saut arrière vers le mur d'en face (on s'y raccroche seul).
  *               Maj : lâcher. En haut, on se rétablit tout seul.
  *  REBORD     : suspendu par les mains à un bord (on le saisit tout seul en tombant le long du mur). Q/D glissent, Q/D + Espace sautent vers le bord voisin,
@@ -58,7 +60,8 @@ public final class Parcours {
     private static int poseBond;               // ticks de la pose de bond
     private static double cible;               // hauteur visée (rétablissement, monte-charge)
     private static double hisseX0, hisseZ0, hisseAvance;   // rétablissement : d'où l'on part, de combien on avance
-    private static boolean zTenu;              // arrivé au bord en montant : Z doit être relâché avant de passer par-dessus
+    private static boolean zTenu;
+    private static double vLat, vVert, bondLat;  // escalade : vitesses lissées (on démarre et on s'arrête en douceur), élan d'un bond en diagonale              // arrivé au bord en montant : Z doit être relâché avant de passer par-dessus
     // Passage d'un angle de mur (en escalade ou suspendu) : quelques ticks où le corps contourne le coin
     private static final int VIRAGE = 6;
     private static int virage;
@@ -248,6 +251,7 @@ public final class Parcours {
 
     private static void accrocher(ClientPlayerEntity p, double[] d) {
         murX = d[0]; murZ = d[1];
+        vLat = 0; vVert = 0; bondLat = 0;
         changer(Etat.MUR);
         bondMur = 0;
         p.playSound(SoundEvents.BLOCK_STONE_HIT, 0.5f, 1.2f);
@@ -276,22 +280,29 @@ public final class Parcours {
             }
         }
 
-        // Plus de mur devant ?
-        if (!bloqueBuste(p, murX * 0.3, murZ * 0.3, 0.3) && !bloque(p, murX * 0.3, murZ * 0.3)) {
+        // Plus de mur devant ? (une fenêtre en retrait, ou le montant d'une ouverture à portée de main, suffisent)
+        if (!appui(p, 0, 0) && !appui(p, tx * 0.9, tz * 0.9) && !appui(p, -tx * 0.9, -tz * 0.9)) {
             changer(Etat.LIBRE);
             return;
         }
 
+        boolean vite = client.options.sprintKey.isPressed();
         if (nouveauSaut) {
-            if (Math.abs(cote) > 0.5) {                          // bond sur le côté
-                double s = Math.signum(cote);
-                p.setVelocity(tx * s * 0.45 + murX * 0.08, 0.4, tz * s * 0.45 + murZ * 0.08);
-                sauter(p, 3, 14);
+            if (vers > 0.3 && Math.abs(cote) > 0.3) {            // bond en diagonale : vers le haut et sur le côté
+                bondMur = 9;
+                bondLat = Math.signum(cote) * 0.3;
+                p.setVelocity(murX * 0.05 + tx * bondLat, 0.58, murZ * 0.05 + tz * bondLat);
+                p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.2f);
+            } else if (Math.abs(cote) > 0.5) {                   // bond sur le côté (grand saut en sprint)
+                double s = Math.signum(cote), f = vite ? 0.62 : 0.45;
+                p.setVelocity(tx * s * f + murX * 0.08, vite ? 0.44 : 0.4, tz * s * f + murZ * 0.08);
+                sauter(p, 3, vite ? 18 : 14);
             } else if (vers < -0.5) {                            // saut arrière, vers le mur d'en face
                 p.setVelocity(-murX * 0.55, 0.45, -murZ * 0.55);
                 sauter(p, 5, 18);
             } else {                                             // bond vers le haut
                 bondMur = 9;
+                bondLat = 0;
                 p.setVelocity(murX * 0.04, 0.62, murZ * 0.04);
                 p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, 0.4f, 1.3f);
             }
@@ -300,26 +311,46 @@ public final class Parcours {
 
         if (bondMur > 0) {                                       // en l'air le long du mur : la gravité agit
             bondMur--;
-            p.setVelocity(murX * 0.04, v.y, murZ * 0.04);
+            if (bondLat != 0 && !appui(p, tx * Math.signum(bondLat) * 0.45, tz * Math.signum(bondLat) * 0.45)) bondLat = 0;
+            p.setVelocity(murX * 0.04 + tx * bondLat, v.y, murZ * 0.04 + tz * bondLat);
+            if (bondMur == 0) { vLat = bondLat; vVert = 0; bondLat = 0; }
             return;
         }
 
-        boolean vite = client.options.sprintKey.isPressed();
-        double vy = vers > 0.3 ? (vite ? 0.2 : 0.13) : vers < -0.3 ? -0.17 : 0;
+        // Ce que veulent les touches : monter, descendre (Ctrl + S : glissade), aller sur le côté
+        double vy = vers > 0.3 ? (vite ? 0.2 : 0.13) : vers < -0.3 ? (vite ? -0.42 : -0.17) : 0;
         if (vy > 0 && gouttiere(p)) vy *= 1.8;                   // le long d'une gouttière, on monte vite
         if (vy < 0 && sol) { changer(Etat.LIBRE); return; }
         double lat = 0;
         if (Math.abs(cote) > 0.3) {
             double s = Math.signum(cote);
-            // Un mur en travers (coin rentrant), ou le bout du mur (coin saillant) : on passe l'angle
+            // Un mur en travers (coin rentrant), ou le bout du mur (coin saillant) : on passe l'angle.
+            // Une fenêtre ou un renfoncement d'un ou deux blocs : on le passe aux mains.
             if (murEnTravers(p, tx * s, tz * s)) { if (contourner(p, tx * s, tz * s, false)) return; }
-            else if (bloqueBuste(p, murX * 0.3 + tx * s * 0.45, murZ * 0.3 + tz * s * 0.45, 0.3)) lat = s * (vite ? 0.15 : 0.1);
+            else if (appui(p, tx * s * 0.45, tz * s * 0.45) || appui(p, tx * s * 1.2, tz * s * 1.2) || appui(p, tx * s * 1.9, tz * s * 1.9))
+                lat = s * (vite ? 0.17 : 0.11);
             else if (contourner(p, tx * s, tz * s, false)) return;
         }
-        p.setVelocity(murX * 0.05 + tx * lat, vy, murZ * 0.05 + tz * lat);
-        if (vy != 0 || lat != 0) {
-            phase += 0.35f;
+        // On y va en douceur : la vitesse rejoint peu à peu celle voulue
+        vLat += (lat - vLat) * 0.35;
+        vVert += (vy - vVert) * (vy < vVert ? 0.5 : 0.4);
+        if (Math.abs(vLat) < 0.005) vLat = 0;
+        if (Math.abs(vVert) < 0.005) vVert = 0;
+        // On reste plaqué contre la façade, mais sans s'enfoncer dans une fenêtre ; si l'on y est entré,
+        // on s'en dégage pour pouvoir longer le mur
+        boolean faceDevant = bloqueBuste(p, murX * 0.3, murZ * 0.3, 0.3) || bloque(p, murX * 0.3, murZ * 0.3);
+        double colle = faceDevant ? 0.05 : 0;
+        if (vLat != 0 && bloqueBuste(p, tx * Math.signum(vLat) * 0.12, tz * Math.signum(vLat) * 0.12, 0.3)) colle = -0.12;
+        p.setVelocity(murX * colle + tx * vLat, vVert, murZ * colle + tz * vLat);
+        if (vVert != 0 || vLat != 0) {
+            phase += (float) (0.25 + 1.5 * Math.max(Math.abs(vLat), Math.abs(vVert)));
             if (duree % 6 == 0) p.playSound(SoundEvents.BLOCK_STONE_STEP, 0.25f, 1.3f);
+            if (vVert < -0.3 && duree % 2 == 0) {                // la glissade soulève la poussière du mur
+                BlockPos b = BlockPos.ofFloored(p.getX() + murX * 0.7, p.getY() + 0.5, p.getZ() + murZ * 0.7);
+                p.getWorld().addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, p.getWorld().getBlockState(b)),
+                        p.getX() + murX * 0.35, p.getY() + 0.2, p.getZ() + murZ * 0.35, 0, 0.05, 0);
+                if (duree % 4 == 0) p.playSound(SoundEvents.BLOCK_GRAVEL_STEP, 0.3f, 1.4f);
+            }
         }
         if (duree % 10 == 0) rattrape();
     }
@@ -468,6 +499,15 @@ public final class Parcours {
         commencerVirage(p, -ax, -az, true);
         virAx = ax; virAz = az; virD1 = d1;
         return true;
+    }
+
+    /**
+     * Une prise pour les mains, décalée de (dx, dz) le long du mur : le mur lui-même, ou ce qui est en retrait
+     * dans son épaisseur (la vitre d'une fenêtre, un volet, le fond d'une niche).
+     */
+    private static boolean appui(ClientPlayerEntity p, double dx, double dz) {
+        return bloqueBuste(p, murX * 0.3 + dx, murZ * 0.3 + dz, 0.3) || bloque(p, murX * 0.3 + dx, murZ * 0.3 + dz)
+                || bloqueBuste(p, murX * 0.75 + dx, murZ * 0.75 + dz, 0.3);
     }
 
     /** Un mur barre-t-il la route dans la direction (ax, az) ? Un vrai mur : il dépasse d'au moins un demi-bloc (pas une gouttière). */

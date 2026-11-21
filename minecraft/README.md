@@ -77,7 +77,10 @@ Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 | Monter / descendre | **Z / S** (Ctrl : plus vite ; le long d'une **gouttière**, deux fois plus vite) |
 | Arriver en haut | On s'arrête **suspendu au bord** (idéal pour l'assassinat depuis le rebord) ; **Z** à nouveau ou **Espace** pour passer par-dessus. En sprint (**Ctrl**), on passe d'un trait |
 | Se déplacer sur le côté | **Q / D** — les angles se passent tout seuls (coin d'une maison ou coin rentrant), la caméra suit |
-| Bondir vers le haut / sur le côté | **Espace** / **Q ou D + Espace** |
+| Bondir vers le haut / sur le côté | **Espace** / **Q ou D + Espace** (avec **Ctrl** : grand saut latéral, jusqu'au mur suivant) |
+| Bond en diagonale | **Z + Q ou D + Espace** : vers le haut et sur le côté à la fois |
+| Glissade | **Ctrl + S** : on descend le long du mur très vite |
+| Fenêtres, renfoncements | On s'agrippe à leur rebord : on les longe et on les passe aux mains sans s'arrêter |
 | Saut arrière vers le mur d'en face | **S + Espace** (on s'y raccroche tout seul) |
 | Lâcher | **Maj** |
 
