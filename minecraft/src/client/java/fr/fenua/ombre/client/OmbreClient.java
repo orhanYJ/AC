@@ -43,6 +43,9 @@ public class OmbreClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.EtatPayload.ID, (payload, ctx) -> EtatAC.recevoir(payload));
         ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ac.JournalPayload.ID, (payload, ctx) -> EtatAC.recevoir(payload));
         WorldRenderEvents.AFTER_ENTITIES.register(HudAC::dessinerMonde);
+        // Les avis de recherche repérés par la vue de l'aigle
+        WorldRenderEvents.AFTER_ENTITIES.register(Affiches::dessiner);
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(Affiches::tick);
 
         // Le serveur dit qui nous a repérés ; l'invite d'assassinat s'affiche sous le viseur
         ClientPlayNetworking.registerGlobalReceiver(fr.fenua.ombre.ExecutionPayload.ID, (payload, ctx) -> { Parcours.executer(payload); Assassin.apresExecution(payload.type()); });

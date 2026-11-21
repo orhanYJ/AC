@@ -83,6 +83,7 @@ public class EcranAide extends Screen {
             new String[]{"#Comme dans Assassin's Creed", ""},
             new String[]{"G (maintenir)", "Roue des outils : le jeu se fige, montre un outil à la souris, relâche : il passe en main"},
             new String[]{"N", "Vue de l'aigle : la caméra s'envole ; vise un garde un instant pour le marquer (1 min, à travers les murs)"},
+            new String[]{"  avis de recherche", "La vue de l'aigle signale aussi les avis de recherche alentour (✉ AVIS doré) : clic droit pour arracher"},
             new String[]{"Fléchette de folie", "Le garde touché attaque ses camarades pendant 15 s"},
             new String[]{"Plumes de corbeau", "Quinze plumes sur les hauteurs de Prague (colonne de lumière) ; le journal les compte"},
             new String[]{"Course des toits", "À Prague, au coin nord-ouest : anneau de flammes sur le toit. Balises à franchir, chrono, record"},

@@ -1174,6 +1174,14 @@ public final class CartePrague {
             if (k < N && k > 0) cotes.add(new Cote(s0, k * PAS + RUE, 1, 0, Direction.NORTH));
         }
         java.util.Collections.shuffle(cotes, r);
+        // Des avis de recherche placardés le long des rues, à hauteur d'homme : un côté de rue sur trois
+        for (Cote c : cotes) {
+            if (r.nextInt(3) != 0) continue;
+            int t = 3 + r.nextInt(18);
+            int x = c.x(t, 1), z = c.z(t, 1);
+            if (c.mur(t) > 0 && dedans(x, z) && hauteur[x][z] == 0 && vide(x, 1, z) && vide(x, 2, z) && vide(x, 0, z))
+                c.pose(t, 1, 1, vers(b("affiche_recherche"), c.versRue.getOpposite()));
+        }
         int[] compte = new int[4];
         for (Cote c : cotes) {
             // On varie : le motif le moins posé jusqu'ici a la priorité, un bout de rue sur cinq reste nu

@@ -74,9 +74,13 @@ public final class OmbreBlocs {
             Decor.b(0, 0, 15, 1, 16, 16), Decor.b(15, 0, 15, 16, 16, 16));
     public static final net.minecraft.util.shape.VoxelShape CHEMINEE_CONTOUR = Decor.u(Decor.b(3, 0, 3, 13, 16, 13), Decor.b(2, 14, 2, 14, 16, 14));
 
-    /** Gouttière : un tuyau de zinc le long d'un mur. On y grimpe deux fois plus vite. */
-    public static final Decor.Gouttiere GOUTTIERE = (Decor.Gouttiere) new Decor.Gouttiere(metal()).formes(true,
-            Decor.b(5, 0, 0, 11, 16, 5), null);
+    /**
+     * Gouttière : un tuyau de zinc le long d'un mur. On y grimpe deux fois plus vite. Elle ne bloque pas le corps :
+     * en longeant la façade aux mains, on passe devant sans buter (avant, on s'en décollait et l'on tournait
+     * à contresens), et elle ne gêne plus les sauts le long des maisons.
+     */
+    public static final Decor.Gouttiere GOUTTIERE = (Decor.Gouttiere) new Decor.Gouttiere(metal().noCollision()).formes(true,
+            Decor.b(5, 0, 0, 11, 16, 5), Decor.VIDE);
     /** Balcon en fer forgé : un plancher et une grille, devant une façade. */
     public static final Decor.Balcon BALCON = (Decor.Balcon) new Decor.Balcon(metal()).formes(true,
             BALCON_CONTOUR, null);

@@ -87,6 +87,7 @@ Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 
 | Geste | Touches |
 |---|---|
+| Gouttière | On y monte deux fois plus vite. Elle ne bloque pas : en longeant la façade aux mains, on passe devant sans s'arrêter |
 | S'accrocher | **Espace** en poussant vers le mur, ou en sautant contre lui. Seulement un vrai mur, d'**au moins 2 blocs** : un muret, une barrière ou un mur de pierre se sautent (ou se franchissent en courant) |
 | Monter / descendre | **Z / S** (Ctrl : plus vite ; le long d'une **gouttière**, deux fois plus vite) |
 | Arriver en haut | On s'arrête **suspendu au bord** (idéal pour l'assassinat depuis le rebord) ; **Z** à nouveau ou **Espace** pour passer par-dessus. En sprint (**Ctrl**), on passe d'un trait |
@@ -144,7 +145,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 
 | Fonction | Comment ça marche |
 |---|---|
-| **Détection progressive** | Un garde qui te voit ne donne pas l'alerte d'un coup : un **« ? »** blanc apparaît au-dessus de sa tête, devient jaune (il s'arrête, te regarde, puis vient voir), puis **« ! »** rouge : l'alerte. Autour du viseur, des **flèches** montrent d'où l'on t'observe et se remplissent. Sors de sa vue, cache-toi ou lance une bombe de fumée : le soupçon retombe |
+| **Détection progressive** | Un garde qui te voit ne donne pas l'alerte d'un coup : un **« ? »** blanc apparaît au-dessus de sa tête, devient jaune (il s'arrête, te regarde, puis vient voir), puis **« ! »** rouge : l'alerte. Autour du viseur, des **flèches** montrent d'où l'on t'observe et se remplissent. Sors de sa vue, cache-toi ou lance une bombe de fumée : le soupçon retombe. Un garde voit à **13 blocs** devant lui (le capitaine 15, les arbalétriers des toits 18), bien moins dans son dos, accroupi ou dans le noir ; un garde au sol remarque mal ce qui se passe sur les toits |
 | **Zones interdites** | Autour des **étendards rouges de la garde** (14 blocs). Une **barre jaune** en haut de l'écran : tu t'en approches ; **rouge** : tu es dedans, et les gardes te repèrent deux fois plus vite |
 | **Roue des outils** | Maintiens **G** : le jeu se fige, montre un outil avec la souris, relâche — il passe dans ta main |
 | **Boussole** | En haut de l'écran : les points cardinaux, les **cibles en losange doré** avec leur distance, les points de vue synchronisés, les gardes en alerte |
@@ -154,7 +155,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Désynchronisation** | Tuer un passant : l'écran se trouble, la notoriété bondit. L'Ombre ne tue pas d'innocents |
 | **Vol à la tire** | Accroupi, dans le dos d'un passant : clic droit pour prendre sa bourse. Vu de face, il crie « Au voleur ! » |
 | **Enchaînement** | Juste après un assassinat, tu as 2,5 s pour en enchaîner un autre au sol, même sur un garde qui t'a vu |
-| **Vue de l'aigle** | Touche **N** : la caméra s'envole au-dessus de toi. Vise un garde un instant : il est marqué une minute, visible à travers les murs. **N** pour revenir |
+| **Vue de l'aigle** | Touche **N** : la caméra s'envole au-dessus de toi. Vise un garde un instant : il est marqué une minute, visible à travers les murs. Les **avis de recherche** à 64 blocs à la ronde sont signalés d'un **« ✉ AVIS »** doré avec leur distance, visible à travers les murs, pendant le vol et 30 s après : va les arracher. **N** pour revenir |
 | **Plumes de corbeau** | Quinze plumes cachées sur les hauteurs de Prague, signalées par une colonne de lumière ; le journal les compte, et la quinzième rapporte une bourse |
 | **Course des toits** | Au coin nord-ouest de Prague, un anneau de flammes sur un toit : le départ. Franchis les balises dans l'ordre par les toits, les passerelles et les échelles, sans toucher la rue. Chrono et record |
 | **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas. Quand une poutre ou un rebord est à portée devant toi, c'est un saut ordinaire vers lui : pour le saut de la foi, **regarde vers le bas** en sautant. Saute : la caméra te filme de derrière, tu plonges tête la première bras en croix, le foin jaillit à l'arrivée |

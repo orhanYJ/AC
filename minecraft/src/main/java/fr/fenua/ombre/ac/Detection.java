@@ -74,10 +74,18 @@ public final class Detection {
         }
     }
 
+    /** Jusqu'où voit un garde, en blocs, avant la discrétion (accroupi, nuit, dans le dos…) et la notoriété. */
+    public static final double VUE_GARDE = 13, VUE_CAPITAINE = 15, VUE_ARBALETRIER = 18;
+
     /** Jusqu'où ce garde peut te remarquer maintenant (0 s'il ne peut pas). */
     private static double portee(MobEntity g, PlayerEntity p) {
         if (g.hasStatusEffect(Effets.ENDORMI) || g.getCommandTags().contains("ombre_aveugle")) return 0;   // endormi, ou mannequin
-        double base = Math.max(16, g.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE));
+        // La portée de vue, comme dans Assassin's Creed : une quinzaine de blocs devant soi (les arbalétriers des
+        // toits, qui guettent, un peu plus). Avant, on prenait la portée de suivi de Minecraft : 32 pour l'arbalétrier.
+        double base = g instanceof fr.fenua.ombre.entite.Gardes.Arbaletrier ? VUE_ARBALETRIER
+                : g instanceof fr.fenua.ombre.entite.Gardes.Capitaine ? VUE_CAPITAINE : VUE_GARDE;
+        // Un garde au sol lève rarement les yeux : sur les toits, il te remarque moins
+        if (!(g instanceof fr.fenua.ombre.entite.Gardes.Arbaletrier) && p.getY() - g.getY() > 4) base *= 0.6;
         double f = p.getAttackDistanceScalingFactor(g);
         return f <= 0.001 ? 1.6 : Math.max(2.0, base * f);
     }

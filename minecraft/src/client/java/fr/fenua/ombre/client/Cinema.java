@@ -304,6 +304,9 @@ public final class Cinema {
         var tr = mc.textRenderer;
         ctx.drawCenteredTextWithShadow(tr, Text.literal("§6✦ Vue de l'aigle ✦"), cx, 12, 0xFFFFFF);
         ctx.drawCenteredTextWithShadow(tr, Text.literal("§7Vise un garde un instant pour le marquer · §fN§7 : revenir"), cx, 24, 0xFFFFFF);
+        int avis = Affiches.nombre();
+        ctx.drawCenteredTextWithShadow(tr, Text.literal(avis == 0 ? "§7Aucun avis de recherche alentour"
+                : "§6✉ " + avis + " §7avis de recherche alentour §8(clic droit pour l'arracher : notoriété −30)"), cx, 36, 0xFFFFFF);
         ctx.drawCenteredTextWithShadow(tr, Text.literal("§f" + marques + " §7marqué" + (marques > 1 ? "s" : "") + " · §f" + Math.max(0, (duree - t) / 20) + " s"), cx, h - 22, 0xFFFFFF);
         ctx.getMatrices().pop();
     }
