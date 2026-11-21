@@ -80,7 +80,7 @@ Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 
 | Geste | Touches |
 |---|---|
-| S'accrocher | **Espace** en poussant vers le mur, ou en sautant contre lui |
+| S'accrocher | **Espace** en poussant vers le mur, ou en sautant contre lui. Seulement un vrai mur, d'**au moins 2 blocs** : un muret, une barrière ou un mur de pierre se sautent (ou se franchissent en courant) |
 | Monter / descendre | **Z / S** (Ctrl : plus vite ; le long d'une **gouttière**, deux fois plus vite) |
 | Arriver en haut | On s'arrête **suspendu au bord** (idéal pour l'assassinat depuis le rebord) ; **Z** à nouveau ou **Espace** pour passer par-dessus. En sprint (**Ctrl**), on passe d'un trait |
 | Se déplacer sur le côté | **Q / D** — les angles se passent tout seuls (coin d'une maison ou coin rentrant), la caméra suit |

@@ -200,7 +200,7 @@ public final class Parcours {
         // En sprint, c'est une course verticale : on monte le mur en courant, bien plus haut.
         if (sol && nouveauSaut) {
             double[] d = murAutour(p, norme(e) > 0.1 ? e : f);
-            if (d != null && dot(e, d) > 0.5 && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)) {
+            if (d != null && dot(e, d) > 0.5 && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0) && assezHaut(p, d[0], d[1])) {
                 boolean course = p.isSprinting() || client.options.sprintKey.isPressed();
                 accrocher(p, d);
                 bondMur = course ? 11 : 5;
@@ -228,7 +228,8 @@ public final class Parcours {
         // En tombant le long d'un mur dont le haut passe aux mains : on s'accroche au rebord
         if (v.y < -0.05 && !in.sneaking) {
             double[] d = murAutour(p, pref);
-            if (d != null && !Double.isNaN(hauteurRebord(p, p.getX() + d[0] * 0.6, p.getZ() + d[1] * 0.6, 0.9, 2.4))) {
+            if (d != null && !Double.isNaN(hauteurRebord(p, p.getX() + d[0] * 0.6, p.getZ() + d[1] * 0.6, 0.9, 2.4))
+                    && assezHaut(p, d[0], d[1])) {
                 murX = d[0]; murZ = d[1];
                 changer(Etat.REBORD);
                 p.setVelocity(0, 0, 0);
@@ -242,7 +243,7 @@ public final class Parcours {
         if (in.movementForward > 0 && vh > 0.2 && v.y < 0.25 && chercheMur == 0) {
             for (int cote = -1; cote <= 1; cote += 2) {
                 double sx = -f[1] * cote, sz = f[0] * cote;          // perpendiculaire au regard
-                if (bloque(p, sx * 0.3, sz * 0.3) && bloqueBuste(p, sx * 0.6, sz * 0.6, 0.6)) {
+                if (bloque(p, sx * 0.3, sz * 0.3) && bloqueBuste(p, sx * 0.6, sz * 0.6, 0.6) && assezHaut(p, sx, sz)) {
                     murX = sx; murZ = sz;
                     coteMur = -cote;
                     changer(Etat.MUR_COURU);
@@ -255,7 +256,8 @@ public final class Parcours {
         // S'accrocher à un mur en l'air : en poussant vers lui, ou juste après un saut de mur à mur
         if (!in.sneaking) {
             double[] d = murAutour(p, pref);
-            if (d != null && (chercheMur > 0 || dot(e, d) > 0.3) && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)) {
+            if (d != null && (chercheMur > 0 || dot(e, d) > 0.3) && bloqueBuste(p, d[0] * 0.25, d[1] * 0.25, 1.0)
+                    && assezHaut(p, d[0], d[1])) {
                 accrocher(p, d);
                 p.setVelocity(0, Math.max(v.y, -0.1), 0);
             }
@@ -1058,6 +1060,41 @@ public final class Parcours {
             }
         }
         return meilleur;
+    }
+
+    /** En dessous de cette hauteur (depuis le sol où l'on est), un mur ne se grimpe pas : on saute par-dessus. */
+    static final double MUR_MIN = 1.8;
+
+    /**
+     * Le mur dans la direction (dx, dz) est-il assez haut pour s'y accrocher ? On le mesure depuis le sol sous
+     * le joueur : un muret d'un bloc, une barrière ou un mur de pierre (1,5) ne s'escaladent pas et n'offrent pas
+     * de rebord — sinon, en retombant d'un saut à côté, on restait pendu les pieds au ras du sol.
+     */
+    private static boolean assezHaut(ClientPlayerEntity p, double dx, double dz) {
+        World w = p.getWorld();
+        // Le sol sous les pieds (jusqu'à 5 blocs plus bas ; au-delà, c'est un vrai vide : tout mur compte)
+        double sol = Double.NaN;
+        if (p.isOnGround()) sol = p.getY();
+        else for (int y = (int) Math.floor(p.getY()); y >= (int) Math.floor(p.getY()) - 5 && Double.isNaN(sol); y--) {
+            BlockPos b = BlockPos.ofFloored(p.getX(), y, p.getZ());
+            var forme = w.getBlockState(b).getCollisionShape(w, b);
+            if (!forme.isEmpty() && y + forme.getMax(Direction.Axis.Y) <= p.getY() + 0.01) sol = y + forme.getMax(Direction.Axis.Y);
+        }
+        if (Double.isNaN(sol)) return true;
+        // Le mur, depuis ce sol : on monte tant qu'il est plein
+        double x = p.getX() + dx * 0.6, z = p.getZ() + dz * 0.6;
+        int y0 = (int) Math.floor(sol + 0.01);
+        BlockPos pied = BlockPos.ofFloored(x, y0, z);
+        if (w.getBlockState(pied).getCollisionShape(w, pied).isEmpty()) return true;   // un mur qui commence plus haut (surplomb)
+        double haut = sol;
+        for (int y = y0; y < y0 + 4; y++) {
+            BlockPos b = BlockPos.ofFloored(x, y, z);
+            var forme = w.getBlockState(b).getCollisionShape(w, b);
+            if (forme.isEmpty()) break;
+            haut = y + forme.getMax(Direction.Axis.Y);
+            if (forme.getMax(Direction.Axis.Y) < 0.99) break;                   // une dalle, une barrière : ça s'arrête là
+        }
+        return haut - sol >= MUR_MIN;
     }
 
     /** Vrai si la boîte du joueur, décalée de (dx, dz), touche un bloc. */
