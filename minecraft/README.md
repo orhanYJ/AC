@@ -40,18 +40,53 @@ Crée un monde **Plat** (commandes autorisées), puis tape **`/ombre initiation`
 
 1. Crée un monde **Plat**, avec **« Autoriser les commandes : OUI »**, difficulté **Normale**.
 2. Tape `/ombre prague` : la Vieille-Ville se construit au nord-est, tu es placé à son coin sud-ouest, et tu reçois l'équipement.
-3. Va sur la grande place, au pied de l'**horloge astronomique** : fais un **clic droit** sur **Tycho Brahe** et **Johannes Kepler**. Ils t'expliquent la mission.
-4. Les deux cibles (en or avec l'Instinct, touche **V**) :
-   - **Ottokar von Rabenstein**, grand maître de la Confrérie du Corbeau, au sommet de la tour du pont Charles ;
-   - **Melchior Kragl**, son alchimiste, dans son laboratoire en haut de la tour nord de l'église de Týn.
+3. **L'histoire commence** : un titre annonce la **Mémoire 1**. Le journal, à gauche, dit quoi faire ; la boussole (en haut) et la **mini-carte** (en bas à droite) montrent où aller (losange doré).
 
-Les deux tours des cibles sont des **zones interdites** (étendards rouges) : la barre en haut de l'écran devient jaune quand tu approches, rouge quand tu y entres. Le journal, à gauche, se coche au fil de la mission ; la boussole, en haut, montre où aller.
+### L'histoire : sept mémoires
+
+La Confrérie du Corbeau (inventée) veut voler les registres d'observations de Tycho Brahe. Chaque mémoire rapporte des **thalers** et des **points de compétence**.
+
+| Mémoire | Ce qu'il faut faire |
+|---|---|
+| 1. L'arrivée | Parler à **Tycho Brahe**, puis à **Johannes Kepler**, sur la grande place (clic droit) |
+| 2. Les yeux de la ville | Se synchroniser au sommet de l'**horloge astronomique**, puis rendre visite au **rabbin Loew**, au nord |
+| 3. Le messager | **Filer** le messager du Corbeau jusqu'à la taverne sans le perdre (moins de 24 blocs), puis lui **voler sa lettre** (accroupi, dans son dos, clic droit) |
+| 4. L'entrepôt du port | Éliminer **Jiří Vrána**, l'intendant, aux **entrepôts du port** (zone interdite), puis **fouiller son corps** |
+| 5. L'alchimiste | Éliminer **Melchior Kragl** dans la tour nord de Týn |
+| 6. L'empereur | Prévenir **Rodolphe II**, sur l'autre rive |
+| 7. Le grand maître | Éliminer **Ottokar von Rabenstein** au sommet de la tour du pont, puis rapporter les registres à Kepler. Épilogue |
+
+`/ombre memoire <1-7>` rejoue (ou saute à) une mémoire.
+
+### Les quêtes secondaires
+
+Des habitants portent un **« ! »** jaune au-dessus de la tête (et sur la mini-carte) : un clic droit, ils te confient une quête. Une seule à la fois ; elle s'affiche sous la mémoire, dans le journal.
+
+| Habitant | Quête |
+|---|---|
+| **Veuve Marta** | Contrat : éliminer le sergent Hrubý |
+| **Ludmila l'aubergiste** | Contrat : éliminer Šťastný, le collecteur, qui fait sa ronde |
+| **Bohuslav le marchand** | Chasser les deux gardes qui le rançonnent |
+| **Mathias l'imprimeur** | Porter une lettre à la tour du pont en moins de 90 secondes |
+| **Pepík le gamin** | Voler cinq bourses aux passants |
+
+### La bourse, les marchands, les compétences
+
+| Fonction | Comment ça marche |
+|---|---|
+| **Bourse** | En haut à droite (⛁). Les thalers viennent des missions, du **vol à la tire** et de la **fouille des corps** |
+| **Fouiller un corps** | Un garde tué reste à terre une minute. Regarde-le et **clic droit** : sa bourse et ce qu'il portait (couteaux, fléchettes, pétards…). Un garde qui **découvre un corps** devient méfiant et va voir |
+| **Marchands** | Sur la grande place, les marchands au nom affiché : **Armurier** (couteaux, fléchettes, pétards, fumée, grappin), **Apothicaire** (potion de soin, nourriture, fléchettes), **Fripier** (tenue de hallebardier, thalers à lancer). Clic droit : l'étal s'ouvre, clic sur une marchandise pour l'acheter |
+| **Compétences** | Touche **K**. Quatre branches de trois rangs : **Ombre** (Pas de velours, Dans la foule, Ombre nocturne), **Lame** (enchaînement plus long, double assassinat sans seconde lame, quatre cœurs de plus), **Toits** (grimper plus vite, chutes amorties, sauts plus hauts), **Ruse** (double butin, vol à la tire infaillible, prix réduits). Un rang coûte 1, 2 puis 3 points ; on en reçoit 2 au départ, puis avec chaque mission |
+| **Mini-carte** | En bas à droite : le terrain autour de toi, ta flèche, l'objectif (◆), les gardes qui t'ont remarqué ou que tu as marqués (rouge), les marchands (vert), les quêtes (« ! ») |
+| **Groupes** | Des passants discutent en cercle, immobiles : marche parmi eux, tu disparais |
 
 **Touche H en jeu : l'écran qui récapitule toutes les commandes.**
 
 ### La carte `/ombre prague`
 
-- **La Vieille-Ville** (5 × 5 îlots, 162 blocs de côté) : une vingtaine d'îlots de maisons bourgeoises **qu'on peut visiter** (porte, échelle d'étage en étage, boutique du métier de l'enseigne ou cuisine au rez-de-chaussée, chambres et salles meublées aux étages), aux façades ordonnées (des **arcades** sur la grande place, des **toits-terrasses** derrière un attique crénelé où mène une trappe, des **lucarnes**, des fenêtres sur tous les murs, corniche continue, auvent et enseigne pour les boutiques, lanterne et balcon pour les habitations), de vraies charrettes (roues, ridelles, brancards, chargées de foin, de tonneaux ou de pierres), façades pastel ou en sgraffite, pignons sur rue, toits de tuiles rouges, lanternes à potence, enseignes, auvents, balcons, gouttières pour grimper, poutres d'un toit à l'autre, cours avec puits et linge.
+- **La Vieille-Ville** (7 × 7 îlots, 224 blocs de côté) : une vingtaine d'îlots de maisons bourgeoises **qu'on peut visiter** (porte, échelle d'étage en étage, boutique du métier de l'enseigne ou cuisine au rez-de-chaussée, chambres et salles meublées aux étages), aux façades ordonnées (des **arcades** sur la grande place, des **toits-terrasses** derrière un attique crénelé où mène une trappe, des **lucarnes**, des fenêtres sur tous les murs, corniche continue, auvent et enseigne pour les boutiques, lanterne et balcon pour les habitations), de vraies charrettes (roues, ridelles, brancards, chargées de foin, de tonneaux ou de pierres), façades pastel ou en sgraffite, pignons sur rue, toits de tuiles rouges, lanternes à potence, enseignes, auvents, balcons, gouttières pour grimper, poutres d'un toit à l'autre, cours avec puits et linge.
+- **Des quartiers différents** : maisons bourgeoises aux crépis pastel ; maisons à **colombages** (charpente sombre, une **corniche de bois** à chaque étage où l'on marche le long de la façade) ; un **quartier pauvre** de maisons basses en planches, avec des échelles et des appentis ; les **entrepôts du port** (halles, cour pleine de caisses, grue, zone interdite) ; une **église** de quartier et son **clocher** (point de vue, foin au pied) ; la **halle aux draps** sur arcades, les étals des drapiers dessous.
 - **Des rues qui ne se ressemblent pas** : maisons de 2 à 5 étages (les toits montent et descendent), façades parfois en retrait, **venelles** de deux blocs entre deux maisons (on y grimpe d'un mur à l'autre, une poutre les enjambe), chaque rue avec son revêtement (pavés, dalles, galets moussus, terre battue). Les **enseignes** pendent au premier étage, au-dessus des auvents : on saute de l'auvent pour s'y balancer. Une gouttière seulement une maison sur trois.
 - **Des lignes de parcours dans les rues**, du pavé jusqu'aux toits, une différente à chaque bout de rue :
   - **les perches** : un escalier de caisses et de tonneaux, un appentis, deux perches à cinq pas l'une de l'autre (saute, clic droit tenu, Z pour l'élan), un appentis pour se recevoir ;
@@ -151,14 +186,14 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Zones interdites** | Autour des **étendards rouges de la garde** (14 blocs). Une **barre jaune** en haut de l'écran : tu t'en approches ; **rouge** : tu es dedans, et les gardes te repèrent deux fois plus vite |
 | **Roue des outils** | Maintiens **G** : le jeu se fige, montre un outil avec la souris, relâche — il passe dans ta main |
 | **Boussole** | En haut de l'écran : les points cardinaux, les **cibles en losange doré** avec leur distance, les points de vue synchronisés, les gardes en alerte |
-| **Journal de mission** | À gauche de l'écran ; les objectifs se cochent tout seuls (parler à Tycho et Kepler, éliminer les deux cibles, et en facultatif synchroniser un point de vue et arracher un avis de recherche) |
+| **Journal de mission** | À gauche de l'écran : la mémoire en cours et ses étapes, la quête secondaire, les défis facultatifs ; tout se coche tout seul |
 | **Carte et voyage rapide** | Touche **J** : le vrai terrain vu du dessus, dessiné comme un vieux plan sur parchemin (toits, rues, rivière ; ce que tu n'as pas encore vu reste vierge), avec les zones interdites en rouge, les points de vue, les cibles et ta flèche. Molette : zoom ; glisser : déplacer. Clic sur un point de vue (ou touches 1 à 9) : tu y retournes d'un coup — sauf si des gardes te cherchent |
 | **Notoriété** | Monte à chaque alerte, bondit si un innocent meurt. À 75, tu es **RECHERCHÉ** : les gardes te reconnaissent de loin. **Arrache les avis de recherche** (clic droit) pour la faire baisser |
 | **Désynchronisation** | Tuer un passant : l'écran se trouble, la notoriété bondit. L'Ombre ne tue pas d'innocents |
 | **Vol à la tire** | Accroupi, dans le dos d'un passant : clic droit pour prendre sa bourse. Vu de face, il crie « Au voleur ! » |
 | **Enchaînement** | Juste après un assassinat, tu as 2,5 s pour en enchaîner un autre au sol, même sur un garde qui t'a vu |
 | **Vue de l'aigle** | Touche **N** : la caméra s'envole au-dessus de toi. Vise un garde un instant : il est marqué une minute, visible à travers les murs. Les **avis de recherche** à 64 blocs à la ronde sont signalés d'un **« ✉ AVIS »** doré avec leur distance, visible à travers les murs, pendant le vol et 30 s après : va les arracher. **N** pour revenir |
-| **Plumes de corbeau** | Quinze plumes cachées sur les hauteurs de Prague, signalées par une colonne de lumière ; le journal les compte, et la quinzième rapporte une bourse |
+| **Plumes de corbeau** | Dix-sept plumes cachées sur les hauteurs de Prague, signalées par une colonne de lumière ; le journal les compte, et la dernière rapporte une bourse |
 | **Course des toits** | Au coin nord-ouest de Prague, un anneau de flammes sur un toit : le départ. Franchis les balises dans l'ordre par les toits, les passerelles et les échelles, sans toucher la rue. Chrono et record |
 | **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas. Quand une poutre ou un rebord est à portée devant toi, c'est un saut ordinaire vers lui : pour le saut de la foi, **regarde vers le bas** en sautant. Saute : la caméra te filme de derrière, tu plonges tête la première bras en croix, le foin jaillit à l'arrivée |
 | **Scènes filmées** | Bandes noires de cinéma et caméra libre : à la synchronisation (l'aigle tourne autour du point de vue, jauge « Synchronisation »), au saut de la foi, et à chaque assassinat (plan de côté, pris du côté d'où l'on voit le mieux) |
@@ -185,6 +220,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 |---|---|
 | `/ombre initiation` | **Commence ici** : la Ruelle d'Or, 30 leçons pas à pas (`/ombre initiation <n>` pour reprendre à l'étape n) |
 | `/ombre prague` | La Vieille-Ville de 1600, avec sa mission |
+| `/ombre memoire <1-7>` | Rejouer une mémoire de l'histoire (ou y sauter) |
 | `/ombre scene <1-17>` | Impose la scène du prochain assassinat (voir le tableau des assassinats) |
 | `/ombre kit` | Tout l'équipement de l'assassin |
 | `/ombre vitrine` | Les 189 blocs du mod exposés en rangées |

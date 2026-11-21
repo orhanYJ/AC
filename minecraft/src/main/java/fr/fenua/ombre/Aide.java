@@ -30,6 +30,8 @@ public final class Aide {
             "§eNotoriété§r : monte à chaque alerte ; arrache les §lavis de recherche§r (clic droit) pour la faire baisser.",
             "§eArène§r : §l/ombre arene§r construit un fortin à 30 blocs devant toi (de préférence en monde plat).",
             "§eParcours§r : §l/ombre parcours§r construit une grande carte d'entraînement (200 blocs, sans gardes) et t'y emmène.",
-            "§ePrague§r : §l/ombre prague§r construit la Vieille-Ville de 1600 et t'y emmène. Clic droit sur Tycho Brahe ou Kepler : la mission.",
+            "§ePrague§r : §l/ombre prague§r construit la Vieille-Ville de 1600 et t'y emmène : l'histoire en sept mémoires commence (journal à gauche, ◆ doré où aller).",
+            "§eQuêtes secondaires§r : clic droit sur les habitants marqués « ! ». §eMarchands§r : clic droit sur l'armurier, l'apothicaire, le fripier.",
+            "§eBourse§r (⛁) : vol à la tire, fouille des corps (clic droit sur un garde à terre). §eCompétences§r : touche §lK§r. §l/ombre memoire <n>§r : rejouer une mémoire.",
             "§l/ombre kit§r : l'équipement. §l/ombre vitrine§r : tous les blocs.");
 }

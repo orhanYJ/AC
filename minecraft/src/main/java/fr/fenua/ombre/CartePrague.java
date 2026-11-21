@@ -1578,6 +1578,22 @@ public final class CartePrague {
             int x = ns ? k * PAS + 2 + r.nextInt(3) : t, z = ns ? t : k * PAS + 2 + r.nextInt(3);
             for (int i = 0; i < 3 + r.nextInt(2); i++) passant(x + r.nextInt(3) - 1, z + r.nextInt(3) - 1);
         }
+        // Des groupes qui discutent, immobiles (trois ou quatre en cercle) : on peut s'y fondre, comme dans Assassin's Creed
+        for (int g = 0; g < 14; g++) {
+            int k = r.nextInt(N + 1), t = RUE + 3 + r.nextInt(VILLE - 2 * RUE - 6);
+            boolean ns = r.nextBoolean();
+            int cx = ns ? k * PAS + 3 : t, cz = ns ? t : k * PAS + 3;
+            int n = 3 + r.nextInt(2);
+            for (int q = 0; q < n; q++) {
+                double a = q * 2 * Math.PI / n;
+                int x = cx + (int) Math.round(Math.cos(a) * 1.3), z = cz + (int) Math.round(Math.sin(a) * 1.3);
+                Passant pa = passant(x, z, -1, 2);
+                if (pa == null) continue;
+                // Il regarde le centre du groupe
+                float lacet = (float) Math.toDegrees(Math.atan2(-(cx - x), cz - z));
+                fr.fenua.ombre.entite.Ordres.poste(pa, pa.getPos(), lacet);
+            }
+        }
         int px = RUE + PAS + ILOT + 14, pz = RUE + PAS + ILOT + 3;          // le milieu de la grande place
         for (int i = 0; i < 34; i++) passant(px - 22 + r.nextInt(44), pz - 22 + r.nextInt(44));
         // Les marchands des étals ; un sur deux tient boutique (clic droit : armurier, apothicaire, fripier)

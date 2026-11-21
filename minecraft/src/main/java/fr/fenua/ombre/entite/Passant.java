@@ -138,8 +138,12 @@ public class Passant extends PathAwareEntity {
         return net.minecraft.util.ActionResult.SUCCESS;
     }
 
+    /** Jusqu'à quand il a peur (il ne retourne pas à sa conversation avant). */
+    public long effrayeJusqua;
+
     /** S'enfuir loin d'un danger, en criant. */
     public void fuir(Vec3d danger) {
+        effrayeJusqua = getWorld().getTime() + 300;
         Vec3d loin = NoPenaltyTargeting.findFrom(this, 16, 6, danger);
         if (loin != null) getNavigation().startMovingTo(loin.x, loin.y, loin.z, 1.5);
         if (random.nextInt(3) == 0) playSound(SoundEvents.ENTITY_VILLAGER_NO, 1f, 1.2f + random.nextFloat() * 0.3f);

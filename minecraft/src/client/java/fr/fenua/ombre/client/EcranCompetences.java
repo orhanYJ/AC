@@ -24,7 +24,7 @@ public class EcranCompetences extends Screen {
         for (Profil.Competence c : Profil.COMPETENCES) {
             boolean appris = ProfilClient.a(c.id());
             boolean ouvert = c.rang() == 0 || Profil.COMPETENCES.stream().anyMatch(d -> d.branche() == c.branche() && d.rang() == c.rang() - 1 && ProfilClient.a(d.id()));
-            String etiquette = appris ? "§a✔ " + c.nom() : (ouvert ? "§f" : "§8") + c.nom() + " §7(" + c.cout() + ")";
+            String etiquette = appris ? "§a✔ " + c.nom() : (ouvert ? "§f" : "§8") + c.nom();
             ButtonWidget b = ButtonWidget.builder(Text.literal(etiquette),
                     w -> ClientPlayNetworking.send(new Profil.DemandePayload(Profil.DemandePayload.APPRENDRE, 0, 0, c.id())))
                     .dimensions(x0 + c.branche() * COL + 4, y0 + c.rang() * RANG, COL - 8, 20)
@@ -48,7 +48,17 @@ public class EcranCompetences extends Screen {
         for (int b = 0; b < 4; b++) {
             int x = x0 + b * COL + COL / 2;
             ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§l" + Profil.BRANCHES[b]), x, y0 - 14, couleurs[b]);
-            for (int r = 0; r < 2; r++) ctx.fill(x - 1, y0 + r * RANG + 21, x + 1, y0 + (r + 1) * RANG - 1, 0x80FFFFFF);
+            for (int r = 0; r < 2; r++) ctx.fill(x - 1, y0 + r * RANG + 31, x + 1, y0 + (r + 1) * RANG - 1, 0x80FFFFFF);
+        }
+        // Le coût de chaque rang, sous son bouton
+        for (Profil.Competence c : Profil.COMPETENCES) {
+            if (ProfilClient.a(c.id())) continue;
+            String t = c.cout() + " point" + (c.cout() > 1 ? "s" : "");
+            ctx.getMatrices().push();
+            ctx.getMatrices().translate(x0 + c.branche() * COL + COL / 2f, y0 + c.rang() * RANG + 23, 0);
+            ctx.getMatrices().scale(0.75f, 0.75f, 1);
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("§7" + t), 0, 0, 0xFFFFFF);
+            ctx.getMatrices().pop();
         }
     }
 

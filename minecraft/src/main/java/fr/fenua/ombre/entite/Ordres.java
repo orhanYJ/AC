@@ -91,6 +91,7 @@ public final class Ordres {
 
         /** Rien ne le trouble : pas de cible, pas le moindre soupçon, pas endormi. */
         private boolean calme() {
+            if (m instanceof Passant pa && pa.getWorld().getTime() < pa.effrayeJusqua) return false;   // il a eu peur
             return m.getTarget() == null && Detection.niveau(m) < 0.01f && !m.hasStatusEffect(Effets.ENDORMI)
                     && !m.hasStatusEffect(Effets.FOLIE) && !m.hasNoGravity();
         }

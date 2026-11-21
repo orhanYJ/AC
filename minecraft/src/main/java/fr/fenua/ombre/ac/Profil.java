@@ -56,8 +56,8 @@ public final class Profil {
     public static final String[] BRANCHES = {"Ombre", "Lame", "Toits", "Ruse"};
     public static final List<Competence> COMPETENCES = List.of(
             new Competence("velours", 0, 0, "Pas de velours", "Accroupi, les gardes te remarquent bien moins loin."),
-            new Competence("foule", 0, 1, "Visage dans la foule", "Un seul passant près de toi suffit pour t'y fondre."),
-            new Competence("nuit", 0, 2, "Enfant de la nuit", "Dans le noir, tu es presque invisible."),
+            new Competence("foule", 0, 1, "Dans la foule", "Un seul passant près de toi suffit pour t'y fondre."),
+            new Competence("nuit", 0, 2, "Ombre nocturne", "Dans le noir, tu es presque invisible."),
             new Competence("chaine", 1, 0, "Enchaînement", "Cinq secondes, au lieu de deux et demie, pour enchaîner un autre assassinat."),
             new Competence("double", 1, 1, "Double lame", "L'assassinat double, même sans seconde lame en main."),
             new Competence("robuste", 1, 2, "Robustesse", "Quatre cœurs de plus."),

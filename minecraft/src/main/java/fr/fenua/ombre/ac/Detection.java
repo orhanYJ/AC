@@ -41,9 +41,29 @@ public final class Detection {
     public static float niveau(MobEntity m) { return SOUPCON.getOrDefault(m, 0f); }
     public static void fixer(MobEntity m, float s) { SOUPCON.put(m, s); }
 
+    /**
+     * Un corps découvert : un garde qui voit (à moins de 12 blocs) le corps d'un camarade qu'on n'avait pas encore
+     * trouvé devient méfiant et va voir ; les gardes proches aussi. (Les corps restent une minute à terre.)
+     */
+    private static void corps(ServerWorld w, MobEntity g) {
+        if (g.age % 10 != 0 || g.getTarget() != null) return;
+        for (LivingEntity c : w.getEntitiesByClass(LivingEntity.class, g.getBoundingBox().expand(12),
+                e -> !e.isAlive() && Discretion.estGarde(e) && !e.getCommandTags().contains("ombre_decouvert"))) {
+            if (!g.canSee(c)) continue;
+            c.addCommandTag("ombre_decouvert");
+            for (MobEntity autre : w.getEntitiesByClass(MobEntity.class, c.getBoundingBox().expand(16), e -> e.isAlive() && Discretion.estGarde(e))) {
+                fixer(autre, Math.max(niveau(autre), 0.6f));
+                autre.getNavigation().startMovingTo(c.getX(), c.getY(), c.getZ(), 0.9);
+            }
+            w.playSound(null, g.getBlockPos(), net.minecraft.sound.SoundEvents.ENTITY_PILLAGER_CELEBRATE, net.minecraft.sound.SoundCategory.HOSTILE, 1f, 0.6f);
+            return;
+        }
+    }
+
     /** Tous les 2 ticks, pour chaque garde du monde. */
     public static void tick(ServerWorld w, List<MobEntity> gardes) {
         for (MobEntity g : gardes) {
+            corps(w, g);
             float s = niveau(g);
             if (g.getTarget() instanceof PlayerEntity) { SOUPCON.put(g, 1f); continue; }
             PlayerEntity p = w.getClosestPlayer(g, 48);
