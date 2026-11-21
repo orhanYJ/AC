@@ -46,7 +46,7 @@ import java.util.Random;
  *  - Au nord, le rabbin Loew et son Golem. Une foule, des hallebardiers, des arbalétriers sur les toits.
  */
 public final class CartePrague {
-    private static final int ILOT = 24, RUE = 7, PAS = ILOT + RUE, N = 5, VILLE = N * PAS + RUE;   // 162
+    private static final int ILOT = 24, RUE = 7, PAS = ILOT + RUE, N = 7, VILLE = N * PAS + RUE;   // 224
     private static final int FLEUVE = 24, RIVE = 34, LARGEUR = VILLE + FLEUVE + RIVE, PROFONDEUR = VILLE;
     private static final int HAUT_MAX = 30;
 
@@ -116,6 +116,8 @@ public final class CartePrague {
                 else if (i == 3 && j == 3) chantier(bx, bz);
                 else if (i == 0 && j == 4) jardin(bx, bz);
                 else if (i == 4 && j == 4) entrepots(bx, bz);
+                else if (i == 5 && j == 1) eglise(bx, bz);
+                else if (i == 6 && j == 3) halleAuxDraps(bx, bz);
                 else ilot(bx, bz);
             }
         place();
@@ -175,6 +177,88 @@ public final class CartePrague {
         donneur("ludmila", "Ludmila l'aubergiste", 4 * PAS + 2, 2 * PAS + 12, 3);
         int px = RUE + PAS + ILOT + 10, pz = RUE + PAS + ILOT + 8;
         donneur("pepik", "Pepík le gamin", px, pz, 5);
+    }
+
+    // ───────────────────────── l'église du quartier ─────────────────────────
+
+    /**
+     * Une église gothique de quartier (inventée) : une nef de pierre au toit d'ardoise, un clocher de 26 blocs
+     * avec sa flèche et un perchoir (point de vue), la place devant, ses bancs et son puits.
+     */
+    private void eglise(int bx, int bz) {
+        Block pierre = b("pierre_de_taille"), sculpte = b("pierre_sculptee");
+        for (int x = bx; x < bx + ILOT; x++) for (int z = bz; z < bz + ILOT; z++) set(x, -1, z, b("dalles_de_pierre"));
+        int x0 = bx + 3, x1 = bx + 12, z0 = bz + 6, z1 = bz + 22, h = 12;
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) {
+            boolean bord = x == x0 || x == x1 || z == z0 || z == z1;
+            for (int y = 0; y < h; y++) set(x, y, z, bord ? (y % 4 == 3 ? sculpte : pierre) : Blocks.AIR);
+            hauteur[x][z] = h;
+        }
+        // Les grandes fenêtres, la porte, les bancs, l'autel
+        for (int z = z0 + 2; z < z1 - 1; z += 3) for (int y = 3; y <= 8; y++) { set(x0, y, z, Blocks.GLASS_PANE); set(x1, y, z, Blocks.GLASS_PANE); }
+        for (int x = x0 + 4; x <= x0 + 5; x++) for (int y = 0; y < 4; y++) set(x, y, z0, Blocks.AIR);
+        for (int z = z0 + 4; z < z1 - 3; z += 2) { set(x0 + 2, 0, z, marche(Blocks.SPRUCE_STAIRS, Direction.SOUTH)); set(x0 + 3, 0, z, marche(Blocks.SPRUCE_STAIRS, Direction.SOUTH)); set(x1 - 3, 0, z, marche(Blocks.SPRUCE_STAIRS, Direction.SOUTH)); set(x1 - 2, 0, z, marche(Blocks.SPRUCE_STAIRS, Direction.SOUTH)); }
+        boite(x0 + 4, 0, z1 - 2, x0 + 5, 0, z1 - 2, sculpte);
+        set(x0 + 4, 1, z1 - 2, Blocks.CANDLE); set(x0 + 5, 1, z1 - 2, Blocks.CANDLE);
+        for (int z = z0 + 3; z < z1; z += 5) set((x0 + x1) / 2, h - 2, z, Blocks.LANTERN.getDefaultState().with(Properties.HANGING, true));
+        toit(x0, z0, x1, z1, h, Direction.NORTH, pierre);
+        // Le clocher, à côté de la nef
+        int c0 = bx + 15, c1 = bx + 19, d0 = bz + 6, d1 = bz + 10, hc = 26;
+        for (int x = c0; x <= c1; x++) for (int z = d0; z <= d1; z++) {
+            boolean bord = x == c0 || x == c1 || z == d0 || z == d1;
+            for (int y = 0; y < hc; y++) {
+                boolean baie = y >= hc - 5 && y < hc - 1 && bord && (x == (c0 + c1) / 2 || z == (d0 + d1) / 2);
+                set(x, y, z, !bord || baie ? Blocks.AIR : y % 6 == 5 ? sculpte : pierre);
+            }
+            hauteur[x][z] = hc;
+        }
+        set((c0 + c1) / 2, hc - 4, (d0 + d1) / 2, Blocks.BELL);
+        for (int y = 0; y < hc; y++) set(c1 - 1, y, d1 - 1, Blocks.LADDER.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.NORTH));
+        // La flèche : des étages de pierre qui rétrécissent, puis le perchoir tout en haut
+        for (int k = 0; k < 3; k++) boite(c0 + k, hc + k, d0 + k, c1 - k, hc + k, d1 - k, b("ardoise"));
+        set((c0 + c1) / 2, hc + 3, (d0 + d1) / 2, OmbreBlocs.PERCHOIR);
+        set((c0 + c1) / 2, hc + 2, (d0 + d1) / 2, b("ardoise"));
+        lieu("Clocher de l'église", (c0 + c1) / 2, hc + 4, (d0 + d1) / 2);
+        plumesEnPlus.add(new int[]{c0, d0});
+        // La place : bancs, puits, arbres, un tas de foin au pied du clocher (le saut de la foi)
+        set(bx + 16, 0, bz + 15, OmbreBlocs.PUITS);
+        for (int x : new int[]{bx + 15, bx + 19}) set(x, 0, bz + 19, vers(OmbreBlocs.BANC, Direction.NORTH));
+        arbre(bx + 21, bz + 17);
+        arbre(bx + 21, bz + 22);
+        boite(bx + 20, 0, bz + 7, bx + 21, 0, bz + 9, OmbreBlocs.MEULE);
+        set(bx + 20, 1, bz + 8, OmbreBlocs.MEULE);
+    }
+
+    // ───────────────────────── la halle aux draps ─────────────────────────
+
+    /**
+     * La halle aux draps : un long bâtiment sur arcades (on marche dessous entre les étals des drapiers),
+     * un étage de colombages, un toit de tuiles qu'on parcourt ; deux escaliers de bois pour monter à l'étage.
+     */
+    private void halleAuxDraps(int bx, int bz) {
+        Block pierre = b("pierre_de_taille");
+        int x0 = bx + 1, x1 = bx + 22, z0 = bz + 6, z1 = bz + 17, h = 9;
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) {
+            boolean bord = x == x0 || x == x1 || z == z0 || z == z1;
+            boolean pilier = bord && ((x - x0) % 3 == 0 || x == x1) && (z == z0 || z == z1) || bord && (z - z0) % 3 == 0 && (x == x0 || x == x1);
+            for (int y = 0; y < h; y++) {
+                BlockState st;
+                if (y < 4) st = pilier ? pierre.getDefaultState() : y == 3 && bord ? b("pierre_sculptee").getDefaultState() : Blocks.AIR.getDefaultState();
+                else if (y == 4) st = Blocks.SPRUCE_PLANKS.getDefaultState();
+                else st = !bord ? Blocks.AIR.getDefaultState() : (x - x0) % 3 == 0 || y == h - 1 ? Blocks.STRIPPED_DARK_OAK_LOG.getDefaultState() : (y == 6 && (x + z) % 2 == 0 ? Blocks.GLASS_PANE.getDefaultState() : b("crepi").getDefaultState());
+                set(x, y, z, st);
+            }
+            hauteur[x][z] = h;
+        }
+        // Les étals des drapiers sous les arcades
+        for (int x = x0 + 2; x < x1 - 2; x += 4) etal(x, (z0 + z1) / 2, Direction.NORTH, r.nextInt(MARCHANDISES.length));
+        for (int x = x0 + 2; x < x1; x += 5) set(x, 3, (z0 + z1) / 2 - 2, Blocks.LANTERN.getDefaultState().with(Properties.HANGING, true));
+        // L'escalier de bois jusqu'à l'étage (une trappe dans le plancher)
+        for (int k = 0; k < 4; k++) set(x0 + 2 + k, k, z0 + 2, marche(Blocks.SPRUCE_STAIRS, Direction.EAST));
+        set(x0 + 6, 4, z0 + 2, Blocks.AIR);
+        toit(x0, z0, x1, z1, h, Direction.WEST, pierre);
+        lieu("Halle aux draps", (x0 + x1) / 2, h + 6, (z0 + z1) / 2);
+        plumesEnPlus.add(new int[]{(x0 + x1) / 2, (z0 + z1) / 2});
     }
 
     // ───────────────────────── les entrepôts du port ─────────────────────────
@@ -246,7 +330,7 @@ public final class CartePrague {
 
     /**
      * Des passerelles de bois relient les toits de la rangée nord d'un îlot à l'autre, par-dessus les rues ;
-     * la course des toits les emprunte. Quinze plumes de corbeau sur les hauteurs de la ville.
+     * la course des toits les emprunte. Dix-sept plumes de corbeau sur les hauteurs de la ville.
      */
     private void defis() {
         int zc = RUE + 3;
@@ -290,6 +374,7 @@ public final class CartePrague {
         plume((x0 + x1) / 2 + 2, (x0 + x1) / 2);
         for (int[] q : new int[][]{{0, 2}, {2, 0}, {4, 0}, {4, 4}, {1, 4}, {4, 2}}) plume(RUE + q[0] * PAS + 3, RUE + q[1] * PAS + ILOT - 4);
         plume(rivePontX + 3, tourPontZ);
+        for (int[] q : plumesEnPlus) plume(q[0], q[1]);
     }
 
     // ───────────────────────── zones interdites et noms des lieux ─────────────────────────
@@ -357,7 +442,16 @@ public final class CartePrague {
 
     // ───────────────────────── les maisons bourgeoises ─────────────────────────
 
+    /** Les plumes de corbeau des nouveaux quartiers (posées avec les autres, dans defis). */
+    private final java.util.List<int[]> plumesEnPlus = new java.util.ArrayList<>();
+
+    /** Le style des maisons de l'îlot en construction : 0 bourgeoises (crépis pastel), 1 à colombages, 2 pauvres (bois). */
+    private int style;
+
     private void ilot(int bx, int bz) {
+        int i = (bx - RUE) / PAS, j = (bz - RUE) / PAS;
+        style = (i == 1 && j == 5) || (i == 5 && j == 5) || (i == 6 && j == 6) || (i == 0 && j == 6) || (i == 2 && j == 6) ? 2
+                : bz != RUE && (i + 2 * j) % 3 == 0 ? 1 : 0;
         rangee(bx, bz, ILOT, Direction.NORTH, bz == RUE);      // la rangée de la course des toits reste régulière
         rangee(bx, bz + ILOT - 8, ILOT, Direction.SOUTH);
         // Deux îlots ont une taverne à l'ouest : la grande salle, le comptoir, les tonneaux
@@ -390,7 +484,7 @@ public final class CartePrague {
             }
             int l = Math.min(longueur - u, 4 + r.nextInt(5));
             if (longueur - u - l < 4 && longueur - u - l > 0) l = longueur - u;
-            int etages = sage ? 3 + r.nextInt(2) : ETAGES[r.nextInt(ETAGES.length)];
+            int etages = sage ? 3 + r.nextInt(2) : style == 2 ? 1 + r.nextInt(2) : ETAGES[r.nextInt(ETAGES.length)];
             int recul = sage || r.nextInt(10) < 6 ? 0 : 1 + r.nextInt(2);
             int a0 = 0, a1 = 7;                                       // la profondeur, depuis la façade
             switch (facade) {
@@ -451,7 +545,8 @@ public final class CartePrague {
 
     private void maison(int x0, int z0, int x1, int z1, Direction facade, int etages, boolean taverne) {
         int h = 4 + etages * 3;
-        Block mur = b(hasard(FACADES));
+        Block[] BOIS = {Blocks.SPRUCE_PLANKS, Blocks.DARK_OAK_PLANKS, Blocks.OAK_PLANKS, Blocks.MUD_BRICKS};
+        Block mur = style == 2 && !taverne ? BOIS[r.nextInt(BOIS.length)] : style == 1 ? b(r.nextBoolean() ? "crepi" : "crepi_ocre") : b(hasard(FACADES));
         boite(x0, 0, z0, x1, h - 1, z1, mur);
         for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) hauteur[x][z] = h;
         boolean ns = facade.getAxis() == Direction.Axis.Z;
@@ -477,7 +572,7 @@ public final class CartePrague {
             boolean sol = y == 3 || (y >= 4 && (y - 4) % 3 == 0);
             poser.accept(new Object[]{u, d, y, sol ? plancher : Blocks.AIR.getDefaultState()});
         }
-        boolean boutique = taverne || r.nextInt(3) > 0;
+        boolean boutique = taverne || (style != 2 && r.nextInt(3) > 0);
         String enseigneNom = taverne ? "enseigne_brasseur" : hasard(ENSEIGNES);
         // La façade donne-t-elle sur la grande place ? Alors elle a des arcades, comme sur la place de la Vieille-Ville
         int[] devant = P.apply((debut + fin) / 2, -10);
@@ -529,9 +624,30 @@ public final class CartePrague {
                     set(x, yb + 1, z, Blocks.GLASS_PANE); set(x, yb + 2, z, Blocks.GLASS_PANE);
                     if (avecVolets) { set(xo, yb + 1, zo, volets); set(xo, yb + 2, zo, volets); }
                 }
+                // Colombages : une corniche de bois court sous les fenêtres de chaque étage (un rebord où marcher)
+                if (style == 1 && k >= 1 && vide(xo, yb, zo)) set(xo, yb, zo, Blocks.SPRUCE_SLAB.getDefaultState().with(Properties.SLAB_TYPE, net.minecraft.block.enums.SlabType.TOP));
                 if (k == etageBalcon && balcon && Math.abs(u - mil) <= 1) set(xo, yb, zo, vers(OmbreBlocs.BALCON, versMur));
             }
             set(xo, h - 1, zo, vers(OmbreBlocs.CORNICHE, versMur));          // la corniche, d'un bout à l'autre
+        }
+        // ── Colombages : la charpente de chêne sombre se voit sur la façade (poteaux d'angle, sablières à chaque étage)
+        if (style == 1) {
+            for (int u = debut; u <= fin; u++) for (int y = 3; y < h; y++) {
+                int[] q = P.apply(u, 0);
+                boolean ligne = y == 3 || (y >= 4 && (y - 4) % 3 == 0) || y == h - 1;
+                if ((u == debut || u == fin || ligne) && w.getBlockState(new BlockPos(ox + q[0], oy + y, oz + q[1])).isOf(mur))
+                    set(q[0], y, q[1], Blocks.STRIPPED_DARK_OAK_LOG.getDefaultState().with(Properties.AXIS, ligne ? (ns ? Direction.Axis.X : Direction.Axis.Z) : Direction.Axis.Y));
+            }
+        }
+        // ── Les maisons pauvres : une échelle de bois sur la façade jusqu'au toit, parfois un appentis de planches
+        if (style == 2 && !taverne) {
+            int[] q = P.apply(fin, 0);
+            int xe = q[0] + facade.getOffsetX(), ze = q[1] + facade.getOffsetZ();
+            if (r.nextBoolean()) for (int y = 0; y < h; y++) set(xe, y, ze, Blocks.LADDER.getDefaultState().with(Properties.HORIZONTAL_FACING, facade));
+            if (r.nextInt(3) == 0) for (int u = debut + 1; u < fin - 1; u++) {
+                int[] a = P.apply(u, 0);
+                set(a[0] + facade.getOffsetX(), 2, a[1] + facade.getOffsetZ(), Blocks.SPRUCE_SLAB.getDefaultState().with(Properties.SLAB_TYPE, net.minecraft.block.enums.SlabType.TOP));
+            }
         }
         // ── Des fenêtres sur les autres murs aussi (côtés et arrière), à chaque étage
         for (int k = -1; k < etages; k++) {
@@ -1456,7 +1572,7 @@ public final class CartePrague {
         Scoreboard sb = w.getScoreboard();
         Team rouges = equipe(sb, "ombre_gardes", Formatting.RED), ors = equipe(sb, "ombre_cibles", Formatting.GOLD);
         // La foule : des groupes dans les rues, beaucoup sur la place, quelques-uns sur le pont
-        for (int g = 0; g < 9; g++) {
+        for (int g = 0; g < 16; g++) {
             int k = r.nextInt(N + 1), t = RUE + r.nextInt(VILLE - 2 * RUE);
             boolean ns = r.nextBoolean();
             int x = ns ? k * PAS + 2 + r.nextInt(3) : t, z = ns ? t : k * PAS + 2 + r.nextInt(3);
@@ -1501,7 +1617,7 @@ public final class CartePrague {
         java.util.Collections.shuffle(carrefours, r);
         int postes = 0;
         for (int[] c : carrefours) {
-            if (postes >= 5) break;
+            if (postes >= 9) break;
             int x1 = c[0] - 2, z1 = c[1] - 2, x2 = c[0] + 2, z2 = c[1] + 2;
             if (!vide(x1, 0, z1) || !vide(x1, 1, z1) || !vide(x2, 0, z2) || !vide(x2, 1, z2)) continue;
             // L'un surveille la rue nord-sud, l'autre la rue est-ouest
@@ -1514,7 +1630,7 @@ public final class CartePrague {
         java.util.List<int[]> ilots = new java.util.ArrayList<>();
         for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) if (!((j == 1 || j == 2) && (i == 1 || i == 2))) ilots.add(new int[]{i, j});
         java.util.Collections.shuffle(ilots, r);
-        for (int n = 0; n < 4 && n < ilots.size(); n++) {
+        for (int n = 0; n < 6 && n < ilots.size(); n++) {
             int i = ilots.get(n)[0], j = ilots.get(n)[1];
             int[][] coins = {{i * PAS + 3, j * PAS + 3}, {(i + 1) * PAS + 3, j * PAS + 3}, {(i + 1) * PAS + 3, (j + 1) * PAS + 3}, {i * PAS + 3, (j + 1) * PAS + 3}};
             if (r.nextBoolean()) java.util.Collections.reverse(java.util.Arrays.asList(coins));   // dans un sens ou dans l'autre
@@ -1523,7 +1639,7 @@ public final class CartePrague {
             for (int k = 0; k < 2; k++) ronde(garde(Entites.HALLEBARDIER, coins[0][0] + k, 0, coins[0][1] + k, 4, "Hallebardier de ronde", rouges, false), route);
         }
         // Les rondes d'un bout à l'autre d'une rue : un homme seul, qui fait les cent pas
-        for (int n = 0; n < 4; n++) {
+        for (int n = 0; n < 7; n++) {
             int k = 1 + r.nextInt(N - 1), j = r.nextInt(N);
             boolean ns = r.nextBoolean();
             int a = RUE + j * PAS + 2, b = RUE + j * PAS + ILOT - 3, c = k * PAS + 3 + (r.nextBoolean() ? 1 : -1);
@@ -1534,7 +1650,7 @@ public final class CartePrague {
         }
         // Les arbalétriers : en poste sur les toits plats (toits-terrasses, passerelles), tournés vers une rue
         int poses = 0;
-        for (int essai = 0; essai < 600 && poses < 10; essai++) {
+        for (int essai = 0; essai < 900 && poses < 15; essai++) {
             int x = 1 + r.nextInt(VILLE - 2), z = 1 + r.nextInt(PROFONDEUR - 2), h = hauteur[x][z];
             if (h <= 0 || vide(x, h, z) || !vide(x, h + 1, z) || !vide(x, h + 2, z)) continue;
             boolean plat = true;                                           // un toit plat tout autour (pas une pente de tuiles)

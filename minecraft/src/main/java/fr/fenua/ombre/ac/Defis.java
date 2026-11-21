@@ -39,7 +39,7 @@ public final class Defis {
     private Defis() {}
 
     public static final String PLUME = "ombre_plume", COURSE = "ombre_course", PLUME_TAG = "ombre_plume:";
-    public static final int PLUMES = 15;
+    public static final int PLUMES = 17;
     /** Les plumes d'entraînement du cours de rappel : elles ne comptent pas parmi les quinze de Prague. */
     public static final String ECOLE = "ombre_ecole", ECOLE_TAG = "ombre_plume_ecole:";
     private static final String RECORD = "ombre_course_record";
