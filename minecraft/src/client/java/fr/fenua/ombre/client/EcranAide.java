@@ -63,7 +63,7 @@ public class EcranAide extends Screen {
             new String[]{"Clic droit (bombe)", "Fumée : les gardes autour perdent ta trace 5 s"},
             new String[]{"V", "Instinct : voir les ennemis à travers les murs (toutes les 15 s)"},
             new String[]{"B", "Siffler : attirer le garde le plus proche"},
-            new String[]{"Maj dans l'herbe haute", "Cachette : on ne te voit qu'à 2 blocs"},
+            new String[]{"Hautes herbes, buissons", "Cachette : debout si la plante te couvre entièrement, sinon accroupi (Maj)"},
             new String[]{"Meule de foin", "On y entre, on y plonge de haut sans mal, on s'y cache même debout"},
             new String[]{"Puits", "Saute dedans : caché, les yeux au ras de la margelle ; un saut pour en sortir"},
             new String[]{"Cabine à rideau", "Entre par le rideau : caché debout"},

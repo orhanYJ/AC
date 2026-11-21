@@ -146,8 +146,7 @@ public final class Parcours {
                 case EXEC -> execution(client, p);
                 case GRAPPIN -> grappin(p);
             }
-            plongeon = etat == Etat.LIBRE && !sol && p.getVelocity().y < -0.75;
-            tourner(client, p);
+            plongeon = etat == Etat.LIBRE && !sol && (p.getVelocity().y < -0.75 || Cinema.plan() == Cinema.Plan.SAUT);
             float corps = corpsVersMur();
             if (!Float.isNaN(corps)) p.setBodyYaw(corps);
         } finally {
@@ -168,6 +167,17 @@ public final class Parcours {
         Vec3d v = p.getVelocity();
         double[] e = entree(p, in);
         double[] f = devant(p);
+
+        // Le saut de la foi : une meule (ou l'eau) attend en contrebas et l'on quitte le bord, en sautant
+        // (Minecraft a déjà lancé le saut quand on le voit : on y ajoute l'élan vers l'avant) ou en se laissant tomber
+        if (solAvant && !sol && HudAC.sautDeLaFoi() && !Cinema.actif()) {
+            if (v.y > 0.3) {
+                double[] fs = devant(p);
+                p.setVelocity(fs[0] * 0.34, v.y, fs[1] * 0.34);
+            }
+            Cinema.saut(p);
+            return;
+        }
 
         // Bond : le saut en sprint porte plus loin
         if (solAvant && !sol && v.y > 0.3 && p.isSprinting()) {
@@ -708,23 +718,11 @@ public final class Parcours {
     // ───────────────────────── PLONGEON, SYNCHRONISATION ─────────────────────────
 
     private static boolean plongeon;
-    private static int tour;                    // ticks restants du tour de caméra (synchronisation)
-    private static net.minecraft.client.option.Perspective vueAvantTour;
 
     /** Point de vue synchronisé : la caméra fait le tour du joueur, comme un aigle qui plane. */
     public static void synchro() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        tour = 72;
-        vueAvantTour = client.options.getPerspective();
-        client.options.setPerspective(net.minecraft.client.option.Perspective.THIRD_PERSON_BACK);
-    }
-
-    private static void tourner(MinecraftClient client, ClientPlayerEntity p) {
-        if (tour <= 0) return;
-        tour--;
-        p.setYaw(p.getYaw() + 5f);
-        p.setPitch(MathHelper.lerp(0.1f, p.getPitch(), 18f));
-        if (tour == 0 && vueAvantTour != null) client.options.setPerspective(vueAvantTour);
+        ClientPlayerEntity p = MinecraftClient.getInstance().player;
+        if (p != null) Cinema.synchro(p);
     }
 
     // ───────────────────────── LANCE-GRAPPIN ─────────────────────────
@@ -781,7 +779,6 @@ public final class Parcours {
     private static int execType, execDuree;
     private static Vec3d execCible;
     private static float execYaw;
-    private static net.minecraft.client.option.Perspective vueAvant;
     private static Etat etatAvantExec = Etat.LIBRE;
 
     /** Progression du geste d'assassinat, de 0 à 1 (pour les poses). */
@@ -797,8 +794,7 @@ public final class Parcours {
         execDuree = fr.fenua.ombre.ExecutionPayload.DUREE[e.type()];
         execCible = new Vec3d(e.x(), e.y(), e.z());
         execYaw = e.yaw();
-        vueAvant = client.options.getPerspective();
-        if (vueAvant.isFirstPerson()) client.options.setPerspective(net.minecraft.client.option.Perspective.THIRD_PERSON_BACK);
+        Cinema.execution(p, execCible, execDuree + 24);        // on reste le temps de le voir tomber
         changer(Etat.EXEC);
         p.playSound(SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, 0.5f, 0.8f);
     }
@@ -828,8 +824,6 @@ public final class Parcours {
         if (duree % 5 == 0) rattrape();
         if (duree >= execDuree + 6) {
             changer(etatAvantExec == Etat.REBORD && execType == fr.fenua.ombre.ExecutionPayload.REBORD ? Etat.REBORD : Etat.LIBRE);
-            if (vueAvant != null) client.options.setPerspective(vueAvant);
-            vueAvant = null;
         }
     }
 

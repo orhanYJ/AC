@@ -38,6 +38,9 @@ public final class HudAC {
     private static final int LARGEUR_BOUSSOLE = 220, CHAMP = 100;   // la boussole couvre ±100°
     private static boolean sautDeLaFoi;
 
+    /** Au bord d'un saut de la foi (calculé au tick d'avant). */
+    public static boolean sautDeLaFoi() { return sautDeLaFoi; }
+
     // ───────────── chaque tick ─────────────
 
     public static void tick(MinecraftClient mc) {
@@ -74,7 +77,7 @@ public final class HudAC {
 
     public static void dessiner(DrawContext ctx, MinecraftClient mc) {
         ClientPlayerEntity p = mc.player;
-        if (p == null || mc.world == null || mc.options.hudHidden) return;
+        if (p == null || mc.world == null || mc.options.hudHidden || Cinema.actif()) return;
         TextRenderer tr = mc.textRenderer;
         int w = ctx.getScaledWindowWidth(), h = ctx.getScaledWindowHeight();
         long t = mc.world.getTime();

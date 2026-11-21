@@ -109,7 +109,7 @@ Dès qu'un garde peut être tué, il est **entouré de rouge** et l'invite **« 
 | Pour te cacher | Comment |
 |---|---|
 | **La foule** | Marche parmi deux passants ou plus, sans courir : invisible |
-| **Cachettes** | Hautes herbes, buissons, feuillage (accroupi) ; **meule**, **puits**, **cabine à rideau** (debout) ; **charrette de foin** (accroupi) ; **banc** (clic droit pour s'asseoir) |
+| **Cachettes** | Hautes herbes, grandes fougères, buissons (debout ou accroupi), feuillage ; **meule**, **puits**, **cabine à rideau** (debout) ; **charrette de foin** (accroupi) ; **banc** (clic droit pour s'asseoir) |
 | **Déguisement** | **Tenue de hallebardier** (clic droit) : les gardes ne te remarquent qu'à 2 blocs. Perdue si tu cours, grimpes ou frappes. Un hallebardier tué laisse sa tenue |
 | **Perdre un poursuivant** | Cache-toi : il perd ta trace s'il est à plus de 3,5 blocs |
 
@@ -129,7 +129,8 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Désynchronisation** | Tuer un passant : l'écran se trouble, la notoriété bondit. L'Ombre ne tue pas d'innocents |
 | **Vol à la tire** | Accroupi, dans le dos d'un passant : clic droit pour prendre sa bourse. Vu de face, il crie « Au voleur ! » |
 | **Enchaînement** | Juste après un assassinat, tu as 2,5 s pour en enchaîner un autre au sol, même sur un garde qui t'a vu |
-| **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas |
+| **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas. Saute : la caméra te filme de derrière, tu plonges tête la première bras en croix, le foin jaillit à l'arrivée |
+| **Scènes filmées** | Bandes noires de cinéma et caméra libre : à la synchronisation (l'aigle tourne autour du point de vue, jauge « Synchronisation »), au saut de la foi, et à chaque assassinat (plan de côté) |
 
 ### Objets
 

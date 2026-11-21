@@ -76,7 +76,7 @@ public final class Discretion {
     /**
      * Dans une meule de foin, un puits, une cabine à rideau (même debout), assis sur un banc,
      * accroupi dans une charrette de foin, ou accroupi dans les hautes herbes,
-     * une fougère, un buisson, ou la tête sous des feuilles.
+     * une fougère, un buisson, ou la tête sous des feuilles (debout, si la plante couvre des pieds à la tête).
      */
     public static boolean dansCachette(PlayerEntity joueur) {
         World w = joueur.getWorld();
@@ -87,12 +87,15 @@ public final class Discretion {
         if (joueur.getVehicle() != null && joueur.getVehicle().getCommandTags().contains(fr.fenua.ombre.bloc.Decor.Banc.SIEGE)) return true;
         // Accroupi dans une charrette de foin
         if (joueur.isSneaking() && w.getBlockState(pieds).isOf(OmbreBlocs.CHARRETTE)) return true;
-        if (!joueur.isSneaking()) return false;
-        return cache(w.getBlockState(pieds)) || cache(w.getBlockState(pieds.up()));
+        // Dans les hautes herbes, les buissons, sous le feuillage : debout, il faut que la plante couvre
+        // des pieds à la tête ; accroupi, il suffit qu'elle couvre les pieds ou la tête
+        boolean bas = cache(w.getBlockState(pieds)), haut = cache(w.getBlockState(pieds.up()));
+        return joueur.isSneaking() ? bas || haut : bas && haut;
     }
 
     private static boolean cache(BlockState s) {
         return s.isOf(Blocks.TALL_GRASS) || s.isOf(Blocks.LARGE_FERN) || s.isOf(Blocks.SWEET_BERRY_BUSH)
+                || s.isOf(Blocks.ROSE_BUSH) || s.isOf(Blocks.LILAC) || s.isOf(Blocks.PEONY)
                 || s.isOf(OmbreBlocs.MEULE) || s.isIn(BlockTags.LEAVES);
     }
 }

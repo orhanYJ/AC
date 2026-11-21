@@ -96,7 +96,7 @@ public final class Assassin {
                 ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal("§6Déguisé en hallebardier"), w / 2, h - 72, 0xFFFFFF);
             if (cache != null) ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal(cache), w / 2, h - 60, 0xFFFFFF);
         }
-        if (cible == null || type == null || client.options.hudHidden) return;
+        if (cible == null || type == null || client.options.hudHidden || Cinema.actif()) return;
         String touche = OmbreClient.toucheAssassiner();
         Text t = Text.literal("§c✦ §f[" + touche + "] §c" + type + (cible instanceof MobEntity && cible.hasCustomName()
                 ? " §7— " + cible.getName().getString() : ""));

@@ -62,11 +62,12 @@ public class OmbreClient implements ClientModInitializer {
         HudRenderCallback.EVENT.register((ctx, compteur) -> {
             HudAC.dessiner(ctx, MinecraftClient.getInstance());
             Assassin.dessiner(ctx, MinecraftClient.getInstance());
+            Cinema.dessiner(ctx, MinecraftClient.getInstance());
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
-            if (!client.isPaused()) { Parcours.tick(client); Assassin.tick(client); HudAC.tick(client); }
+            if (!client.isPaused()) { Parcours.tick(client); Assassin.tick(client); HudAC.tick(client); Cinema.tick(client); }
             while (assassiner.wasPressed()) Assassin.frapper();
             while (instinct.wasPressed()) ClientPlayNetworking.send(new ActionPayload(ActionPayload.INSTINCT));
             while (siffler.wasPressed()) ClientPlayNetworking.send(new ActionPayload(ActionPayload.SIFFLER));
