@@ -88,6 +88,7 @@ Les **cibles** et la **Confrérie du Corbeau** sont inventées.
 
 | Geste | Touches |
 |---|---|
+| Saillies | Un **auvent**, un **balcon** ou la **corniche** au-dessus de la tête ne bloquent plus : on saisit leur bord et l'on passe dessus d'un rétablissement, puis on continue de grimper si **Z** est toujours enfoncé. En longeant le mur (**Q/D**), on se hisse de côté sur un balcon ou un auvent qu'on rencontre |
 | Gouttière | On y monte deux fois plus vite. Elle ne bloque pas : en longeant la façade aux mains, on passe devant sans s'arrêter |
 | S'accrocher | **Espace** en poussant vers le mur, ou en sautant contre lui. Seulement un vrai mur, d'**au moins 2 blocs** : un muret, une barrière ou un mur de pierre se sautent (ou se franchissent en courant) |
 | Monter / descendre | **Z / S** (Ctrl : plus vite ; le long d'une **gouttière**, deux fois plus vite) |

@@ -46,7 +46,7 @@ import net.minecraft.world.World;
 public final class Parcours {
     private Parcours() {}
 
-    enum Etat { LIBRE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, EXEC, GRAPPIN }
+    enum Etat { LIBRE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, EXEC, GRAPPIN, SURPLOMB }
 
     /** Poses reprises par les animations (Animations). */
     public enum Pose { AUCUNE, MUR, REBORD, HISSE, MUR_COURU, TYRO, LIFT, PERCHE, BOND, FRANCHIR, PLONGEON, GRAPPIN, EXEC_SOL, EXEC_AERIEN, EXEC_CACHETTE, EXEC_REBORD }
@@ -93,7 +93,7 @@ public final class Parcours {
         return switch (etat) {
             case MUR -> Pose.MUR;
             case REBORD -> Pose.REBORD;
-            case HISSE -> Pose.HISSE;
+            case HISSE, SURPLOMB -> Pose.HISSE;
             case MUR_COURU -> Pose.MUR_COURU;
             case TYRO -> Pose.TYRO;
             case LIFT -> Pose.LIFT;
@@ -155,6 +155,7 @@ public final class Parcours {
                 case PERCHE -> perche(p, in, nouveauSaut);
                 case EXEC -> execution(client, p);
                 case GRAPPIN -> grappin(p);
+                case SURPLOMB -> surplomb(p, in);
             }
             plongeon = etat == Etat.LIBRE && !sol && (p.getVelocity().y < -0.75 || Cinema.plan() == Cinema.Plan.SAUT);
             float corps = corpsVersMur();
@@ -407,6 +408,10 @@ public final class Parcours {
             }
         }
 
+        // La tête bute sous une saillie (auvent, balcon, corniche, enseigne de pierre) : comme dans Assassin's Creed,
+        // c'est une prise. On saisit son bord, on passe dessus d'un rétablissement, et l'on continue à grimper.
+        if ((vers > 0.3 || bondMur > 0) && !libreEn(p, 0, 0.12, 0) && passerSurplomb(p)) return;
+
         // Plus de mur devant ? (une fenêtre en retrait, ou le montant d'une ouverture à portée de main, suffisent)
         if (!appui(p, 0, 0) && !appui(p, tx * 0.9, tz * 0.9) && !appui(p, -tx * 0.9, -tz * 0.9)) {
             changer(Etat.LIBRE);
@@ -454,6 +459,7 @@ public final class Parcours {
             // Un mur en travers (coin rentrant), ou le bout du mur (coin saillant) : on passe l'angle.
             // Une fenêtre ou un renfoncement d'un ou deux blocs : on le passe aux mains.
             if (murEnTravers(p, tx * s, tz * s)) { if (contourner(p, tx * s, tz * s, false)) return; }
+            else if (bloqueBuste(p, tx * s * 0.15, tz * s * 0.15, 0.0) && passerSurplombCote(p, tx * s, tz * s)) return;
             else if (appui(p, tx * s * 0.45, tz * s * 0.45) || appui(p, tx * s * 1.2, tz * s * 1.2) || appui(p, tx * s * 1.9, tz * s * 1.9))
                 lat = s * (vite ? 0.17 : 0.11);
             else if (contourner(p, tx * s, tz * s, false)) return;
@@ -467,7 +473,13 @@ public final class Parcours {
         // on s'en dégage pour pouvoir longer le mur
         boolean faceDevant = bloqueBuste(p, murX * 0.3, murZ * 0.3, 0.3) || bloque(p, murX * 0.3, murZ * 0.3);
         double colle = faceDevant ? 0.05 : 0;
-        if (vLat != 0 && bloqueBuste(p, tx * Math.signum(vLat) * 0.12, tz * Math.signum(vLat) * 0.12, 0.3)) colle = -0.12;
+        if (vLat != 0 && bloqueBuste(p, tx * Math.signum(vLat) * 0.12, tz * Math.signum(vLat) * 0.12, 0.3)) {
+            double sl = Math.signum(vLat);
+            // Une saillie sur la façade (un balcon, un auvent) : on s'arrête contre elle — on passera dessus en montant.
+            // Le côté d'une embrasure de fenêtre, où l'on s'est enfoncé : on s'en dégage pour longer le mur.
+            if (bloqueBuste(p, tx * sl * 0.12 - murX * 0.4, tz * sl * 0.12 - murZ * 0.4, 0.3)) vLat = 0;
+            else colle = -0.12;
+        }
         p.setVelocity(murX * colle + tx * vLat, vVert, murZ * colle + tz * vLat);
         if (vVert != 0 || vLat != 0) {
             phase += (float) (0.25 + 1.5 * Math.max(Math.abs(vLat), Math.abs(vVert)));
@@ -543,6 +555,110 @@ public final class Parcours {
     private static void monterDuRebord(ClientPlayerEntity p) {
         double h = hauteurRebord(p, p.getX() + murX * 0.6, p.getZ() + murZ * 0.6, 0.5, 2.3);
         if (!Double.isNaN(h)) hisser(p, murX, murZ, h);
+    }
+
+    // ───────────────────────── SURPLOMB (passer sur une saillie) ─────────────────────────
+
+    private static Vec3d spDepart, spDehors, spHaut, spArrivee;
+    private static final int SP_DUREE = 11;
+
+    /**
+     * La saillie au-dessus de la tête : son dessus (au plus 1,4 au-dessus de la tête), son bord côté rue
+     * (à moins de 1,3 du joueur), la place pour passer devant puis se tenir dessus. Si tout va, le geste commence.
+     */
+    private static boolean passerSurplomb(ClientPlayerEntity p) {
+        World w = p.getWorld();
+        double tete = p.getY() + p.getHeight();
+        double dessus = Double.NaN;
+        for (int y = (int) Math.floor(tete); y <= (int) Math.floor(tete + 1.4); y++) {
+            double d = dessusEn(w, BlockPos.ofFloored(p.getX(), y, p.getZ()), p.getX(), p.getZ());
+            if (Double.isNaN(d)) { if (!Double.isNaN(dessus)) break; continue; }
+            dessus = d;
+        }
+        if (Double.isNaN(dessus) || dessus - tete > 1.4) return false;
+        // Le bord de la saillie, en s'éloignant du mur
+        double ox = -murX, oz = -murZ, bord = Double.NaN;
+        for (double t = 0; t <= 1.3; t += 0.05) {
+            double x = p.getX() + ox * t, z = p.getZ() + oz * t;
+            if (w.isSpaceEmpty(new Box(x - 0.02, dessus - 0.08, z - 0.02, x + 0.02, dessus - 0.02, z + 0.02))) { bord = t; break; }
+        }
+        if (Double.isNaN(bord)) return false;                   // une saillie trop large : un plafond
+        double sortie = bord + 0.34;
+        double dy = dessus + 0.01 - p.getY();
+        if (!libreEn(p, ox * sortie, 0, oz * sortie) || !libreEn(p, ox * sortie, dy, oz * sortie)) return false;
+        if (!libreEn(p, 0, dy, 0)) return false;                 // pas la place de se tenir dessus
+        spDepart = p.getPos();
+        spDehors = spDepart.add(ox * sortie, 0, oz * sortie);
+        spHaut = spDehors.add(0, dy, 0);
+        spArrivee = spDepart.add(0, dy, 0);
+        changer(Etat.SURPLOMB);
+        p.setVelocity(0, 0, 0);
+        p.playSound(SoundEvents.BLOCK_WOOD_STEP, 0.6f, 1.1f);
+        return true;
+    }
+
+    /**
+     * En longeant le mur, on arrive contre une saillie (balcon, auvent) dont le dessus est à portée :
+     * on se hisse dessus, de côté. (Sinon Minecraft nous poussait hors de la saillie, devant elle, dans le vide.)
+     */
+    private static boolean passerSurplombCote(ClientPlayerEntity p, double ax, double az) {
+        World w = p.getWorld();
+        double x = p.getX() + ax * 0.55, z = p.getZ() + az * 0.55;
+        double dessus = Double.NaN;
+        for (int y = (int) Math.floor(p.getY()); y <= (int) Math.floor(p.getY() + p.getHeight() + 1.0); y++) {
+            double d = dessusEn(w, BlockPos.ofFloored(x, y, z), x, z);
+            if (Double.isNaN(d)) { if (!Double.isNaN(dessus)) break; continue; }
+            dessus = d;
+        }
+        double dy = dessus + 0.01 - p.getY();
+        if (Double.isNaN(dessus) || dessus - p.getY() > p.getHeight() + 0.9 || dessus - p.getY() < 0.3) return false;
+        if (!libreEn(p, 0, dy, 0) || !libreEn(p, ax * 0.8, dy, az * 0.8)) return false;
+        spDepart = p.getPos();
+        spDehors = spDepart;
+        spHaut = spDepart.add(0, dy, 0);
+        spArrivee = spHaut.add(ax * 0.8, 0, az * 0.8);
+        changer(Etat.SURPLOMB);
+        p.setVelocity(0, 0, 0);
+        p.playSound(SoundEvents.BLOCK_WOOD_STEP, 0.6f, 1.1f);
+        return true;
+    }
+
+    /** Le dessus de ce qui est plein dans le bloc b, à l'aplomb du point (x, z) (le plancher d'un balcon, pas sa rambarde) ; NaN s'il n'y a rien. */
+    private static double dessusEn(World w, BlockPos b, double x, double z) {
+        var forme = w.getBlockState(b).getCollisionShape(w, b);
+        if (forme.isEmpty()) return Double.NaN;
+        double lx = x - b.getX(), lz = z - b.getZ(), haut = Double.NaN;
+        for (Box c : forme.getBoundingBoxes())
+            if (lx >= c.minX - 0.3 && lx <= c.maxX + 0.3 && lz >= c.minZ - 0.3 && lz <= c.maxZ + 0.3)
+                haut = Double.isNaN(haut) ? c.maxY : Math.max(haut, c.maxY);
+        return Double.isNaN(haut) ? Double.NaN : b.getY() + haut;
+    }
+
+    /** Le geste : les mains au bord, le corps se décale vers la rue, se hisse, et repasse au-dessus de la saillie. */
+    private static void surplomb(ClientPlayerEntity p, Input in) {
+        double k = Math.min(1, duree / (double) SP_DUREE);
+        Vec3d ici;
+        if (k < 0.3) ici = lerp(spDepart, spDehors, k / 0.3);
+        else if (k < 0.75) ici = lerp(spDehors, spHaut, (k - 0.3) / 0.45);
+        else ici = lerp(spHaut, spArrivee, (k - 0.75) / 0.25);
+        p.setPosition(ici);
+        p.setVelocity(0, 0, 0);
+        p.fallDistance = 0;
+        phase += 0.4f;
+        if (duree >= SP_DUREE) {
+            p.setPosition(spArrivee);
+            rattrape();
+            // Z toujours enfoncé : on reprend l'escalade dans la foulée ; sinon, on reste debout sur la saillie
+            if (in.movementForward > 0 && bloqueBuste(p, murX * 0.3, murZ * 0.3, 0.3)) {
+                vLat = 0; vVert = 0; bondMur = 0;
+                changer(Etat.MUR);
+            } else changer(Etat.LIBRE);
+        }
+    }
+
+    private static Vec3d lerp(Vec3d a, Vec3d b, double u) {
+        double s = u * u * (3 - 2 * u);
+        return a.add(b.subtract(a).multiply(s));
     }
 
     // ───────────────────────── HISSE (rétablissement) ─────────────────────────
@@ -639,7 +755,13 @@ public final class Parcours {
 
     /** Un mur barre-t-il la route dans la direction (ax, az) ? Un vrai mur : il dépasse d'au moins un demi-bloc (pas une gouttière). */
     private static boolean murEnTravers(ClientPlayerEntity p, double ax, double az) {
-        return bloqueBuste(p, ax * 0.2, az * 0.2, 0.3) && bloqueBuste(p, ax * 0.2 - murX * 0.5, az * 0.2 - murZ * 0.5, 0.3);
+        if (!(bloqueBuste(p, ax * 0.2, az * 0.2, 0.3) && bloqueBuste(p, ax * 0.2 - murX * 0.5, az * 0.2 - murZ * 0.5, 0.3))) return false;
+        // Un vrai mur est plein des pieds jusqu'au-dessus de la tête ; un balcon ou un auvent n'occupe qu'une tranche :
+        // ce n'est pas un angle (sinon on pivotait, et l'on « grimpait » le flanc du balcon vers la rue)
+        Box b = p.getBoundingBox().offset(ax * 0.2 - murX * 0.5, 0, az * 0.2 - murZ * 0.5);
+        Box bas = new Box(b.minX, b.minY + 0.05, b.minZ, b.maxX, b.minY + 0.6, b.maxZ);
+        Box haut = new Box(b.minX, b.maxY + 0.8, b.minZ, b.maxX, b.maxY + 1.4, b.maxZ);
+        return !p.getWorld().isSpaceEmpty(p, bas) && !p.getWorld().isSpaceEmpty(p, haut);
     }
 
     private static float capDe(double x, double z) { return (float) Math.toDegrees(Math.atan2(-x, z)); }
@@ -1129,4 +1251,6 @@ public final class Parcours {
         return res;
     }
 }
+
+
 
