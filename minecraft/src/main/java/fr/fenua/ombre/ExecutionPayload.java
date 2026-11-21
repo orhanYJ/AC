@@ -8,12 +8,15 @@ import net.minecraft.util.Identifier;
 
 /**
  * Message du serveur vers le joueur : « ton assassinat commence ». Le joueur joue alors le geste
- * (bond, pas derrière la victime…), la pose et la caméra ; le serveur, lui, fige la victime.
+ * (sa course, ses poses, la caméra) et anime le corps de la victime ; le serveur, lui, la déplace selon la
+ * chorégraphie. « yaw » est l'axe du joueur vers la victime (voir Choregraphie).
  */
 public record ExecutionPayload(int type, int victime, double x, double y, double z, float yaw) implements CustomPayload {
-    public static final int SOL = 0, AERIEN = 1, CACHETTE = 2, REBORD = 3;
+    /** Les scènes (voir Choregraphie) : dans le dos, aérien, cachette, rebord, projection. */
+    public static final int SOL = Choregraphie.DOS, AERIEN = Choregraphie.AERIEN, CACHETTE = Choregraphie.CACHETTE,
+            REBORD = Choregraphie.REBORD, PROJECTION = Choregraphie.PROJECTION;
     /** Durée du geste, en ticks (20 par seconde). */
-    public static final int[] DUREE = {8, 11, 9, 9};
+    public static final int[] DUREE = Choregraphie.DUREE;
 
     public static final Id<ExecutionPayload> ID = new Id<>(Identifier.of(Ombre.MOD_ID, "execution"));
     public static final PacketCodec<RegistryByteBuf, ExecutionPayload> CODEC = PacketCodec.tuple(

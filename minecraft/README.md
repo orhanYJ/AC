@@ -113,10 +113,11 @@ Dès qu'un garde peut être tué, il est **entouré de rouge** et l'invite **« 
 
 | Assassinat | Quand | Le geste |
 |---|---|---|
-| **Au sol** | Il ne t'a pas repéré, devant toi, à 3 blocs | Tu passes derrière lui, une main le saisit, l'autre frappe |
-| **Aérien** | Il est sous toi (toit, rebord, chute), même s'il t'a vu | Tu bondis en arc et retombes sur lui |
-| **Depuis la cachette** | Tu es caché, il passe tout près | Tu l'attires dans la cachette |
-| **Depuis le rebord** | Tu es suspendu, il marche au bord au-dessus | Tu le tires par-dessus le bord |
+| **Dans le dos** | Il ne t'a pas repéré, devant toi, à 3 blocs | Une main le saisit par l'épaule et le cambre, la lame frappe ; il s'effondre face contre terre et tu poses un genou au sol |
+| **Projection** | Au sol, une fois sur deux (et toujours en enchaînement), s'il y a la place derrière toi | Tu l'empoignes, le soulèves par-dessus ton épaule et le plaques au sol derrière toi, puis tu achèves |
+| **Aérien** | Il est sous toi (toit, rebord, chute), même s'il t'a vu | Tu bondis en arc, retombes sur lui et le plaques au sol |
+| **Depuis la cachette** | Tu es caché, il passe tout près | Tu le saisis, l'attires contre toi et l'entraînes au fond de la cachette, où il disparaît |
+| **Depuis le rebord** | Tu es suspendu, il marche au bord au-dessus | Tu l'attrapes par la cheville et le fais basculer par-dessus le bord ; il tombe dans le vide |
 | **Double** | Une lame dans chaque main (F) | Un 2ᵉ garde distrait tombe aussi |
 
 ### Discrétion
@@ -148,7 +149,7 @@ Les gardes voient mal dans leur dos et dans le noir ; un garde qui te repère so
 | **Plumes de corbeau** | Quinze plumes cachées sur les hauteurs de Prague, signalées par une colonne de lumière ; le journal les compte, et la quinzième rapporte une bourse |
 | **Course des toits** | Au coin nord-ouest de Prague, un anneau de flammes sur un toit : le départ. Franchis les balises dans l'ordre par les toits, les passerelles et les échelles, sans toucher la rue. Chrono et record |
 | **Saut de la foi** | Au bord d'un vide, une invite dorée t'avertit quand une meule, du foin ou l'eau t'attend en bas. Quand une poutre ou un rebord est à portée devant toi, c'est un saut ordinaire vers lui : pour le saut de la foi, **regarde vers le bas** en sautant. Saute : la caméra te filme de derrière, tu plonges tête la première bras en croix, le foin jaillit à l'arrivée |
-| **Scènes filmées** | Bandes noires de cinéma et caméra libre : à la synchronisation (l'aigle tourne autour du point de vue, jauge « Synchronisation »), au saut de la foi, et à chaque assassinat (plan de côté) |
+| **Scènes filmées** | Bandes noires de cinéma et caméra libre : à la synchronisation (l'aigle tourne autour du point de vue, jauge « Synchronisation »), au saut de la foi, et à chaque assassinat (plan de côté, pris du côté d'où l'on voit le mieux) |
 
 ### Objets
 

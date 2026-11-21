@@ -15,5 +15,6 @@ public abstract class PosesMixin<T extends LivingEntity> {
     @Inject(method = "setAngles(Lnet/minecraft/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
     private void ombre$poses(T entite, float f, float g, float age, float i, float j, CallbackInfo ci) {
         if (entite == MinecraftClient.getInstance().player) Animations.appliquer((BipedEntityModel<?>) (Object) this, age);
+        else if (fr.fenua.ombre.client.ExecClient.victime(entite)) fr.fenua.ombre.client.ExecClient.poseVictime((BipedEntityModel<?>) (Object) this);
     }
 }

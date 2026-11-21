@@ -977,6 +977,7 @@ public final class Parcours {
         etatAvantExec = etat == Etat.REBORD ? Etat.REBORD : Etat.LIBRE;
         execType = e.type();
         execDuree = fr.fenua.ombre.ExecutionPayload.DUREE[e.type()];
+        ExecClient.demarrer(e);
         execCible = new Vec3d(e.x(), e.y(), e.z());
         execYaw = e.yaw();
         Cinema.execution(p, execCible, execDuree + 24);        // on reste le temps de le voir tomber
@@ -985,29 +986,18 @@ public final class Parcours {
     }
 
     private static void execution(MinecraftClient client, ClientPlayerEntity p) {
-        int reste = Math.max(1, execDuree - duree);
-        Vec3d pos = p.getPos();
-        switch (execType) {
-            case fr.fenua.ombre.ExecutionPayload.AERIEN -> {
-                // Un bond en arc jusque sur la victime
-                Vec3d but = execCible.add(0, 0.2, 0);
-                Vec3d v = but.subtract(pos).multiply(1.0 / reste);
-                p.setVelocity(v.x, v.y + (reste > 3 ? 0.06 : 0), v.z);
-            }
-            case fr.fenua.ombre.ExecutionPayload.SOL -> {
-                // Un pas derrière la victime
-                float r = execYaw * MathHelper.RADIANS_PER_DEGREE;
-                Vec3d but = execCible.add(MathHelper.sin(r) * 0.75, 0, -MathHelper.cos(r) * 0.75);
-                Vec3d v = but.subtract(pos);
-                p.setVelocity(v.x * 0.35, p.getVelocity().y, v.z * 0.35);
-            }
-            default -> p.setVelocity(0, etatAvantExec == Etat.REBORD || execType == fr.fenua.ombre.ExecutionPayload.REBORD ? 0 : p.getVelocity().y, 0);
+        // Le joueur suit la chorégraphie : sa place, et son orientation (la projection le fait pivoter)
+        double k = ExecClient.k(0) + 1.0 / execDuree;
+        if (execType == fr.fenua.ombre.ExecutionPayload.REBORD) p.setVelocity(0, 0, 0);
+        else {
+            Vec3d but = ExecClient.posJoueur(k), v = but.subtract(p.getPos());
+            boolean sol = execType != fr.fenua.ombre.ExecutionPayload.AERIEN || k > 0.6;
+            p.setVelocity(v.x * 0.7, sol && execType != fr.fenua.ombre.ExecutionPayload.CACHETTE ? Math.min(0, v.y) * 0.7 + (v.y > 0 ? v.y : 0) * 0.7 : v.y * 0.7, v.z * 0.7);
         }
-        // On regarde la victime
-        double dx = execCible.x - p.getX(), dz = execCible.z - p.getZ();
-        if (dx * dx + dz * dz > 0.04) p.setBodyYaw((float) Math.toDegrees(Math.atan2(-dx, dz)));
+        p.setBodyYaw(ExecClient.lacet() + fr.fenua.ombre.Choregraphie.lacetJoueur(execType, Math.min(1, k)));
+        p.setHeadYaw(p.getBodyYaw());
         if (duree % 5 == 0) rattrape();
-        if (duree >= execDuree + 6) {
+        if (duree >= execDuree + 4) {
             changer(etatAvantExec == Etat.REBORD && execType == fr.fenua.ombre.ExecutionPayload.REBORD ? Etat.REBORD : Etat.LIBRE);
         }
     }

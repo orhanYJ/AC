@@ -22,6 +22,21 @@ public class RenduHumain<T extends MobEntity> extends BipedEntityRenderer<T, Pla
 
     @Override public Identifier getTexture(T e) { return texture.apply(e); }
 
+    /** La victime d'un assassinat : dessinée à sa place dans la chorégraphie, tournée et basculée comme il faut. */
+    @Override
+    protected void setupTransforms(T e, net.minecraft.client.util.math.MatrixStack m, float progres, float lacet, float td, float echelle) {
+        if (!ExecClient.victime(e)) { super.setupTransforms(e, m, progres, lacet, td, echelle); return; }
+        double k = ExecClient.k(td);
+        net.minecraft.util.math.Vec3d ici = e.getLerpedPos(td), la = ExecClient.posVictime(k, ici);
+        m.translate(la.x - ici.x, la.y - ici.y, la.z - ici.z);
+        super.setupTransforms(e, m, progres, ExecClient.lacetVictime(k), td, echelle);
+        m.multiply(net.minecraft.util.math.RotationAxis.POSITIVE_X.rotationDegrees(-ExecClient.bascule(k)));
+    }
+
+    /** Pas de chute sur le côté à la mort : la chorégraphie a déjà couché la victime. */
+    @Override
+    protected float getLyingAngle(T e) { return ExecClient.victime(e) ? 0 : super.getLyingAngle(e); }
+
     public static Identifier tex(String nom) { return Identifier.of(Ombre.MOD_ID, "textures/entity/" + nom + ".png"); }
 
     private static final Identifier[] PASSANTS = new Identifier[Passant.VARIANTES];

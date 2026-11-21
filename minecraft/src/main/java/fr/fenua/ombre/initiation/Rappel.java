@@ -58,7 +58,7 @@ public final class Rappel {
                 .but(7, 6, 7).si(c -> c.suspendu(8, 5.5, 8.2));
         e(BORD, "L'assassinat depuis le bord",
                 "Un mannequin monte la garde juste au-dessus de toi.",
-                "Entouré de §crouge§f : §6R§f. Il passe par-dessus le bord — et c'est filmé, comme tout assassinat.")
+                "Entouré de §crouge§f : §6R§f. Tu l'attrapes par la cheville et il bascule par-dessus le bord. Chaque assassinat a désormais sa propre scène.")
                 .debut(c -> c.garde("ombre_init_g1", 9, 8, 7, 90, false, true, 0))
                 .but(8, 8, 7).si(c -> c.morts("ombre_init_g1")).ouvre();
 

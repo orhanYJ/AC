@@ -113,65 +113,93 @@ public final class Assassinat {
         if (nom == null || !joueur.canSee(v)) return;
         if (chaine && nom.equals("Assassinat")) nom = ENCHAINEMENT;
 
-        // L'assassinat est mis en scène : la victime est figée, le joueur fait son geste, puis le coup tombe
+        // L'assassinat est mis en scène (voir Choregraphie) : chaque scène a ses gestes, pour l'Ombre comme pour la victime
         int type = nom.equals("Assassinat aérien") ? ExecutionPayload.AERIEN : nom.equals(CACHETTE) ? ExecutionPayload.CACHETTE
                 : nom.startsWith("Assassinat depuis le rebord") ? ExecutionPayload.REBORD : ExecutionPayload.SOL;
         for (Execution x : EN_COURS) if (x.victime == v || x.joueur == joueur) return;   // déjà en cours
+        Execution x = new Execution(joueur, v, type, nom);
+        // Au sol, une fois sur deux (et toujours pour un enchaînement) : la projection par-dessus l'épaule,
+        // s'il y a la place de le jeter derrière soi
+        if (type == ExecutionPayload.SOL && (nom.equals(ENCHAINEMENT) || sw.random.nextBoolean())) {
+            net.minecraft.util.math.Vec3d sol = x.monde(x.pf - 1.9, 0, 0);
+            if (sw.isSpaceEmpty(v, v.getBoundingBox().offset(sol.subtract(v.getPos())))) { x.scene = ExecutionPayload.PROJECTION; x.nom = nom.equals(ENCHAINEMENT) ? nom : "Projection"; }
+        }
         joueur.fallDistance = 0;
         if (v instanceof MobEntity m) { m.setTarget(null); m.getNavigation().stop(); }
-        EN_COURS.add(new Execution(joueur, v, type, nom));
+        v.setNoGravity(true);
+        EN_COURS.add(x);
         if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(joueur, ExecutionPayload.ID))
             net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(joueur,
-                    new ExecutionPayload(type, v.getId(), v.getX(), v.getY(), v.getZ(), v.getBodyYaw()));
+                    new ExecutionPayload(x.scene, v.getId(), v.getX(), v.getY(), v.getZ(), x.lacet));
         sw.playSound(null, joueur.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 0.4f, 1.4f);
     }
 
-    /** Un assassinat en train de se jouer. */
+    /** Un assassinat en train de se jouer, dans le repère de la chorégraphie. */
     private static final class Execution {
         final net.minecraft.server.network.ServerPlayerEntity joueur;
         final LivingEntity victime;
-        final int type;
-        final String nom;
+        int scene;
+        String nom;
         int t;
+        boolean tue, lachee;
+        final net.minecraft.util.math.Vec3d a;
+        final double fx, fz, pf, py;
+        final float lacet;
 
-        Execution(net.minecraft.server.network.ServerPlayerEntity j, LivingEntity v, int type, String nom) {
-            this.joueur = j; this.victime = v; this.type = type; this.nom = nom;
+        Execution(net.minecraft.server.network.ServerPlayerEntity j, LivingEntity v, int scene, String nom) {
+            this.joueur = j; this.victime = v; this.scene = scene; this.nom = nom;
+            a = v.getPos();
+            double dx = a.x - j.getX(), dz = a.z - j.getZ(), n = Math.sqrt(dx * dx + dz * dz);
+            if (n < 0.05) { float r = j.getYaw() * net.minecraft.util.math.MathHelper.RADIANS_PER_DEGREE; dx = -Math.sin(r); dz = Math.cos(r); n = 1; }
+            fx = dx / n; fz = dz / n;
+            pf = -(n < 0.05 ? 0 : n); py = j.getY() - a.y;
+            lacet = (float) Math.toDegrees(Math.atan2(-fx, fz));
+        }
+
+        /** Un point du repère, dans le monde. */
+        net.minecraft.util.math.Vec3d monde(double f, double s, double y) {
+            return new net.minecraft.util.math.Vec3d(a.x + fx * f - fz * s, a.y + y, a.z + fz * f + fx * s);
         }
     }
 
     private static final java.util.List<Execution> EN_COURS = new java.util.ArrayList<>();
 
-    /** Chaque tick : la victime reste figée (ou est tirée), puis le coup tombe à la fin du geste. */
+    /** Chaque tick : la victime suit la chorégraphie ; le coup tombe au bon moment ; elle reste en place jusqu'à la fin. */
     public static void tickExecutions() {
         java.util.Iterator<Execution> it = EN_COURS.iterator();
         while (it.hasNext()) {
             Execution x = it.next();
             x.t++;
             LivingEntity v = x.victime;
-            if (!v.isAlive() || x.joueur.isRemoved() || x.joueur.getWorld() != v.getWorld()) { it.remove(); continue; }
-            if (v instanceof MobEntity m) { m.setTarget(null); m.getNavigation().stop(); }
-            switch (x.type) {
-                case ExecutionPayload.CACHETTE -> {
-                    // On l'attire dans la cachette
-                    net.minecraft.util.math.Vec3d p = v.getPos().lerp(x.joueur.getPos(), 0.3);
-                    v.requestTeleport(p.x, p.y, p.z);
-                }
-                case ExecutionPayload.REBORD -> {
-                    // On le tire par-dessus le bord : il passe devant le joueur et tombe
-                    if (x.t == 3) {
-                        double dx = x.joueur.getX() - v.getX(), dz = x.joueur.getZ() - v.getZ(), n = Math.max(0.01, Math.sqrt(dx * dx + dz * dz));
-                        v.setVelocity(dx / n * 0.45, 0.25, dz / n * 0.45);
-                        v.velocityModified = true;
-                    }
-                }
-                default -> {
-                    v.setVelocity(0, Math.min(0, v.getVelocity().y), 0);
-                    v.velocityModified = true;
-                }
+            int duree = Choregraphie.DUREE[x.scene];
+            if (v.isRemoved() || x.joueur.isRemoved() || x.joueur.getWorld() != v.getWorld()) { v.setNoGravity(false); it.remove(); continue; }
+            double k = Math.min(1, x.t / (double) duree);
+            if (v instanceof MobEntity m && v.isAlive()) { m.setTarget(null); m.getNavigation().stop(); }
+            ServerWorld sw = (ServerWorld) v.getWorld();
+            boolean libre = x.scene == Choregraphie.REBORD && k >= Choregraphie.CHUTE_LIBRE;
+            if (!libre) {
+                double[] q = Choregraphie.victime(x.scene, k, x.pf, x.py);
+                net.minecraft.util.math.Vec3d p = x.monde(q[0], q[1], q[2]);
+                float yaw = x.lacet + Choregraphie.corps(x.scene, k)[1];
+                v.refreshPositionAndAngles(p.x, p.y, p.z, yaw, 0);
+                v.setBodyYaw(yaw);
+                v.setHeadYaw(yaw);
+                v.setVelocity(0, 0, 0);
+                v.velocityModified = true;
+            } else if (!x.lachee) {
+                // Il tombe : on le lâche, avec l'élan vers l'extérieur
+                x.lachee = true;
+                v.setNoGravity(false);
+                v.setVelocity(-x.fx * 0.22, -0.2, -x.fz * 0.22);
+                v.velocityModified = true;
             }
-            if (x.t >= ExecutionPayload.DUREE[x.type]) {
-                it.remove();
-                ServerWorld sw = (ServerWorld) v.getWorld();
+            // Bruits : le choc de la projection, la saisie de la cachette
+            if (x.scene == Choregraphie.PROJECTION && x.t == (int) (0.56 * duree))
+                sw.playSound(null, v.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK, SoundCategory.PLAYERS, 0.9f, 0.6f);
+            if (x.scene == Choregraphie.CACHETTE && x.t == (int) (0.3 * duree))
+                sw.playSound(null, v.getBlockPos(), SoundEvents.BLOCK_GRASS_BREAK, SoundCategory.PLAYERS, 0.8f, 0.8f);
+            if (!x.tue && k >= Choregraphie.COUP[x.scene]) {
+                x.tue = true;
                 x.joueur.fallDistance = 0;
                 tuer(sw, x.joueur, v);
                 x.joueur.swingHand(Hand.MAIN_HAND, true);
@@ -186,6 +214,9 @@ public final class Assassinat {
                     }
                 }
                 x.joueur.sendMessage(Text.literal("§7✦ " + nom), true);
+            }
+            if (x.t >= duree) {
+                it.remove();
                 CHAINE_JUSQUA.put(x.joueur.getUuid(), sw.getTime() + CHAINE);
             }
         }

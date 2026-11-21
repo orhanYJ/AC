@@ -55,7 +55,7 @@ public class EcranAide extends Screen {
             new String[]{"Perchoir, gargouille", "Point de vue : s'y tenir révèle les gardes 30 s et ouvre le voyage rapide"},
             new String[]{"#Assassin", ""},
             new String[]{"R", "Assassiner le garde entouré de rouge (la lame doit être dans l'inventaire)"},
-            new String[]{"(mise en scène)", "Chaque assassinat a son geste ; la caméra passe en vue extérieure le temps du coup"},
+            new String[]{"(mise en scène)", "Chaque assassinat a sa scène : saisie dans le dos, projection, plongeon, tiré dans la cachette, basculé du rebord"},
             new String[]{"  au sol", "Il ne t'a pas repéré et il est devant toi, à 3 blocs"},
             new String[]{"  aérien", "Il est sous toi (toit, rebord, chute) : tu plonges sur lui, même s'il t'a vu"},
             new String[]{"  depuis un rebord", "Suspendu sous un garde qui marche au bord du toit"},

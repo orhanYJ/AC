@@ -72,8 +72,28 @@ public final class Cinema {
         commencer(Plan.EXEC, d);
         cible = victime;
         double dx = victime.x - p.getX(), dz = victime.z - p.getZ();
-        yaw0 = (dx * dx + dz * dz > 0.01 ? (float) Math.toDegrees(Math.atan2(-dx, dz)) : p.getYaw()) + 90f;
+        float axe = dx * dx + dz * dz > 0.01 ? (float) Math.toDegrees(Math.atan2(-dx, dz)) : p.getYaw();
         centre = p.getPos().add(victime).multiply(0.5).add(0, 1.1, 0);
+        // On choisit le côté d'où l'on voit le mieux toute la scène, jusqu'aux pieds (la victime finit au sol) :
+        // de profil à droite ou à gauche d'abord, puis de trois quarts.
+        float mieux = axe + 90f; double score = -1;
+        for (float essai : new float[]{90f, -130f, 140f, -90f, 50f, -50f}) {
+            double s = 0;
+            for (double u = 0; u <= 1.01; u += 0.5) {
+                double a = Math.toRadians(axe + essai + 40 * u);
+                Vec3d oeil = centre.add(Math.sin(a) * 4.6, 0.9 + 0.6 * u, -Math.cos(a) * 4.6);
+                s += libre(p, centre, oeil) + libre(p, centre.add(0, -0.9, 0), oeil);
+            }
+            if (s > score + 0.5) { score = s; mieux = axe + essai; }
+        }
+        yaw0 = mieux;
+    }
+
+    /** Quelle part du trajet de depuis à vers est dégagée (0 à 1) ? */
+    private static double libre(ClientPlayerEntity p, Vec3d depuis, Vec3d vers) {
+        HitResult h = p.getWorld().raycast(new RaycastContext(depuis, vers, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, p));
+        if (h.getType() == HitResult.Type.MISS) return 1;
+        return h.getPos().distanceTo(depuis) / Math.max(0.01, vers.distanceTo(depuis));
     }
 
     // ───────────────────────── la vue de l'aigle ─────────────────────────
@@ -222,7 +242,7 @@ public final class Cinema {
             }
             case EXEC -> {
                 double a = Math.toRadians(yaw0 + 40 * u);
-                oeil = centre.add(Math.sin(a) * 3.4, 0.6 + 0.4 * u, -Math.cos(a) * 3.4);
+                oeil = centre.add(Math.sin(a) * 4.6, 0.9 + 0.6 * u, -Math.cos(a) * 4.6);
                 regard = centre;
             }
             case AIGLE -> {
@@ -242,7 +262,7 @@ public final class Cinema {
 
     /** La caméra ne traverse pas les murs : on l'arrête juste devant ce qui la cacherait. */
     private static Vec3d degager(ClientPlayerEntity p, Vec3d depuis, Vec3d vers) {
-        HitResult h = p.getWorld().raycast(new RaycastContext(depuis, vers, RaycastContext.ShapeType.VISUAL, RaycastContext.FluidHandling.NONE, p));
+        HitResult h = p.getWorld().raycast(new RaycastContext(depuis, vers, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, p));
         if (h.getType() == HitResult.Type.MISS) return vers;
         Vec3d dir = vers.subtract(depuis).normalize();
         return h.getPos().subtract(dir.multiply(0.3));
