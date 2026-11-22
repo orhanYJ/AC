@@ -84,9 +84,9 @@ public final class Rappel {
                 "(Ça marche aussi sur les étals, les charrettes, les garde-corps des rues de Prague.)")
                 .but(27, 0, 7).si(c -> c.x() >= 27).ouvre();
 
-        e(BONDS, "Le bond assisté",
-                "Monte sur le premier toit et §6sprinte§f vers le bord, §6Z§f enfoncé :",
-                "s'il y a un toit en face, tu t'élances tout seul, juste assez fort pour l'atteindre (jusqu'à 5 blocs).",
+        e(BONDS, "Le saut en course",
+                "Monte sur le premier toit, §6sprinte§f vers le bord et §6saute (Espace)§f au dernier moment :",
+                "en courant, tes sauts portent bien plus loin (jusqu'à 5 blocs). Rien n'est automatique : c'est à toi de sauter.",
                 "Traverse les quatre toits. (Tomber dans l'eau ne fait pas mal.)")
                 .but(31, 5, 7).si(c -> c.p.isOnGround() && c.x() >= 29 && c.y() >= 4.5).ouvre();
 

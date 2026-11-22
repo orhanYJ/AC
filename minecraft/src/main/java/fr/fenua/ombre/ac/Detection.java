@@ -94,6 +94,9 @@ public final class Detection {
         }
     }
 
+    /** Étiquette d'un garde toujours vigilant, même hors des zones interdites (l'arène). */
+    public static final String VIGILANT = "ombre_vigilant";
+
     /** Jusqu'où voit un garde, en blocs, avant la discrétion (accroupi, nuit, dans le dos…) et la notoriété. */
     public static final double VUE_GARDE = 13, VUE_CAPITAINE = 15, VUE_ARBALETRIER = 18;
     /** Au-delà de cette hauteur au-dessus d'un garde à pied, on est hors de sa vue. */
@@ -102,6 +105,11 @@ public final class Detection {
     /** Jusqu'où ce garde peut te remarquer maintenant (0 s'il ne peut pas). */
     private static double portee(MobEntity g, PlayerEntity p) {
         if (g.hasStatusEffect(Effets.ENDORMI) || g.getCommandTags().contains("ombre_aveugle")) return 0;   // endormi, ou mannequin
+        // Comme dans Assassin's Creed : hors d'une zone interdite, les gardes ne s'occupent pas de toi — sauf si tu es
+        // recherché, ou s'ils sont déjà sur leurs gardes (un vol raté, un corps découvert, un camarade qui crie).
+        // Les recrues de l'initiation et les gardes de l'arène (un fortin ennemi) restent toujours vigilants.
+        boolean vigilant = g.getCommandTags().contains("ombre_init") || g.getCommandTags().contains(VIGILANT) || niveau(g) >= 0.5f;
+        if (!vigilant && Zones.etat(p) != Zones.DEDANS && Notoriete.get(p) < Notoriete.RECHERCHE) return 0;
         // La portée de vue, comme dans Assassin's Creed : une quinzaine de blocs devant soi (les arbalétriers des
         // toits, qui guettent, un peu plus). Avant, on prenait la portée de suivi de Minecraft : 32 pour l'arbalétrier.
         double base = g instanceof fr.fenua.ombre.entite.Gardes.Arbaletrier ? VUE_ARBALETRIER

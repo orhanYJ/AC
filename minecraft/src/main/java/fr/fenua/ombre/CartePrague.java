@@ -27,6 +27,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.Map;
 import java.util.Random;
@@ -123,6 +124,7 @@ public final class CartePrague {
         place();
         fleuve();
         venelles();
+        passerellesDeToits();
         parcoursDeRue();
         poutresEtLinge();
         mobilierDeRue();
@@ -474,17 +476,21 @@ public final class CartePrague {
     private void rangee(int x0, int z0, int longueur, Direction facade, boolean sage) {
         boolean ns = facade.getAxis() == Direction.Axis.Z;
         int[] ETAGES = {2, 3, 3, 4, 4, 5};
-        int u = 0;
+        int u = 0, avant = -1;
         while (u < longueur) {
             // Une venelle, entre deux maisons (jamais au bout de la rangée)
             if (!sage && u > 0 && longueur - u >= 7 && r.nextInt(5) == 0) {
                 venelles.add(ns ? new int[]{x0 + u, z0, x0 + u + 1, z0 + 7, 1} : new int[]{x0, z0 + u, x0 + 7, z0 + u + 1, 0});
+                avant = -1;
                 u += 2;
                 continue;
             }
             int l = Math.min(longueur - u, 4 + r.nextInt(5));
             if (longueur - u - l < 4 && longueur - u - l > 0) l = longueur - u;
-            int etages = sage ? 3 + r.nextInt(2) : style == 2 ? 1 + r.nextInt(2) : ETAGES[r.nextInt(ETAGES.length)];
+            // Un étage d'écart au plus avec la voisine : les toits se suivent, on court de l'un à l'autre
+            int etages = sage ? 3 + r.nextInt(2) : style == 2 ? 1 + r.nextInt(2)
+                    : avant < 0 ? ETAGES[r.nextInt(ETAGES.length)] : MathHelper.clamp(avant + r.nextInt(3) - 1, 2, 5);
+            avant = etages;
             int recul = sage || r.nextInt(10) < 6 ? 0 : 1 + r.nextInt(2);
             int a0 = 0, a1 = 7;                                       // la profondeur, depuis la façade
             switch (facade) {
@@ -641,9 +647,12 @@ public final class CartePrague {
         }
         // ── Les maisons pauvres : une échelle de bois sur la façade jusqu'au toit, parfois un appentis de planches
         if (style == 2 && !taverne) {
-            int[] q = P.apply(fin, 0);
+            // L'échelle : sur une colonne de mur plein (ni fenêtre, ni porte, ni enseigne)
+            int colonne = -1;
+            for (int u = debut + 2; u <= fin; u += 2) if (u != porte && u != posEnseigne) { colonne = u; break; }
+            int[] q = P.apply(colonne < 0 ? debut : colonne, 0);
             int xe = q[0] + facade.getOffsetX(), ze = q[1] + facade.getOffsetZ();
-            if (r.nextBoolean()) for (int y = 0; y < h; y++) set(xe, y, ze, Blocks.LADDER.getDefaultState().with(Properties.HORIZONTAL_FACING, facade));
+            if (colonne >= 0 && r.nextBoolean()) for (int y = 0; y < h; y++) set(xe, y, ze, Blocks.LADDER.getDefaultState().with(Properties.HORIZONTAL_FACING, facade));
             if (r.nextInt(3) == 0) for (int u = debut + 1; u < fin - 1; u++) {
                 int[] a = P.apply(u, 0);
                 set(a[0] + facade.getOffsetX(), 2, a[1] + facade.getOffsetZ(), Blocks.SPRUCE_SLAB.getDefaultState().with(Properties.SLAB_TYPE, net.minecraft.block.enums.SlabType.TOP));
@@ -1333,6 +1342,8 @@ public final class CartePrague {
     private final class Cote {
         final int ax, az, tx, tz, dx, dz;
         final Direction versRue;
+        /** Le bout de rue (les deux côtés d'une même rue entre deux carrefours ont le même). */
+        int troncon;
         Cote(int ax, int az, int tx, int tz, Direction versRue) {
             this.ax = ax; this.az = az; this.tx = tx; this.tz = tz; this.versRue = versRue;
             dx = versRue.getOffsetX(); dz = versRue.getOffsetZ();
@@ -1368,8 +1379,19 @@ public final class CartePrague {
             }
         }
 
+        /** Le mur, en t, est-il plein (ni vitre, ni porte) du sol jusqu'à yMax ? Une échelle s'y accroche. */
+        boolean murPlein(int t, int yMax) {
+            for (int y = 0; y <= yMax; y++) {
+                BlockPos b = new BlockPos(ox + x(t, 0), oy + y, oz + z(t, 0));
+                if (!w.getBlockState(b).isOpaqueFullCube(w, b)) return false;
+            }
+            return true;
+        }
+
         int plusBas(int t0, int t1) { int m = Integer.MAX_VALUE; for (int t = t0; t <= t1; t++) m = Math.min(m, mur(t)); return m; }
     }
+
+    private Cote tron(Cote c, int t) { c.troncon = t; return c; }
 
     private static final BlockState DALLE_HAUTE = Blocks.SPRUCE_SLAB.getDefaultState().with(Properties.SLAB_TYPE, net.minecraft.block.enums.SlabType.TOP);
 
@@ -1386,11 +1408,12 @@ public final class CartePrague {
         for (int k = 0; k <= N; k++) for (int j = 0; j < N; j++) {
             int s0 = RUE + j * PAS;
             // Rue nord-sud n° k : son côté ouest (le mur est en x = k·PAS - 1) et son côté est (en x = k·PAS + RUE)
-            if (k > 0) cotes.add(new Cote(k * PAS - 1, s0, 0, 1, Direction.EAST));
-            if (k < N) cotes.add(new Cote(k * PAS + RUE, s0, 0, 1, Direction.WEST));
+            int tv = (k * N + j) * 2, th = tv + 1;
+            if (k > 0) cotes.add(tron(new Cote(k * PAS - 1, s0, 0, 1, Direction.EAST), tv));
+            if (k < N) cotes.add(tron(new Cote(k * PAS + RUE, s0, 0, 1, Direction.WEST), tv));
             // Rue est-ouest n° k : côté nord et côté sud (la toute première rue, celle du départ de la course, reste libre)
-            if (k > 0) cotes.add(new Cote(s0, k * PAS - 1, 1, 0, Direction.SOUTH));
-            if (k < N && k > 0) cotes.add(new Cote(s0, k * PAS + RUE, 1, 0, Direction.NORTH));
+            if (k > 0) cotes.add(tron(new Cote(s0, k * PAS - 1, 1, 0, Direction.SOUTH), th));
+            if (k < N && k > 0) cotes.add(tron(new Cote(s0, k * PAS + RUE, 1, 0, Direction.NORTH), th));
         }
         java.util.Collections.shuffle(cotes, r);
         // Des avis de recherche placardés le long des rues, à hauteur d'homme : un côté de rue sur trois
@@ -1402,9 +1425,11 @@ public final class CartePrague {
                 c.pose(t, 1, 1, vers(b("affiche_recherche"), c.versRue.getOpposite()));
         }
         int[] compte = new int[4];
+        java.util.Set<Integer> faits = new java.util.HashSet<>();
         for (Cote c : cotes) {
-            // On varie : le motif le moins posé jusqu'ici a la priorité, un bout de rue sur cinq reste nu
-            if (r.nextInt(5) == 0) continue;
+            // Un seul parcours par bout de rue (jamais face à face) ; le motif le moins posé jusqu'ici a la priorité ;
+            // un bout de rue sur quatre reste nu
+            if (faits.contains(c.troncon) || r.nextInt(4) == 0) continue;
             Integer[] ordre = {0, 1, 2, 3};
             java.util.Arrays.sort(ordre, (a, b) -> compte[a] != compte[b] ? compte[a] - compte[b] : r.nextInt(3) - 1);
             for (int m : ordre) {
@@ -1414,6 +1439,7 @@ public final class CartePrague {
                     case 2 -> foin(c);
                     default -> marches(c);
                 };
+                if (fait) { compte[m]++; faits.add(c.troncon); break; }
             }
         }
     }
@@ -1449,13 +1475,17 @@ public final class CartePrague {
         if (!c.libre(t0, t0 + 3, 10)) return false;
         int h = c.plusBas(t0, t0 + 3);
         int haut = h - 3;
+        int sommet = haut - Math.floorMod(haut - 2, 3);
+        // L'échelle s'accroche à une colonne de mur plein (jamais sur une fenêtre ni une porte)
+        int te = -1;
+        for (int t = t0; t <= t0 + 3 && te < 0; t++) if (c.murPlein(t, sommet + 1)) te = t;
+        if (te < 0) return false;
         c.nettoyer(t0, t0 + 3, 2, h);
         for (int y = 2; y <= haut; y += 3)
             for (int t = t0; t <= t0 + 3; t++) for (int d = 1; d <= 2; d++)
-                if (!(t == t0 + 1 && d == 1)) c.pose(t, d, y, DALLE_HAUTE);
-        int sommet = haut - Math.floorMod(haut - 2, 3);
+                if (!(t == te && d == 1)) c.pose(t, d, y, DALLE_HAUTE);
         for (int t : new int[]{t0, t0 + 3}) for (int y = 0; y <= sommet + 1; y++) c.pose(t, 2, y, Blocks.SPRUCE_FENCE);
-        for (int y = 0; y <= sommet + 1; y++) c.pose(t0 + 1, 1, y, Blocks.LADDER.getDefaultState().with(Properties.HORIZONTAL_FACING, c.versRue));
+        for (int y = 0; y <= sommet + 1; y++) c.pose(te, 1, y, Blocks.LADDER.getDefaultState().with(Properties.HORIZONTAL_FACING, c.versRue));
         // Le matériel du maçon sur les paliers
         c.pose(t0 + 3, 1, 3, Blocks.BARREL.getDefaultState());
         c.pose(t0 + 2, 2, 3, b("pierre_de_taille"));
@@ -1512,6 +1542,52 @@ public final class CartePrague {
         }
     }
 
+    /**
+     * Les passerelles des toits : sur chaque bout de rue, une passerelle de planches (deux de large) relie les deux
+     * rangées au niveau du haut des murs, là où elles ne diffèrent pas de plus d'un étage. On traverse la ville
+     * par les toits sans redescendre dans la rue, comme dans Assassin's Creed.
+     */
+    private void passerellesDeToits() {
+        BlockState planche = Blocks.SPRUCE_PLANKS.getDefaultState();
+        for (int k = 1; k < N; k++) for (int j = 0; j < N; j++) {
+            for (int essai = 0; essai < 6; essai++) {
+                int z = RUE + j * PAS + 4 + r.nextInt(ILOT - 9);
+                int xa = k * PAS - 1, xb = k * PAS + RUE;
+                if (passerelle(true, k * PAS, z, hauteur[xa][z], hauteur[xb][z], hauteur[xa][z + 1], hauteur[xb][z + 1], planche)) break;
+            }
+            for (int essai = 0; essai < 6; essai++) {
+                int x = RUE + j * PAS + 4 + r.nextInt(ILOT - 9);
+                int za = k * PAS - 1, zb = k * PAS + RUE;
+                if (passerelle(false, x, k * PAS, hauteur[x][za], hauteur[x][zb], hauteur[x + 1][za], hauteur[x + 1][zb], planche)) break;
+            }
+        }
+    }
+
+    /** Une passerelle de deux de large à travers la rue qui commence en (a, b) ; vrai si elle est posée. */
+    private boolean passerelle(boolean ns, int a, int b, int h1, int h2, int h3, int h4, BlockState planche) {
+        int bas = Math.min(Math.min(h1, h2), Math.min(h3, h4)), haut = Math.max(Math.max(h1, h2), Math.max(h3, h4));
+        if (bas < 7 || haut - bas > 3) return false;
+        int y = bas - 1;
+        for (int t = 0; t < RUE; t++) for (int l = 0; l <= 1; l++) {
+            int x = ns ? a + t : b + l, z = ns ? b + l : a + t;
+            if (!dedans(x, z) || pris[x][z]) return false;
+        }
+        for (int t = 0; t < RUE; t++) for (int l = 0; l <= 1; l++) {
+            int x = ns ? a + t : b + l, z = ns ? b + l : a + t;
+            set(x, y, z, planche);
+            for (int yy = y + 1; yy <= y + 2; yy++) if (!vide(x, yy, z)) set(x, yy, z, Blocks.AIR);
+        }
+        for (int l = 0; l <= 1; l++) {
+            int x0 = ns ? a : b + l, z0 = ns ? b + l : a, x1 = ns ? a + RUE - 1 : b + l, z1 = ns ? b + l : a + RUE - 1;
+            set(x0, y - 1, z0, Blocks.SPRUCE_FENCE); set(x1, y - 1, z1, Blocks.SPRUCE_FENCE);
+        }
+        for (int t = 0; t < RUE; t++) for (int l = -3; l <= 4; l++) {
+            int x = ns ? a + t : b + l, z = ns ? b + l : a + t;
+            if (dedans(x, z)) pris[x][z] = true;
+        }
+        return true;
+    }
+
     /** Des poutres d'un toit à l'autre au-dessus des rues, à des hauteurs variées ; du linge plus bas. */
     private void poutresEtLinge() {
         for (int k = 1; k < N; k++) {
@@ -1519,7 +1595,7 @@ public final class CartePrague {
             for (int j = 0; j < N; j++) {
                 int z = RUE + j * PAS + 4 + r.nextInt(ILOT - 8);
                 int hg = hauteur[rue - 1][z], hd = hauteur[rue + RUE][z];
-                if (hg > 0 && hd > 0 && r.nextInt(3) > 0 && rueLibreX(rue, z)) {
+                if (hg > 0 && hd > 0 && r.nextInt(3) == 0 && rueLibreX(rue, z)) {
                     int y = poutreY(Math.min(hg, hd));
                     for (int x = rue; x < rue + RUE; x++) set(x, y, z, OmbreBlocs.POUTRE.getDefaultState().with(Properties.HORIZONTAL_AXIS, Direction.Axis.X));
                 }
@@ -1530,7 +1606,7 @@ public final class CartePrague {
             for (int i = 0; i < N; i++) {
                 int x = RUE + i * PAS + 4 + r.nextInt(ILOT - 8);
                 int hn = hauteur[x][k * PAS - 1], hs = hauteur[x][k * PAS + RUE];
-                if (hn > 0 && hs > 0 && r.nextInt(3) > 0 && rueLibreZ(x, k * PAS)) {
+                if (hn > 0 && hs > 0 && r.nextInt(3) == 0 && rueLibreZ(x, k * PAS)) {
                     int y = poutreY(Math.min(hn, hs));
                     for (int z = k * PAS; z < k * PAS + RUE; z++) set(x, y, z, OmbreBlocs.POUTRE.getDefaultState().with(Properties.HORIZONTAL_AXIS, Direction.Axis.Z));
                 }

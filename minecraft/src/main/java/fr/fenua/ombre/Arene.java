@@ -379,6 +379,7 @@ public final class Arene {
         g.setCustomName(Text.literal(nom));
         g.setPositionTarget(p, rayon);          // il ne s'éloigne pas de son poste en temps normal
         g.addCommandTag(Gardes.GARDE);
+        g.addCommandTag(fr.fenua.ombre.ac.Detection.VIGILANT);      // un fortin ennemi : on y est partout en territoire interdit
         if (cible) g.addCommandTag(Gardes.CIBLE);
         w.spawnEntityAndPassengers(g);
         w.getScoreboard().addScoreHolderToTeam(g.getNameForScoreboard(), equipe);

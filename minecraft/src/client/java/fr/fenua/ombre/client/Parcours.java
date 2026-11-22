@@ -211,7 +211,8 @@ public final class Parcours {
             return;
         }
         if (sol) {
-            if (franchir(p, in, f) || bondAssiste(p, in, f) || descendreAuBord(p, in, e)) return;
+            // (Le bond assisté — s'élancer tout seul vers le toit d'en face — est retiré : les sauts restent à toi)
+            if (franchir(p, in, f) || descendreAuBord(p, in, e)) return;
             auBord = 0;
             return;
         }
